@@ -114,6 +114,8 @@ class YouTube:
     # This method will check if the videos are the correct duration and High Definition
     # then returns a set of video ids with no duplicates that meet the requirements.
     def check_video(self, matched_video_ids: list) -> set:
+        min_duration = timedelta(minutes=5)
+        max_duration = timedelta(minutes=20)
         logger.info("..........Checking matched videos for duration and quality..........")
         passed_check_video_ids = set()
         for video_id in matched_video_ids:
@@ -122,14 +124,14 @@ class YouTube:
             for item in response['items']:
                 iso_content_duration = item['contentDetails']['duration']
                 content_duration = isodate.parse_duration(iso_content_duration)
-                duration_in_seconds = int(content_duration.total_seconds())
-                duration_in_minutes = duration_in_seconds / 60
                 definition = item['contentDetails']['definition']
-                if 5 < duration_in_minutes < 20 and definition == "hd":
+                if min_duration < content_duration < max_duration and definition == "hd":
                     passed_check_video_ids.add(video_id)
-                    logger.info(f"Video ID: {video_id} passed check.")
+                    logger.info(f"Video ID: {video_id} passed check. "
+                                f"Duration: {content_duration}, Quality: {definition}")
                 else:
-                    logger.warning(f"Video ID: {video_id} failed check.")
+                    logger.warning(f"Video ID: {video_id} failed check. "
+                                   f"Duration: {content_duration}, Quality: {definition}")
         return passed_check_video_ids
 
     # This method will check if videos is in playlist and add it otherwise.

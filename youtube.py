@@ -112,10 +112,10 @@ class YouTube:
         return video_id_and_title
 
     # This method will check if the videos are the correct duration and High Definition
-    # then returns a list of video ids that meet the requirements.
-    def check_video(self, matched_video_ids: list) -> list:
+    # then returns a set of video ids with no duplicates that meet the requirements.
+    def check_video(self, matched_video_ids: list) -> set:
         logger.info("..........Checking matched videos for duration and quality..........")
-        passed_check_video_ids = []
+        passed_check_video_ids = set()
         for video_id in matched_video_ids:
             request = self.youtube.videos().list(part="contentDetails", id=video_id)
             response = request.execute()
@@ -126,14 +126,14 @@ class YouTube:
                 duration_in_minutes = duration_in_seconds / 60
                 definition = item['contentDetails']['definition']
                 if 5 < duration_in_minutes < 20 and definition == "hd":
-                    passed_check_video_ids.append(video_id)
+                    passed_check_video_ids.add(video_id)
                     logger.info(f"Video ID: {video_id} passed check.")
                 else:
                     logger.warning(f"Video ID: {video_id} failed check.")
         return passed_check_video_ids
 
     # This method will check if videos is in playlist and add it otherwise.
-    def add_video_to_playlist(self, passed_video_ids: list) -> None:
+    def add_video_to_playlist(self, passed_video_ids: set) -> None:
         logger.info("..........Adding videos to playlist..........")
         video_ids_in_playlist = []
         request = self.youtube.playlistItems().list(part="snippet", maxResults=50, playlistId=self.playlist_id)

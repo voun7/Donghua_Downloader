@@ -14,7 +14,7 @@ def get_donghua_chinese_name_list(destination_dir: Path) -> list:
     return keywords
 
 
-def main():
+def main() -> None:
     get_log()
     logger.debug("Logging Started")
 

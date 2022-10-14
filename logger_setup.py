@@ -5,7 +5,7 @@ from logging.handlers import TimedRotatingFileHandler
 import graypy
 
 
-def get_log():
+def get_log() -> None:
     # Create a custom base_logger
     base_logger = logging.getLogger()
     base_logger.setLevel(logging.DEBUG)

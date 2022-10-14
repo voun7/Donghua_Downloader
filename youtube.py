@@ -1,8 +1,7 @@
 import logging
-import os.path
-import pathlib
 import time
 from datetime import datetime, timedelta
+from pathlib import Path
 
 import isodate
 from dateutil import parser
@@ -33,13 +32,13 @@ class YouTube:
         api_service_name = "youtube"
         api_version = "v3"
         client_secrets_file = "Credentials/OAuth 2.0 Client ID.json"
-        token_file = "Credentials/token.json"
+        token_file = Path("Credentials/token.json")
         creds = None
         # The file token.json stores the user's access and refresh tokens, and is
         # created automatically when the authorization flow completes for the first
         # time.
-        if os.path.exists(token_file):
-            creds = Credentials.from_authorized_user_file(token_file, scopes)
+        if token_file.exists():
+            creds = Credentials.from_authorized_user_file(str(token_file), scopes)
         # If there are no (valid) credentials available, let the user log in.
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
@@ -187,7 +186,7 @@ class YouTube:
         logger.info(f"Total time matching recent uploads and adding to playlist took: {total_time}")
 
     # This method uses yt_dlp to download videos from playlist
-    def playlist_downloader(self, playlist_download_location: pathlib.Path) -> None:
+    def playlist_downloader(self, playlist_download_location: Path) -> None:
         start = time.perf_counter()
         logger.info("..........Downloading videos from playlist..........")
 

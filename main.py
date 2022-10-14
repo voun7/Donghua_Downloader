@@ -1,5 +1,4 @@
 import logging
-import pathlib
 import re
 from pathlib import Path
 
@@ -10,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 # This function returns a list of all the donghua chinese names enclosed in the brackets of their folders.
-def get_donghua_chinese_name_list(destination_dir: pathlib.Path) -> list:
+def get_donghua_chinese_name_list(destination_dir: Path) -> list:
     keywords = [keyword for folder in destination_dir.iterdir() for keyword in re.findall(r'\((.*?)\)', folder.name)]
     return keywords
 

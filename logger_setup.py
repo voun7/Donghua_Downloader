@@ -12,7 +12,7 @@ def get_log() -> None:
 
     # Create handlers
     file_handler = TimedRotatingFileHandler(
-        'logs/runtime.log', when='midnight', interval=1, backupCount=30, encoding='utf-8'
+        'logs/runtime.log', when='midnight', interval=1, backupCount=7, encoding='utf-8'
     )
     file_handler.namer = my_namer
     file_handler.setLevel(logging.DEBUG)

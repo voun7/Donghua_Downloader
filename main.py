@@ -34,6 +34,7 @@ def main() -> None:
     youtube = YouTube(playlist_id)
     youtube.clear_playlist()
     youtube.match_to_youtube_videos(anime_list, youtube_channel_ids)
+    youtube.match_to_youtube_videos(["丹武至尊", "无敌之前情债太多"], ["UCYkn7e_zaRR_UxOrJR0RVdg"])
     youtube.playlist_downloader(playlist_download_dir)
 
     logger.debug("Logging Ended\n")

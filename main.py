@@ -25,7 +25,8 @@ def main() -> None:
         "UC80ztI40QAXzWL94eoRzWow",
         "UCBIiQ5Hlsadi1HQl8dufZag",
         "UC8r57bRU8OrpXnLFNC0ym7Q",
-        "UCJSAZ5pbDi8StbSbJI1riEg"
+        "UCJSAZ5pbDi8StbSbJI1riEg",
+        "UC_iyEDS9KWxboB-ZMOUDvMw"
     ]
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
 

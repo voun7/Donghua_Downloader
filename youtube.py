@@ -202,7 +202,7 @@ class YouTube:
             'noprogress': True,
             'ignoreerrors': True,
             'download_archive': 'logs/yt_dlp_downloads_archive.txt',
-            'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]',
+            'format': 'bestvideo[height>720][ext=mp4]+bestaudio[ext=m4a]',
             'ffmpeg_location': 'ffmpeg/bin',
             'outtmpl': str(playlist_download_location) + '/%(title)s.%(ext)s'
         }

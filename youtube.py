@@ -201,6 +201,7 @@ class YouTube:
             'progress_hooks': [my_hook],
             'noprogress': True,
             'ignoreerrors': True,
+            'wait_for_video': (1, 120),
             'download_archive': 'logs/yt_dlp_downloads_archive.txt',
             'format': 'bestvideo[height>720][ext=mp4]+bestaudio[ext=m4a]',
             'ffmpeg_location': 'ffmpeg/bin',

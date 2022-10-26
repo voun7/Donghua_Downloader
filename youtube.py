@@ -113,9 +113,9 @@ class YouTube:
     # This method will check if the videos are the correct duration and High Definition
     # then returns video ids with no duplicates that meet the requirements.
     def check_video(self, matched_video_ids: list) -> set:
+        logger.info("..........Checking matched videos for duration and quality..........")
         min_duration = timedelta(minutes=5)
         max_duration = timedelta(minutes=20)
-        logger.info("..........Checking matched videos for duration and quality..........")
         passed_check_video_ids = set()
         for video_id in matched_video_ids:
             request = self.youtube.videos().list(part="contentDetails", id=video_id)
@@ -163,10 +163,10 @@ class YouTube:
     # This function matches the names in the list to recently uploaded YouTube videos
     # from the channels and adds them to the playlist.
     def match_to_youtube_videos(self, file_names: list, youtube_channel_ids: list) -> None:
-        start = time.perf_counter()
-        all_recent_uploads = {}
         logger.info(f"..........Checking all channels for recent video uploads "
                     f"in the last {self.default_duration}..........")
+        start = time.perf_counter()
+        all_recent_uploads = {}
         for channel_id in youtube_channel_ids:
             uploads = self.get_channel_recent_video_uploads(channel_id)
             all_recent_uploads.update(uploads)
@@ -187,8 +187,8 @@ class YouTube:
 
     # This method uses yt_dlp to download videos from playlist
     def playlist_downloader(self, playlist_download_location: Path) -> None:
-        start = time.perf_counter()
         logger.info("..........Downloading videos from playlist..........")
+        start = time.perf_counter()
 
         def my_hook(d):
             if d['status'] == 'error':

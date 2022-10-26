@@ -82,7 +82,7 @@ class YouTube:
                 delete_request.execute()
 
     # This method uses the channel id and finds the upload id then returns
-    # a dict of the video id and title for the videos uploaded less than the default time.
+    # the video id and title for the videos uploaded less than the default time.
     def get_channel_recent_video_uploads(self, channel_id: str) -> dict:
         upload_id = None
         channel_request = self.youtube.channels().list(part="contentDetails", id=channel_id)
@@ -111,7 +111,7 @@ class YouTube:
         return video_id_and_title
 
     # This method will check if the videos are the correct duration and High Definition
-    # then returns a set of video ids with no duplicates that meet the requirements.
+    # then returns video ids with no duplicates that meet the requirements.
     def check_video(self, matched_video_ids: list) -> set:
         min_duration = timedelta(minutes=5)
         max_duration = timedelta(minutes=20)

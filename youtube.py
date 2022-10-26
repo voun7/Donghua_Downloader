@@ -186,7 +186,7 @@ class YouTube:
         logger.info(f"Total time matching recent uploads and adding to playlist took: {total_time}")
 
     # This method uses yt_dlp to download videos from playlist
-    def playlist_downloader(self, playlist_download_location: Path) -> None:
+    def playlist_downloader(self, download_location: Path) -> None:
         logger.info("..........Downloading videos from playlist..........")
         start = time.perf_counter()
 
@@ -205,7 +205,7 @@ class YouTube:
             'download_archive': 'logs/yt_dlp_downloads_archive.txt',
             'format': 'bestvideo[height>720][ext=mp4]+bestaudio[ext=m4a]',
             'ffmpeg_location': 'ffmpeg/bin',
-            'outtmpl': str(playlist_download_location) + '/%(title)s.%(ext)s'
+            'outtmpl': str(download_location) + '/%(title)s.%(ext)s'
         }
         with YoutubeDL(ydl_opts) as ydl:
             logger.debug(ydl.download(self.playlist_id))

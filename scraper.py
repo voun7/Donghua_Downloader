@@ -1,11 +1,14 @@
+import logging
+import re
 import time
 from datetime import datetime
-from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
 from dateutil import parser
 from yt_dlp import YoutubeDL
+
+logger = logging.getLogger(__name__)
 
 
 class XiaoheimiScraper:
@@ -25,17 +28,17 @@ class XiaoheimiScraper:
         page_response = requests.get(self.base_url + payload, headers=self.header)
         soup = BeautifulSoup(page_response.text, 'lxml')
         posts = soup.find_all('li', class_='col-lg-8 col-md-6 col-sm-4 col-xs-3')
-        print("..........Site Page one Anime Posts..........")
+        logger.info("..........Site Page one Anime Posts..........")
         for post in posts:
             post_name = post.find('h4', class_='title text-overflow').text
             post_url = self.base_url + post.find('a').get('href')
-            print(f"Post Title: {post_name}, Post URL: {post_url}")
+            logger.info(f"Post Title: {post_name}, Post URL: {post_url}")
             video_name_and_link[post_name] = post_url
         return video_name_and_link
 
     # This method takes a post's url check if its recent and gets the latest video link.
     def get_latest_video_links(self, matched_posts: dict) -> list:
-        print("..........Checking for recent posts..........")
+        logger.info("..........Checking for recent posts..........")
         latest_video_links = []
         now = datetime.now()
         for name, url in matched_posts.items():
@@ -45,52 +48,65 @@ class XiaoheimiScraper:
             last_updated_date = parser.parse(post_update[1])
             latest_video_number = post_update[0].strip('更新至集全')
             if last_updated_date > now:
-                print(f"Post named: {name} is new, latest video number: {latest_video_number}")
+                logger.info(f"Post named: {name} is new, latest video number: {latest_video_number}")
                 latest_video_post = soup.find('li', {"title": f"{latest_video_number}"})
                 latest_video_link = self.base_url + latest_video_post.find('a').get('href')
-                print(f"Latest Video link: {latest_video_link}")
+                logger.info(f"Latest Video link: {latest_video_link}")
                 latest_video_links.append(latest_video_link)
             else:
-                print(f"Post named: {name} is not recent")
+                logger.warning(f"Post named: {name} is not recent")
         return latest_video_links
 
     # This method checks if anime matches a recent post from the site.
     def match_to_recent_videos(self, anime_list: list) -> list:
         posts = self.get_page_one_anime_posts()
         matched_posts = {}
-        print("..........Matching names to site recent post..........")
+        logger.info("..........Matching names to site recent post..........")
         start = time.perf_counter()
         for name in anime_list:
             for post_name, post_url in posts.items():
                 if name in post_name:
-                    print(f"Anime: {name} matches Post Title: {post_name}, Post URL: {post_url}")
+                    logger.info(f"Anime: {name} matches Post Title: {post_name}, Post URL: {post_url}")
                     matched_posts[post_name] = post_url
         checked_video_urls = self.get_latest_video_links(matched_posts)
         end = time.perf_counter()
         total_time = end - start
-        print(f"Done checking recent videos Total time: {total_time}")
+        logger.info(f"Done checking recent videos Total time: {total_time}")
         return checked_video_urls
 
     def video_downloader(self, video_urls: list) -> None:
-        print("..........Downloading matched recent site videos..........")
+        logger.info("..........Downloading matched recent site videos..........")
         start = time.perf_counter()
         for url in video_urls:
             page_response = requests.get(url, headers=self.header)
             soup = BeautifulSoup(page_response.text, 'lxml')
-            # print(soup.prettify())
+            file_name = soup.title.string.replace(" 在线播放 - 小宝影院 - 在线视频", '')
+            download_script = soup.find(class_='embed-responsive clearfix')
+            download_match = re.finditer(r'"url":"(.*?)"', str(download_script))
+            download_link = None
+            for match in download_match:
+                download_link = match[1].replace("\\", '')
+                logger.debug(download_link)
 
+            def my_hook(d) -> None:
+                print(type(d))
+                if d['status'] == 'error':
+                    logger.exception('An error has occurred ...')
+                if d['status'] == 'finished':
+                    logger.info('Done downloading file, now post-processing ...')
+
+            ydl_opts = {
+                'logger': logger.getChild('yt_dlp'),
+                'progress_hooks': [my_hook],
+                'noprogress': True,
+                'ignoreerrors': True,
+                'wait_for_video': (1, 120),
+                'download_archive': 'logs/yt_dlp_downloads_archive.txt',
+                'ffmpeg_location': 'ffmpeg/bin',
+                'outtmpl': str(self.download_location) + '/' + file_name + '.%(ext)s'
+            }
+            with YoutubeDL(ydl_opts) as ydl:
+                ydl.download(download_link)
         end = time.perf_counter()
         total_time = end - start
-        print(f"Downloads finished Total time: {total_time}\n")
-
-
-def main():
-    anime_list = ["徒弟个个是大佬", "徒弟都是女魔头", "被迫成为反派赘婿", "异皇重生", "万古神王", "绝世武", "靠你啦！战神系统"]
-    playlist_download_dir = Path(r"\\192.168.0.111\General File Sharing\From YouTube\Chinese Anime For Subbing")
-    xiaoheimi = XiaoheimiScraper(playlist_download_dir)
-    matched_urls = xiaoheimi.match_to_recent_videos(anime_list)
-    xiaoheimi.video_downloader(matched_urls)
-
-
-if __name__ == '__main__':
-    main()
+        logger.info(f"Downloads finished Total time: {total_time}")

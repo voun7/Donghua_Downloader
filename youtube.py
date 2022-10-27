@@ -208,7 +208,7 @@ class YouTube:
             'outtmpl': str(download_location) + '/%(title)s.%(ext)s'
         }
         with YoutubeDL(ydl_opts) as ydl:
-            logger.debug(ydl.download(self.playlist_id))
+            ydl.download(self.playlist_id)
         end = time.perf_counter()
         total_time = end - start
         logger.info(f"Total time downloading playlist took: {total_time}")

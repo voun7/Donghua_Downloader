@@ -2,6 +2,7 @@ import logging
 import re
 import time
 from datetime import datetime
+from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
@@ -12,14 +13,13 @@ logger = logging.getLogger(__name__)
 
 
 class XiaoheimiScraper:
-    def __init__(self, download_location):
+    def __init__(self) -> None:
         self.base_url = 'https://xiaoheimi.net'
         self.header = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                           'AppleWebKit/537.36 (KHTML, like Gecko) '
                           'Chrome/106.0.0.0 Safari/537.36'
         }
-        self.download_location = download_location
 
     # This method returns all the anime's posted on the sites first page.
     def get_page_one_anime_posts(self) -> dict:
@@ -74,7 +74,7 @@ class XiaoheimiScraper:
         logger.info(f"Done checking recent videos Total time: {total_time}")
         return checked_video_urls
 
-    def video_downloader(self, video_urls: list) -> None:
+    def video_downloader(self, video_urls: list, download_location: Path) -> None:
         logger.info("..........Downloading matched recent site videos..........")
         start = time.perf_counter()
         for url in video_urls:
@@ -102,7 +102,7 @@ class XiaoheimiScraper:
                 'wait_for_video': (1, 120),
                 'download_archive': 'logs/yt_dlp_downloads_archive.txt',
                 'ffmpeg_location': 'ffmpeg/bin',
-                'outtmpl': str(self.download_location) + '/' + file_name + '.%(ext)s'
+                'outtmpl': str(download_location) + '/' + file_name + '.%(ext)s'
             }
             with YoutubeDL(ydl_opts) as ydl:
                 ydl.download(download_link)

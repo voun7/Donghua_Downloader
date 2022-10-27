@@ -42,9 +42,9 @@ def main() -> None:
     youtube.match_to_youtube_videos(["大主宰"], ["UCJS5PJXcAIpXkBOjPNvK7Uw"])
     youtube.playlist_downloader(playlist_download_dir)
 
-    xiaoheimi = XiaoheimiScraper(playlist_download_dir)
+    xiaoheimi = XiaoheimiScraper()
     matched_urls = xiaoheimi.match_to_recent_videos(anime_list_two)
-    xiaoheimi.video_downloader(matched_urls)
+    xiaoheimi.video_downloader(matched_urls, playlist_download_dir)
 
     logger.debug("Logging Ended\n")
 

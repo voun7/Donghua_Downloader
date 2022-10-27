@@ -88,8 +88,7 @@ class XiaoheimiScraper:
                 download_link = match[1].replace("\\", '')
                 logger.debug(download_link)
 
-            def my_hook(d) -> None:
-                print(type(d))
+            def my_hook(d: dict) -> None:
                 if d['status'] == 'error':
                     logger.exception('An error has occurred ...')
                 if d['status'] == 'finished':

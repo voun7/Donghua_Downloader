@@ -190,7 +190,7 @@ class YouTube:
         logger.info("..........Downloading videos from playlist..........")
         start = time.perf_counter()
 
-        def my_hook(d):
+        def my_hook(d: dict) -> None:
             if d['status'] == 'error':
                 logger.exception('An error has occurred ...')
             if d['status'] == 'finished':

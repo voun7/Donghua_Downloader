@@ -31,8 +31,8 @@ class YouTube:
         scopes = ["https://www.googleapis.com/auth/youtube.force-ssl"]
         api_service_name = "youtube"
         api_version = "v3"
-        client_secrets_file = "Credentials/OAuth 2.0 Client ID.json"
-        token_file = Path("Credentials/token.json")
+        client_secrets_file = "credentials/OAuth 2.0 Client ID.json"
+        token_file = Path("credentials/token.json")
         creds = None
         # The file token.json stores the user's access and refresh tokens, and is
         # created automatically when the authorization flow completes for the first

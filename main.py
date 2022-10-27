@@ -32,7 +32,7 @@ def main() -> None:
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
     anime_list = get_donghua_chinese_name_list(destination_dir)
     anime_list_two = [
-        "徒弟个个是大佬", "徒弟都是女魔头", "被迫成为反派赘婿", "异皇重生", "万古神王", "绝世武", "靠你啦！战神系统"
+        "徒弟个个是大佬", "徒弟都是女魔头", "被迫成为反派赘婿", "异皇重生"
     ]
 
     youtube = YouTube(playlist_id)

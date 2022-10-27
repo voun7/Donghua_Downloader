@@ -74,6 +74,8 @@ class XiaoheimiScraper:
         logger.info(f"Done checking recent videos Total time: {total_time}")
         return checked_video_urls
 
+    # This method uses the video url to find the video download link.
+    # It uses yt-dlp to download the file from hls stream
     def video_downloader(self, video_urls: list, download_location: Path) -> None:
         logger.info("..........Downloading matched recent site videos..........")
         start = time.perf_counter()

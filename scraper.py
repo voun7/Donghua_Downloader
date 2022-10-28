@@ -40,14 +40,14 @@ class XiaoheimiScraper:
     def get_latest_video_links(self, matched_posts: dict) -> list:
         logger.info("..........Checking for recent posts..........")
         latest_video_links = []
-        now = datetime.now()
+        current_date_without_time = datetime.now().date()
         for name, url in matched_posts.items():
             page_response = requests.get(url, headers=self.header)
             soup = BeautifulSoup(page_response.text, 'lxml')
             post_update = soup.find('span', class_='text-red').text.split(' / ')
-            last_updated_date = parser.parse(post_update[1])
+            last_updated_date_without_time = parser.parse(post_update[1]).date()
             latest_video_number = post_update[0].strip('更新至集全')
-            if last_updated_date > now:
+            if last_updated_date_without_time >= current_date_without_time:
                 logger.info(f"Post named: {name} is new, latest video number: {latest_video_number}")
                 latest_video_post = soup.find('li', {"title": f"{latest_video_number}"})
                 latest_video_link = self.base_url + latest_video_post.find('a').get('href')

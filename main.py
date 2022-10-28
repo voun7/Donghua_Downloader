@@ -39,7 +39,7 @@ def main() -> None:
     youtube.clear_playlist()
     youtube.match_to_youtube_videos(anime_list, youtube_channel_ids)
     youtube.match_to_youtube_videos(["丹武至尊"], ["UCYkn7e_zaRR_UxOrJR0RVdg"])
-    youtube.match_to_youtube_videos(["大主宰"], ["UCJS5PJXcAIpXkBOjPNvK7Uw"])
+    youtube.match_to_youtube_videos(["大主宰", "万古龙神"], ["UCJS5PJXcAIpXkBOjPNvK7Uw"])
     youtube.playlist_downloader(playlist_download_dir)
 
     xiaoheimi = XiaoheimiScraper()

@@ -58,14 +58,14 @@ class YouTube:
             part="snippet,contentDetails", maxResults=50, playlistId=self.playlist_id
         )
         response = request.execute()
-        now = datetime.now().astimezone()
+        current_time = datetime.now().astimezone()
         for keys in response['items']:
             video_playlist_id = keys['id']
             video_title = keys['snippet']['title']
             if video_title != "Deleted video":
                 iso_upload_time = keys['contentDetails']['videoPublishedAt']
                 upload_time = parser.parse(iso_upload_time).astimezone()
-                time_diff = now - upload_time
+                time_diff = current_time - upload_time
                 if time_diff < self.default_duration:
                     logger.info(f"Not Removing Video: {video_title}, "
                                 f"Uploaded At: {upload_time}, "
@@ -91,7 +91,7 @@ class YouTube:
             upload_id = key['contentDetails']['relatedPlaylists']['uploads']
         request = self.youtube.playlistItems().list(part="snippet", maxResults=50, playlistId=upload_id)
         response = request.execute()
-        now = datetime.now().astimezone()
+        current_time = datetime.now().astimezone()
         video_id_and_title = {}
         for keys in response['items']:
             channel_title = keys['snippet']['channelTitle']
@@ -101,7 +101,7 @@ class YouTube:
             # always the same for the uploads playlist when accessed by non owner.
             iso_published_time = keys['snippet']['publishedAt']
             upload_time = parser.parse(iso_published_time).astimezone()
-            time_diff = now - upload_time
+            time_diff = current_time - upload_time
             if time_diff < self.default_duration:
                 logger.info(f"Channel Title: {channel_title}, "
                             f"Video Title: {video_title}, "

@@ -25,16 +25,20 @@ class XiaoheimiScraper:
     def get_page_one_anime_posts(self) -> dict:
         video_name_and_link = {}
         payload = '/index.php/vod/show/area/大陆/id/4.html'
-        page_response = requests.get(self.base_url + payload, headers=self.header)
-        soup = BeautifulSoup(page_response.text, 'lxml')
-        posts = soup.find_all('li', class_='col-lg-8 col-md-6 col-sm-4 col-xs-3')
-        logger.info("..........Site Page one Anime Posts..........")
-        for post in posts:
-            post_name = post.find('h4', class_='title text-overflow').text
-            post_url = self.base_url + post.find('a').get('href')
-            logger.info(f"Post Title: {post_name}, Post URL: {post_url}")
-            video_name_and_link[post_name] = post_url
-        return video_name_and_link
+        try:
+            page_response = requests.get(self.base_url + payload, headers=self.header)
+            soup = BeautifulSoup(page_response.text, 'lxml')
+            posts = soup.find_all('li', class_='col-lg-8 col-md-6 col-sm-4 col-xs-3')
+            logger.info("..........Site Page one Anime Posts..........")
+            for post in posts:
+                post_name = post.find('h4', class_='title text-overflow').text
+                post_url = self.base_url + post.find('a').get('href')
+                logger.info(f"Post Title: {post_name}, Post URL: {post_url}")
+                video_name_and_link[post_name] = post_url
+            return video_name_and_link
+        except Exception as error:
+            logger.exception(error)
+            logger.critical("Program failed to access website!\n")
 
     # This method takes a post's url check if its recent and gets the latest video link.
     def get_latest_video_links(self, matched_posts: dict) -> list:
@@ -82,7 +86,7 @@ class XiaoheimiScraper:
         for url in video_urls:
             page_response = requests.get(url, headers=self.header)
             soup = BeautifulSoup(page_response.text, 'lxml')
-            file_name = soup.title.string.replace(" 在线播放 - 小宝影院 - 在线视频", '')
+            file_name = soup.title.string.strip(' 在线播放 - 小宝影院 - 在线视频')
             download_script = soup.find(class_='embed-responsive clearfix')
             download_match = re.finditer(r'"url":"(.*?)"', str(download_script))
             download_link = None

@@ -26,7 +26,7 @@ class YouTube:
             logger.exception(error)
             logger.critical("Program failed to authenticate!\n")
 
-    # This method authenticates the script
+    # This method authenticates the program
     def get_authenticated_service(self) -> None:
         scopes = ["https://www.googleapis.com/auth/youtube.force-ssl"]
         api_service_name = "youtube"

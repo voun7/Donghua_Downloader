@@ -9,12 +9,6 @@ from scraper import XiaoheimiScraper
 logger = logging.getLogger(__name__)
 
 
-# This function returns a list of all the donghua chinese names enclosed in the brackets of their folders.
-def get_donghua_chinese_name_list(destination_dir: Path) -> list:
-    keywords = [keyword for folder in destination_dir.iterdir() for keyword in re.findall(r'\((.*?)\)', folder.name)]
-    return keywords
-
-
 def main() -> None:
     get_log()
     logger.debug("Logging Started")
@@ -30,10 +24,8 @@ def main() -> None:
         "UC_iyEDS9KWxboB-ZMOUDvMw"
     ]
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
-    anime_list = get_donghua_chinese_name_list(destination_dir)
-    anime_list_two = [
-        "徒弟个个是大佬", "徒弟都是女魔头", "被迫成为反派赘婿", "异皇重生"
-    ]
+    anime_list = [keyword for folder in destination_dir.iterdir() for keyword in re.findall(r'\((.*?)\)', folder.name)]
+    anime_list_two = ["徒弟个个是大佬", "徒弟都是女魔头", "被迫成为反派赘婿", "异皇重生"]
 
     youtube = YouTube(playlist_id)
     youtube.clear_playlist()

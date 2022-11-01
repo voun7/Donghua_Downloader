@@ -58,7 +58,7 @@ class XiaoheimiScraper:
                 logger.info(f"Latest Video link: {latest_video_link}")
                 latest_video_links.append(latest_video_link)
             else:
-                logger.warning(f"Post named: {name} is not recent")
+                logger.warning(f"Post named: {name} is not recent, Last Updated: {last_updated_date_without_time}")
         return latest_video_links
 
     # This method checks if anime matches a recent post from the site.

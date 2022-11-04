@@ -78,6 +78,14 @@ class XiaoheimiScraper:
         logger.info(f"Done checking recent videos Total time: {total_time}")
         return checked_video_urls
 
+    @staticmethod
+    def file_name_generator(file_name: str) -> str:
+        new_name = file_name.strip(' 在线播放 - 小宝影院 - 在线视频')
+        for match in re.finditer(r'(\d+)', new_name):
+            number = match.group(0)
+            new_name = new_name.replace(number, f"第{number}集")
+        return new_name
+
     # This method uses the video url to find the video download link.
     # It uses yt-dlp to download the file from hls stream
     def video_downloader(self, video_urls: list, download_location: Path) -> None:
@@ -86,26 +94,19 @@ class XiaoheimiScraper:
         for url in video_urls:
             page_response = requests.get(url, headers=self.header)
             soup = BeautifulSoup(page_response.text, 'lxml')
-            file_name = soup.title.string.strip(' 在线播放 - 小宝影院 - 在线视频')
+            file_name = self.file_name_generator(soup.title.string)
             download_script = soup.find(class_='embed-responsive clearfix')
             download_match = re.finditer(r'"url":"(.*?)"', str(download_script))
             download_link = None
             for match in download_match:
                 download_link = match[1].replace("\\", '')
                 logger.debug(download_link)
-
-            def my_hook(d: dict) -> None:
-                if d['status'] == 'error':
-                    logger.exception('An error has occurred ...')
-                if d['status'] == 'finished':
-                    logger.info('Done downloading file, now post-processing ...')
+            logger.info(f"Downloading Post: {url}, File name: {file_name}")
 
             ydl_opts = {
                 'logger': logger.getChild('yt_dlp'),
-                'progress_hooks': [my_hook],
                 'noprogress': True,
                 'ignoreerrors': True,
-                'wait_for_video': (1, 120),
                 'download_archive': 'logs/yt_dlp_downloads_archive.txt',
                 'ffmpeg_location': 'ffmpeg/bin',
                 'outtmpl': str(download_location) + '/' + file_name + '.%(ext)s'

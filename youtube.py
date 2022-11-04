@@ -179,8 +179,12 @@ class YouTube:
                                 f"Video ID: {video_id}, "
                                 f"Video Title: {video_title}")
                     matched_video_ids.append(video_id)
-        passed_video_ids = self.check_video(matched_video_ids)
-        self.add_video_to_playlist(passed_video_ids)
+        if matched_video_ids:
+            passed_video_ids = self.check_video(matched_video_ids)
+            self.add_video_to_playlist(passed_video_ids)
+        else:
+            logger.warning("No video matches!")
+
         end = time.perf_counter()
         total_time = end - start
         logger.info(f"Total time matching recent uploads and adding to playlist took: {total_time}")
@@ -201,7 +205,8 @@ class YouTube:
             'progress_hooks': [my_hook],
             'noprogress': True,
             'ignoreerrors': True,
-            'wait_for_video': (1, 120),
+            'socket_timeout': 120,
+            'wait_for_video': (1, 600),
             'download_archive': 'logs/yt_dlp_downloads_archive.txt',
             'format': 'bestvideo[height>720][ext=mp4]+bestaudio[ext=m4a]',
             'ffmpeg_location': 'ffmpeg/bin',

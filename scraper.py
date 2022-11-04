@@ -42,7 +42,7 @@ class XiaoheimiScraper:
 
     # This method takes a post's url check if its recent and gets the latest video link.
     def get_latest_video_links(self, matched_posts: dict) -> list:
-        logger.info("..........Checking for recent posts..........")
+        logger.info("..........Checking for latest videos..........")
         latest_video_links = []
         current_date_without_time = datetime.now().date()
         for name, url in matched_posts.items():

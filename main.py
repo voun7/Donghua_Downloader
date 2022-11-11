@@ -36,7 +36,7 @@ def main() -> None:
 
     xiaoheimi = XiaoheimiScraper()
     matched_urls = xiaoheimi.match_to_recent_videos(anime_list_two)
-    xiaoheimi.video_downloader(matched_urls, playlist_download_dir)
+    xiaoheimi.download_all_videos(matched_urls, playlist_download_dir)
 
     logger.debug("Logging Ended\n")
 

@@ -44,19 +44,23 @@ class XiaoheimiScraper:
     def get_latest_video_links(self, matched_posts: dict) -> list:
         logger.info("..........Checking for latest videos..........")
         latest_video_links = []
+        default_num_videos = 3
         current_date_without_time = datetime.now().date()
         for name, url in matched_posts.items():
             page_response = requests.get(url, headers=self.header)
             soup = BeautifulSoup(page_response.text, 'lxml')
             post_update = soup.find('span', class_='text-red').text.split(' / ')
             last_updated_date_without_time = parser.parse(post_update[1]).date()
-            latest_video_number = post_update[0].strip('更新至集全')
             if last_updated_date_without_time >= current_date_without_time:
-                logger.info(f"Post named: {name} is new, latest video number: {latest_video_number}")
-                latest_video_post = soup.find('li', {"title": f"{latest_video_number}"})
-                latest_video_link = self.base_url + latest_video_post.find('a').get('href')
-                logger.info(f"Latest Video link: {latest_video_link}")
-                latest_video_links.append(latest_video_link)
+                latest_video_number = int(post_update[0].strip('更新至集全'))
+                video_start_num = latest_video_number - default_num_videos + 1
+                logger.info(f"Post named: {name} is new, latest video number: {latest_video_number}. "
+                            f"Last {default_num_videos} video numbers: {video_start_num} - {latest_video_number}")
+                for video_number in range(video_start_num, latest_video_number + 1):
+                    video_post = soup.find('li', {"title": f"{video_number}"})
+                    video_link = self.base_url + video_post.find('a').get('href')
+                    logger.info(f"Video link: {video_link}")
+                    latest_video_links.append(video_link)
             else:
                 logger.warning(f"Post named: {name} is not recent, Last Updated: {last_updated_date_without_time}")
         return latest_video_links

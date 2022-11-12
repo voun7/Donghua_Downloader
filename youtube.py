@@ -20,6 +20,7 @@ class YouTube:
     def __init__(self, playlist_id: str) -> None:
         self.playlist_id = playlist_id
         self.youtube = None
+        self.max_results = 50
         self.default_duration = timedelta(hours=12)
         try:
             self.get_authenticated_service()
@@ -56,7 +57,7 @@ class YouTube:
     def clear_playlist(self) -> None:
         logger.info(f"..........Removing videos in playlist uploaded more than {self.default_duration}..........")
         request = self.youtube.playlistItems().list(
-            part="snippet,contentDetails", maxResults=50, playlistId=self.playlist_id
+            part="snippet,contentDetails", maxResults=self.max_results, playlistId=self.playlist_id
         )
         response = request.execute()
         current_time = datetime.now().astimezone()
@@ -90,7 +91,7 @@ class YouTube:
         channel_response = channel_request.execute()
         for item in channel_response['items']:
             upload_id = item['contentDetails']['relatedPlaylists']['uploads']
-        request = self.youtube.playlistItems().list(part="snippet", maxResults=50, playlistId=upload_id)
+        request = self.youtube.playlistItems().list(part="snippet", maxResults=self.max_results, playlistId=upload_id)
         response = request.execute()
         current_time = datetime.now().astimezone()
         video_id_and_title = {}
@@ -136,23 +137,24 @@ class YouTube:
         return passed_check_videos
 
     @staticmethod
-    def similar(s1: str, s2: str, threshold: float = 0.5) -> float:
-        return SequenceMatcher(a=s1, b=s2).ratio() > threshold
+    def similarity_checker(videos_in_playlist: dict, passed_check_videos: dict) -> dict:
+        logger.info("..........Checking for similar videos titles in playlist..........")
+        passed_similarity_videos = {}
+        s1 = ""
+        s2 = ""
+        threshold = 0.5
+        _ = SequenceMatcher(a=s1, b=s2).ratio() > threshold
+        return passed_check_videos
 
     # This method will check if videos is in playlist and add it otherwise.
-    def add_video_to_playlist(self, passed_videos: dict) -> None:
+    def add_video_to_playlist(self, videos_in_playlist: dict, passed_videos: dict) -> None:
         logger.info("..........Adding videos to playlist..........")
-        request = self.youtube.playlistItems().list(part="snippet", maxResults=50, playlistId=self.playlist_id)
-        response = request.execute()
-        videos_in_playlist = {}
-        for keys in response['items']:
-            video_id = keys['snippet']['resourceId']['videoId']
-            video_title = keys['snippet']['title']
-            videos_in_playlist[video_id] = video_title
+        if not passed_videos:
+            logger.warning("No videos to add to playlist!")
         for passed_video_id, passed_video_title in passed_videos.items():
             if passed_video_id not in list(videos_in_playlist.keys()):
-                logger.info(f"Video ID: {passed_video_id}, "
-                            f"Video Title: {passed_video_title} ---> is being added to playlist.")
+                logger.info(f"Video ID: {passed_video_id} is being added to playlist, "
+                            f"Video Title: {passed_video_title}")
                 insert_request = self.youtube.playlistItems().insert(
                     part="snippet",
                     body={
@@ -167,8 +169,19 @@ class YouTube:
                 )
                 insert_request.execute()
             else:
-                logger.warning(f"Video ID: {passed_video_id}, "
-                               f"Video Title: {passed_video_title} ---> already in playlist.")
+                logger.warning(f"Video ID: {passed_video_id} already in playlist, Video Title: {passed_video_title}")
+
+    def get_videos_in_playlist(self) -> dict:
+        request = self.youtube.playlistItems().list(
+            part="snippet", maxResults=self.max_results, playlistId=self.playlist_id
+        )
+        response = request.execute()
+        videos_in_playlist = {}
+        for item in response['items']:
+            video_id = item['snippet']['resourceId']['videoId']
+            video_title = item['snippet']['title']
+            videos_in_playlist[video_id] = video_title
+        return videos_in_playlist
 
     # This function matches the names in the list to recently uploaded YouTube videos
     # from the channels and adds them to the playlist.
@@ -190,8 +203,10 @@ class YouTube:
                                 f"Video Title: {video_title}")
                     matched_video_ids.append(video_id)
         if matched_video_ids:
-            passed_video_ids = self.check_video(matched_video_ids)
-            self.add_video_to_playlist(passed_video_ids)
+            passed_check_videos = self.check_video(matched_video_ids)
+            videos_in_playlist = self.get_videos_in_playlist()
+            passed_similarity_videos = self.similarity_checker(videos_in_playlist, passed_check_videos)
+            self.add_video_to_playlist(videos_in_playlist, passed_similarity_videos)
         else:
             logger.warning("No video matches!")
         end = time.perf_counter()

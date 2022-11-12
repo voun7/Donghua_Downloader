@@ -25,12 +25,11 @@ def main() -> None:
     ]
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
     anime_list = [keyword for folder in destination_dir.iterdir() for keyword in re.findall(r'\((.*?)\)', folder.name)]
-    anime_list_two = ["徒弟个个是大佬", "徒弟都是女魔头", "被迫成为反派赘婿", "异皇重生"]
+    anime_list_two = ["徒弟个个是大佬", "徒弟都是女魔头", "被迫成为反派赘婿", "异皇重生", "丹武至尊"]
 
     youtube = YouTube(playlist_id)
     youtube.clear_playlist()
     youtube.match_to_youtube_videos(anime_list, youtube_channel_ids)
-    youtube.match_to_youtube_videos(["丹武至尊"], ["UCYkn7e_zaRR_UxOrJR0RVdg"])
     youtube.match_to_youtube_videos(["大主宰"], ["UCJS5PJXcAIpXkBOjPNvK7Uw"])
     youtube.playlist_downloader(playlist_download_dir)
 

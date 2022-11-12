@@ -60,11 +60,11 @@ class YouTube:
         )
         response = request.execute()
         current_time = datetime.now().astimezone()
-        for keys in response['items']:
-            video_playlist_id = keys['id']
-            video_title = keys['snippet']['title']
+        for item in response['items']:
+            video_playlist_id = item['id']
+            video_title = item['snippet']['title']
             if video_title != "Deleted video":
-                iso_upload_time = keys['contentDetails']['videoPublishedAt']
+                iso_upload_time = item['contentDetails']['videoPublishedAt']
                 upload_time = parser.parse(iso_upload_time).astimezone()
                 time_diff = current_time - upload_time
                 if time_diff < self.default_duration:
@@ -88,19 +88,19 @@ class YouTube:
         upload_id = None
         channel_request = self.youtube.channels().list(part="contentDetails", id=channel_id)
         channel_response = channel_request.execute()
-        for key in channel_response['items']:
-            upload_id = key['contentDetails']['relatedPlaylists']['uploads']
+        for item in channel_response['items']:
+            upload_id = item['contentDetails']['relatedPlaylists']['uploads']
         request = self.youtube.playlistItems().list(part="snippet", maxResults=50, playlistId=upload_id)
         response = request.execute()
         current_time = datetime.now().astimezone()
         video_id_and_title = {}
-        for keys in response['items']:
-            channel_title = keys['snippet']['channelTitle']
-            video_id = keys['snippet']['resourceId']['videoId']
-            video_title = keys['snippet']['title']
+        for item in response['items']:
+            channel_title = item['snippet']['channelTitle']
+            video_id = item['snippet']['resourceId']['videoId']
+            video_title = item['snippet']['title']
             # The time in snippet.publishedAt and contentDetails.videoPublishedAt are
             # always the same for the uploads playlist when accessed by non owner.
-            iso_published_time = keys['snippet']['publishedAt']
+            iso_published_time = item['snippet']['publishedAt']
             upload_time = parser.parse(iso_published_time).astimezone()
             time_diff = current_time - upload_time
             if time_diff < self.default_duration:
@@ -113,33 +113,34 @@ class YouTube:
 
     # This method will check if the videos are the correct duration and High Definition
     # then returns video ids with no duplicates that meet the requirements.
-    def check_video(self, matched_video_ids: list) -> set:
+    def check_video(self, matched_video_ids: list) -> dict:
         logger.info("..........Checking matched videos for duration and quality..........")
         min_duration = timedelta(minutes=5)
         max_duration = timedelta(minutes=20)
-        passed_check_video_ids = set()
+        passed_check_videos = {}
         for video_id in matched_video_ids:
-            request = self.youtube.videos().list(part="contentDetails", id=video_id)
+            request = self.youtube.videos().list(part="snippet,contentDetails", id=video_id)
             response = request.execute()
             for item in response['items']:
+                video_title = item['snippet']['title']
                 iso_content_duration = item['contentDetails']['duration']
                 content_duration = isodate.parse_duration(iso_content_duration)
                 definition = item['contentDetails']['definition']
                 if min_duration < content_duration < max_duration and definition == "hd":
-                    passed_check_video_ids.add(video_id)
+                    passed_check_videos[video_id] = video_title
                     logger.info(f"Video ID: {video_id} passed check. "
-                                f"Duration: {content_duration}, Quality: {definition}")
+                                f"Duration: {content_duration}, Quality: {definition}, Video Title: {video_title}")
                 else:
                     logger.warning(f"Video ID: {video_id} failed check. "
-                                   f"Duration: {content_duration}, Quality: {definition}")
-        return passed_check_video_ids
+                                   f"Duration: {content_duration}, Quality: {definition}, Video Title: {video_title}")
+        return passed_check_videos
 
     @staticmethod
     def similarity_check(s1: str, s2: str, threshold: float = 0.8) -> float:
         return SequenceMatcher(a=s1, b=s2).ratio() > threshold
 
     # This method will check if videos is in playlist and add it otherwise.
-    def add_video_to_playlist(self, passed_video_ids: set) -> None:
+    def add_video_to_playlist(self, passed_videos: dict) -> None:
         logger.info("..........Adding videos to playlist..........")
         request = self.youtube.playlistItems().list(part="snippet", maxResults=50, playlistId=self.playlist_id)
         response = request.execute()
@@ -148,9 +149,10 @@ class YouTube:
             video_id = keys['snippet']['resourceId']['videoId']
             video_title = keys['snippet']['title']
             videos_in_playlist[video_id] = video_title
-        for passed_video_id in passed_video_ids:
+        for passed_video_id, passed_video_title in passed_videos.items():
             if passed_video_id not in list(videos_in_playlist.keys()):
-                logger.info(f"Video ID: {passed_video_id} is being added to playlist.")
+                logger.info(f"Video ID: {passed_video_id}, "
+                            f"Video Title: {passed_video_title} is being added to playlist.")
                 insert_request = self.youtube.playlistItems().insert(
                     part="snippet",
                     body={
@@ -165,7 +167,7 @@ class YouTube:
                 )
                 insert_request.execute()
             else:
-                logger.warning(f"Video ID: {passed_video_id} already in playlist.")
+                logger.warning(f"Video ID: {passed_video_id}, Video Title: {passed_video_title} already in playlist.")
 
     # This function matches the names in the list to recently uploaded YouTube videos
     # from the channels and adds them to the playlist.

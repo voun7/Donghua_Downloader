@@ -2,6 +2,7 @@ import logging
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
+from difflib import SequenceMatcher
 
 import isodate
 from dateutil import parser
@@ -136,13 +137,15 @@ class YouTube:
     # This method will check if videos is in playlist and add it otherwise.
     def add_video_to_playlist(self, passed_video_ids: set) -> None:
         logger.info("..........Adding videos to playlist..........")
-        video_ids_in_playlist = []
         request = self.youtube.playlistItems().list(part="snippet", maxResults=50, playlistId=self.playlist_id)
         response = request.execute()
+        videos_in_playlist = {}
         for keys in response['items']:
-            video_ids_in_playlist.append(keys['snippet']['resourceId']['videoId'])
+            video_id = keys['snippet']['resourceId']['videoId']
+            video_title = keys['snippet']['title']
+            videos_in_playlist[video_id] = video_title
         for passed_video_id in passed_video_ids:
-            if passed_video_id not in video_ids_in_playlist:
+            if passed_video_id not in list(videos_in_playlist.keys()):
                 logger.info(f"Video ID: {passed_video_id} is being added to playlist.")
                 insert_request = self.youtube.playlistItems().insert(
                     part="snippet",

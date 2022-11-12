@@ -1,5 +1,6 @@
 import logging
 import time
+import itertools
 from datetime import datetime, timedelta
 from pathlib import Path
 from difflib import SequenceMatcher
@@ -113,14 +114,25 @@ class YouTube:
         return video_id_and_title
 
     @staticmethod
-    def similar(s1: str, s2: str, threshold: float = 0.8) -> bool:
-        # print(s1, s2)
-        return SequenceMatcher(a=s1, b=s2).ratio() > threshold
+    def similar(s1: str, s2: str, threshold: float = 0.5) -> bool:
+        title1 = s1
+        title2 = s2
+        return SequenceMatcher(a=title1, b=title2).ratio() > threshold
 
     def similarity_checker(self, all_recent_uploads: dict) -> dict:
         logger.info("..........Checking for similarity among recent videos titles..........")
-        passed_similarity_videos = {}
-        return all_recent_uploads
+        videos_with_low_similarity = {}
+        videos_titles_with_high_similarity = []
+        for title1, title2 in itertools.combinations(list(all_recent_uploads.values()), 2):
+            if self.similar(title1, title2):
+                logger.warning(f"Video title: {title1} ---- is similar to ---- Video title: {title2}")
+                videos_titles_with_high_similarity.append(title2)
+        for video_id, video_title in all_recent_uploads.items():
+            if video_title not in videos_titles_with_high_similarity:
+                videos_with_low_similarity[video_id] = video_title
+        if not videos_titles_with_high_similarity:
+            logger.warning("No videos with high similarities")
+        return videos_with_low_similarity
 
     # This method will check if the videos are the correct duration and High Definition
     # then returns video ids with no duplicates that meet the requirements.

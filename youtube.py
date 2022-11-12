@@ -1,9 +1,9 @@
+import itertools
 import logging
 import time
-import itertools
 from datetime import datetime, timedelta
-from pathlib import Path
 from difflib import SequenceMatcher
+from pathlib import Path
 
 import isodate
 from dateutil import parser

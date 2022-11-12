@@ -134,6 +134,10 @@ class YouTube:
                                    f"Duration: {content_duration}, Quality: {definition}")
         return passed_check_video_ids
 
+    @staticmethod
+    def similarity_check(s1: str, s2: str, threshold: float = 0.8) -> float:
+        return SequenceMatcher(a=s1, b=s2).ratio() > threshold
+
     # This method will check if videos is in playlist and add it otherwise.
     def add_video_to_playlist(self, passed_video_ids: set) -> None:
         logger.info("..........Adding videos to playlist..........")

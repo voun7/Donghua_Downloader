@@ -136,7 +136,7 @@ class YouTube:
         return passed_check_videos
 
     @staticmethod
-    def similarity_check(s1: str, s2: str, threshold: float = 0.8) -> float:
+    def similar(s1: str, s2: str, threshold: float = 0.5) -> float:
         return SequenceMatcher(a=s1, b=s2).ratio() > threshold
 
     # This method will check if videos is in playlist and add it otherwise.
@@ -152,7 +152,7 @@ class YouTube:
         for passed_video_id, passed_video_title in passed_videos.items():
             if passed_video_id not in list(videos_in_playlist.keys()):
                 logger.info(f"Video ID: {passed_video_id}, "
-                            f"Video Title: {passed_video_title} is being added to playlist.")
+                            f"Video Title: {passed_video_title} ---> is being added to playlist.")
                 insert_request = self.youtube.playlistItems().insert(
                     part="snippet",
                     body={
@@ -167,7 +167,8 @@ class YouTube:
                 )
                 insert_request.execute()
             else:
-                logger.warning(f"Video ID: {passed_video_id}, Video Title: {passed_video_title} already in playlist.")
+                logger.warning(f"Video ID: {passed_video_id}, "
+                               f"Video Title: {passed_video_title} ---> already in playlist.")
 
     # This function matches the names in the list to recently uploaded YouTube videos
     # from the channels and adds them to the playlist.
@@ -193,7 +194,6 @@ class YouTube:
             self.add_video_to_playlist(passed_video_ids)
         else:
             logger.warning("No video matches!")
-
         end = time.perf_counter()
         total_time = end - start
         logger.info(f"Total time matching recent uploads and adding to playlist took: {total_time}")

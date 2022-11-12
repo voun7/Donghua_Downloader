@@ -112,6 +112,16 @@ class YouTube:
                 video_id_and_title[video_id] = video_title
         return video_id_and_title
 
+    @staticmethod
+    def similar(s1: str, s2: str, threshold: float = 0.8) -> bool:
+        # print(s1, s2)
+        return SequenceMatcher(a=s1, b=s2).ratio() > threshold
+
+    def similarity_checker(self, all_recent_uploads: dict) -> dict:
+        logger.info("..........Checking for similarity among recent videos titles..........")
+        passed_similarity_videos = {}
+        return all_recent_uploads
+
     # This method will check if the videos are the correct duration and High Definition
     # then returns video ids with no duplicates that meet the requirements.
     def check_video(self, matched_video_ids: list) -> dict:
@@ -136,19 +146,22 @@ class YouTube:
                                    f"Duration: {content_duration}, Quality: {definition}, Video Title: {video_title}")
         return passed_check_videos
 
-    @staticmethod
-    def similarity_checker(videos_in_playlist: dict, passed_check_videos: dict) -> dict:
-        logger.info("..........Checking for similar videos titles in playlist..........")
-        passed_similarity_videos = {}
-        s1 = ""
-        s2 = ""
-        threshold = 0.5
-        _ = SequenceMatcher(a=s1, b=s2).ratio() > threshold
-        return passed_check_videos
+    def get_videos_in_playlist(self) -> dict:
+        request = self.youtube.playlistItems().list(
+            part="snippet", maxResults=self.max_results, playlistId=self.playlist_id
+        )
+        response = request.execute()
+        videos_in_playlist = {}
+        for item in response['items']:
+            video_id = item['snippet']['resourceId']['videoId']
+            video_title = item['snippet']['title']
+            videos_in_playlist[video_id] = video_title
+        return videos_in_playlist
 
     # This method will check if videos is in playlist and add it otherwise.
-    def add_video_to_playlist(self, videos_in_playlist: dict, passed_videos: dict) -> None:
+    def add_video_to_playlist(self, passed_videos: dict) -> None:
         logger.info("..........Adding videos to playlist..........")
+        videos_in_playlist = self.get_videos_in_playlist()
         if not passed_videos:
             logger.warning("No videos to add to playlist!")
         for passed_video_id, passed_video_title in passed_videos.items():
@@ -171,18 +184,6 @@ class YouTube:
             else:
                 logger.warning(f"Video ID: {passed_video_id} already in playlist, Video Title: {passed_video_title}")
 
-    def get_videos_in_playlist(self) -> dict:
-        request = self.youtube.playlistItems().list(
-            part="snippet", maxResults=self.max_results, playlistId=self.playlist_id
-        )
-        response = request.execute()
-        videos_in_playlist = {}
-        for item in response['items']:
-            video_id = item['snippet']['resourceId']['videoId']
-            video_title = item['snippet']['title']
-            videos_in_playlist[video_id] = video_title
-        return videos_in_playlist
-
     # This function matches the names in the list to recently uploaded YouTube videos
     # from the channels and adds them to the playlist.
     def match_to_youtube_videos(self, file_names: list, youtube_channel_ids: list) -> None:
@@ -193,6 +194,7 @@ class YouTube:
         for channel_id in youtube_channel_ids:
             uploads = self.get_channel_recent_video_uploads(channel_id)
             all_recent_uploads.update(uploads)
+        all_recent_uploads = self.similarity_checker(all_recent_uploads)
         logger.info("..........Checking for video matches..........")
         matched_video_ids = []
         for name in file_names:
@@ -204,9 +206,7 @@ class YouTube:
                     matched_video_ids.append(video_id)
         if matched_video_ids:
             passed_check_videos = self.check_video(matched_video_ids)
-            videos_in_playlist = self.get_videos_in_playlist()
-            passed_similarity_videos = self.similarity_checker(videos_in_playlist, passed_check_videos)
-            self.add_video_to_playlist(videos_in_playlist, passed_similarity_videos)
+            self.add_video_to_playlist(passed_check_videos)
         else:
             logger.warning("No video matches!")
         end = time.perf_counter()

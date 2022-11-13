@@ -1,7 +1,7 @@
 import itertools
 import logging
-import time
 import re
+import time
 from datetime import datetime, timedelta
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -179,6 +179,7 @@ class YouTube:
             else:
                 logger.warning(f"Video ID: {passed_video_id} already in playlist, Video Title: {passed_video_title}")
 
+    # The regex removes substitutes all characters that aren't chinese or space or digits.
     @staticmethod
     def name_filter(name: str) -> str:
         new_name = name.replace("1080P", "")

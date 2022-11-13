@@ -182,7 +182,7 @@ class YouTube:
     # The regex removes substitutes all characters that aren't chinese or space or digits.
     @staticmethod
     def name_filter(name: str) -> str:
-        new_name = name.replace("1080P", "").replace("蓝光", "")
+        new_name = name.replace("1080", "").replace("蓝光", "")
         new_name = re.sub('[^\u4e00-\u9fff \\d]+', '', new_name)
         return new_name
 

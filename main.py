@@ -3,8 +3,8 @@ import re
 from pathlib import Path
 
 from logger_setup import get_log
-from youtube import YouTube
 from scraper import XiaoheimiScraper
+from youtube import YouTube
 
 logger = logging.getLogger(__name__)
 

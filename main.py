@@ -20,7 +20,8 @@ def main() -> None:
         "UC80ztI40QAXzWL94eoRzWow",
         "UCBIiQ5Hlsadi1HQl8dufZag",
         "UC8r57bRU8OrpXnLFNC0ym7Q",
-        "UCJSAZ5pbDi8StbSbJI1riEg"
+        "UCJSAZ5pbDi8StbSbJI1riEg",
+        "UCJS5PJXcAIpXkBOjPNvK7Uw"
     ]
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
     anime_list = [keyword for folder in destination_dir.iterdir() for keyword in re.findall(r'\((.*?)\)', folder.name)]
@@ -29,7 +30,6 @@ def main() -> None:
     youtube = YouTube(playlist_id)
     youtube.clear_playlist()
     youtube.match_to_youtube_videos(anime_list, youtube_channel_ids)
-    youtube.match_to_youtube_videos(["大主宰"], ["UCJS5PJXcAIpXkBOjPNvK7Uw"])
     youtube.playlist_downloader(playlist_download_dir)
 
     xiaoheimi = XiaoheimiScraper()

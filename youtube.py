@@ -61,6 +61,11 @@ class YouTube:
             part="snippet,contentDetails", maxResults=self.max_results, playlistId=self.playlist_id
         )
         response = request.execute()
+        num_of_videos_in_playlist = response['pageInfo']['totalResults']
+        if num_of_videos_in_playlist:
+            logger.info(f"{num_of_videos_in_playlist} Videos in playlist.")
+        else:
+            logger.info("No videos in playlist!")
         current_time = datetime.now().astimezone()
         for item in response['items']:
             video_playlist_id = item['id']
@@ -131,7 +136,7 @@ class YouTube:
             if video_title not in videos_titles_with_high_similarity:
                 videos_with_low_similarity[video_id] = video_title
         if not videos_titles_with_high_similarity:
-            logger.warning("No videos with high similarities")
+            logger.info("No videos with high similarities!")
         return videos_with_low_similarity
 
     # This method will check if the videos are the correct duration and High Definition
@@ -206,6 +211,8 @@ class YouTube:
         for channel_id in youtube_channel_ids:
             uploads = self.get_channel_recent_video_uploads(channel_id)
             all_recent_uploads.update(uploads)
+        if not all_recent_uploads:
+            logger.info("No recent video uploads!")
         all_recent_uploads = self.similarity_checker(all_recent_uploads)
         logger.info("..........Checking for video matches..........")
         matched_video_ids = []

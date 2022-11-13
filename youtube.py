@@ -1,9 +1,6 @@
-import itertools
 import logging
-import re
 import time
 from datetime import datetime, timedelta
-from difflib import SequenceMatcher
 from pathlib import Path
 
 import isodate
@@ -179,41 +176,10 @@ class YouTube:
             else:
                 logger.warning(f"Video ID: {passed_video_id} already in playlist, Video Title: {passed_video_title}")
 
-    # The regex removes substitutes all characters that aren't chinese or space or digits.
-    @staticmethod
-    def name_filter(name: str) -> str:
-        new_name = name.replace("1080", "").replace("蓝光", "")
-        new_name = re.sub('[^\u4e00-\u9fff \\d]+', '', new_name)
-        return new_name
-
-    # Calculates the similarity between the two strings. Returns true if similarity is above threshold.
-    def similar(self, s1: str, s2: str, threshold: int = 50) -> tuple[bool, float]:
-        title1 = self.name_filter(s1)
-        title2 = self.name_filter(s2)
-        similarity_percentage = SequenceMatcher(a=title1, b=title2).quick_ratio()*100
-        return similarity_percentage > threshold, similarity_percentage
-
-    def similarity_checker(self, checked_videos: dict) -> dict:
-        logger.info("..........Checking for similarity among videos titles..........")
-        videos_with_low_similarity = {}
-        videos_titles_with_high_similarity = []
-        for title1, title2 in itertools.combinations(list(checked_videos.values()), 2):
-            similar, similarity_percentage = self.similar(title1, title2)
-            if similar:
-                logger.warning(f"Video title: {title2} ---is {similarity_percentage}% similar to--- "
-                               f"Video title: {title1} so it failed check.")
-                videos_titles_with_high_similarity.append(title2)
-        for video_id, video_title in checked_videos.items():
-            if video_title not in videos_titles_with_high_similarity:
-                videos_with_low_similarity[video_id] = video_title
-        if not videos_titles_with_high_similarity:
-            logger.info("No videos with high similarities!")
-        return videos_with_low_similarity
-
     # This function matches the names in the list to recently uploaded YouTube videos
     # from the channels and adds them to the playlist.
     def match_to_youtube_videos(self, file_names: list, youtube_channel_ids: list) -> None:
-        logger.info(f"..........Checking all channels for recent video uploads "
+        logger.info(f"..........Checking channel(s) for recent video uploads "
                     f"in the last {self.default_duration}..........")
         start = time.perf_counter()
         all_recent_uploads = {}
@@ -233,8 +199,7 @@ class YouTube:
                     matched_video_ids.append(video_id)
         if matched_video_ids:
             passed_check_videos = self.check_video(matched_video_ids)
-            passed_similarity_check = self.similarity_checker(passed_check_videos)
-            self.add_video_to_playlist(passed_similarity_check)
+            self.add_video_to_playlist(passed_check_videos)
         else:
             logger.warning("No video matches!")
         end = time.perf_counter()

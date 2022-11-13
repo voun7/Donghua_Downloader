@@ -27,9 +27,9 @@ def main() -> None:
 
     youtube = YouTube(playlist_id)
     youtube.clear_playlist()
-    youtube.match_to_youtube_videos(anime_list, youtube_channel_ids)
-    youtube.match_to_youtube_videos(["史上第一祖师爷", "从姑获鸟开始", "掌门低调点"], ["UCJSAZ5pbDi8StbSbJI1riEg"])
-    youtube.match_to_youtube_videos(["大主宰"], ["UCJS5PJXcAIpXkBOjPNvK7Uw"])
+    youtube.match_to_youtube_videos(youtube_channel_ids, anime_list)
+    youtube.match_to_youtube_videos(["UCJSAZ5pbDi8StbSbJI1riEg"], ["史上第一祖师爷", "从姑获鸟开始", "掌门低调点"])
+    youtube.match_to_youtube_videos(["UCJS5PJXcAIpXkBOjPNvK7Uw"], ["大主宰"])
     youtube.playlist_downloader(playlist_download_dir)
 
     xiaoheimi = XiaoheimiScraper()

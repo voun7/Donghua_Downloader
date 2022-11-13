@@ -178,7 +178,7 @@ class YouTube:
 
     # This function matches the names in the list to recently uploaded YouTube videos
     # from the channels and adds them to the playlist.
-    def match_to_youtube_videos(self, file_names: list, youtube_channel_ids: list) -> None:
+    def match_to_youtube_videos(self, youtube_channel_ids: list, file_names: list) -> None:
         logger.info(f"..........Checking channel(s) for recent video uploads "
                     f"in the last {self.default_duration}..........")
         start = time.perf_counter()

@@ -63,7 +63,7 @@ class YouTube:
         response = request.execute()
         num_of_videos_in_playlist = response['pageInfo']['totalResults']
         if num_of_videos_in_playlist:
-            logger.info(f"{num_of_videos_in_playlist} Videos in playlist.")
+            logger.info(f"{num_of_videos_in_playlist} Video(s) in playlist.")
         else:
             logger.info("No videos in playlist!")
         current_time = datetime.now().astimezone()
@@ -75,12 +75,10 @@ class YouTube:
                 upload_time = parser.parse(iso_upload_time).astimezone()
                 time_diff = current_time - upload_time
                 if time_diff < self.default_duration:
-                    logger.info(f"Not Removing Video: {video_title}, "
-                                f"Uploaded At: {upload_time}, "
+                    logger.info(f"Not Removing Video: {video_title}, Uploaded At: {upload_time}, "
                                 f"Time since uploaded: {time_diff}")
                 else:
-                    logger.info(f"Removing Video: {video_title} from playlist, "
-                                f"Uploaded At: {upload_time}, "
+                    logger.info(f"Removing Video: {video_title} from playlist, Uploaded At: {upload_time}, "
                                 f"Time since uploaded: {time_diff}")
                     delete_request = self.youtube.playlistItems().delete(id=video_playlist_id)
                     delete_request.execute()

@@ -1,6 +1,7 @@
 import itertools
 import logging
 import time
+import re
 from datetime import datetime, timedelta
 from difflib import SequenceMatcher
 from pathlib import Path
@@ -180,7 +181,8 @@ class YouTube:
 
     @staticmethod
     def name_filter(name: str) -> str:
-        new_name = name.replace("Eng subtitles", "").replace("蓝光1080P", "")
+        new_name = name.replace("1080P", "")
+        new_name = re.sub('[^\u4e00-\u9fff \\d]+', '', new_name)
         return new_name
 
     # Calculates the similarity between the two strings. Returns true if similarity is above threshold.

@@ -80,7 +80,7 @@ class XiaoheimiScraper:
         checked_video_urls = self.get_latest_video_links(matched_posts)
         end = time.perf_counter()
         total_time = end - start
-        logger.info(f"Done checking recent videos Total time: {total_time}")
+        logger.info(f"Done checking recent videos, Total time: {total_time}")
         return checked_video_urls
 
     @staticmethod
@@ -130,4 +130,4 @@ class XiaoheimiScraper:
             _ = [executor.submit(self.video_downloader, url, download_location) for url in video_urls]
         end = time.perf_counter()
         total_time = end - start
-        logger.info(f"Downloads finished Total time: {total_time}")
+        logger.info(f"Downloads finished, Total time: {total_time}")

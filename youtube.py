@@ -193,7 +193,7 @@ class YouTube:
         return similarity_percentage > threshold, similarity_percentage
 
     def similarity_checker(self, checked_videos: dict) -> dict:
-        logger.info("..........Checking for similarity among recent videos titles..........")
+        logger.info("..........Checking for similarity among videos titles..........")
         videos_with_low_similarity = {}
         videos_titles_with_high_similarity = []
         for title1, title2 in itertools.combinations(list(checked_videos.values()), 2):

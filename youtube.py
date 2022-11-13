@@ -116,27 +116,6 @@ class YouTube:
                 video_id_and_title[video_id] = video_title
         return video_id_and_title
 
-    @staticmethod
-    def similar(s1: str, s2: str, threshold: float = 0.5) -> bool:
-        title1 = s1
-        title2 = s2
-        return SequenceMatcher(a=title1, b=title2).ratio() > threshold
-
-    def similarity_checker(self, all_recent_uploads: dict) -> dict:
-        logger.info("..........Checking for similarity among recent videos titles..........")
-        videos_with_low_similarity = {}
-        videos_titles_with_high_similarity = []
-        for title1, title2 in itertools.combinations(list(all_recent_uploads.values()), 2):
-            if self.similar(title1, title2):
-                logger.warning(f"Video title: {title1} ---- is similar to ---- Video title: {title2}")
-                videos_titles_with_high_similarity.append(title2)
-        for video_id, video_title in all_recent_uploads.items():
-            if video_title not in videos_titles_with_high_similarity:
-                videos_with_low_similarity[video_id] = video_title
-        if not videos_titles_with_high_similarity:
-            logger.info("No videos with high similarities!")
-        return videos_with_low_similarity
-
     # This method will check if the videos are the correct duration and High Definition
     # then returns video ids with no duplicates that meet the requirements.
     def check_video(self, matched_video_ids: list) -> dict:
@@ -199,6 +178,35 @@ class YouTube:
             else:
                 logger.warning(f"Video ID: {passed_video_id} already in playlist, Video Title: {passed_video_title}")
 
+    @staticmethod
+    def name_filter(name: str) -> str:
+        new_name = name.replace("Eng subtitles", "").replace("蓝光1080P", "")
+        return new_name
+
+    # Calculates the similarity between the two strings. Returns true if similarity is above threshold.
+    def similar(self, s1: str, s2: str, threshold: int = 50) -> tuple[bool, float]:
+        title1 = self.name_filter(s1)
+        title2 = self.name_filter(s2)
+        similarity_percentage = SequenceMatcher(a=title1, b=title2).quick_ratio()*100
+        return similarity_percentage > threshold, similarity_percentage
+
+    def similarity_checker(self, checked_videos: dict) -> dict:
+        logger.info("..........Checking for similarity among recent videos titles..........")
+        videos_with_low_similarity = {}
+        videos_titles_with_high_similarity = []
+        for title1, title2 in itertools.combinations(list(checked_videos.values()), 2):
+            similar, similarity_percentage = self.similar(title1, title2)
+            if similar:
+                logger.warning(f"Video title: {title2} ---is {similarity_percentage}% similar to--- "
+                               f"Video title: {title1} so it failed check.")
+                videos_titles_with_high_similarity.append(title2)
+        for video_id, video_title in checked_videos.items():
+            if video_title not in videos_titles_with_high_similarity:
+                videos_with_low_similarity[video_id] = video_title
+        if not videos_titles_with_high_similarity:
+            logger.info("No videos with high similarities!")
+        return videos_with_low_similarity
+
     # This function matches the names in the list to recently uploaded YouTube videos
     # from the channels and adds them to the playlist.
     def match_to_youtube_videos(self, file_names: list, youtube_channel_ids: list) -> None:
@@ -211,7 +219,6 @@ class YouTube:
             all_recent_uploads.update(uploads)
         if not all_recent_uploads:
             logger.info("No recent video uploads!")
-        all_recent_uploads = self.similarity_checker(all_recent_uploads)
         logger.info("..........Checking for video matches..........")
         matched_video_ids = []
         for name in file_names:
@@ -223,7 +230,8 @@ class YouTube:
                     matched_video_ids.append(video_id)
         if matched_video_ids:
             passed_check_videos = self.check_video(matched_video_ids)
-            self.add_video_to_playlist(passed_check_videos)
+            passed_similarity_check = self.similarity_checker(passed_check_videos)
+            self.add_video_to_playlist(passed_similarity_check)
         else:
             logger.warning("No video matches!")
         end = time.perf_counter()

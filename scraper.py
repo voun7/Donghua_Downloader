@@ -126,8 +126,12 @@ class XiaoheimiScraper:
     def download_all_videos(self, video_urls: list, download_location: Path) -> None:
         logger.info("..........Downloading matched recent site videos..........")
         start = time.perf_counter()
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            _ = [executor.submit(self.video_downloader, url, download_location) for url in video_urls]
+        if not video_urls:
+            logger.info("No Video(s) to Download")
+        else:
+            with concurrent.futures.ThreadPoolExecutor() as executor:
+                _ = [executor.submit(self.video_downloader, url, download_location) for url in video_urls]
+            logger.info("Downloads finished!")
         end = time.perf_counter()
         total_time = end - start
-        logger.info(f"Downloads finished, Total time: {total_time}")
+        logger.info(f"Total time: {total_time}")

@@ -71,17 +71,17 @@ class XiaoheimiScraper:
         posts = self.get_page_one_anime_posts()
         matched_posts = {}
         logger.info("..........Matching names to site recent post..........")
-        start = time.perf_counter()
         for name in anime_list:
             for post_name, post_url in posts.items():
                 if name in post_name:
                     logger.info(f"Anime: {name} matches Post Title: {post_name}, Post URL: {post_url}")
                     matched_posts[post_name] = post_url
-        checked_video_urls = self.get_latest_video_links(matched_posts)
-        end = time.perf_counter()
-        total_time = end - start
-        logger.info(f"Done checking recent videos, Total time: {total_time}")
-        return checked_video_urls
+        if matched_posts:
+            checked_video_urls = self.get_latest_video_links(matched_posts)
+            return checked_video_urls
+        else:
+            logger.info("No post matches found!")
+            return []
 
     @staticmethod
     def download_video(download_link: str, file_name: str, download_location: Path) -> None:

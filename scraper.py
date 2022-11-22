@@ -28,7 +28,7 @@ class XiaoheimiScraper:
         payload = '/index.php/vod/show/area/大陆/id/4.html'
         try:
             page_response = requests.get(self.base_url + payload, headers=self.header)
-            soup = BeautifulSoup(page_response.text, 'lxml')
+            soup = BeautifulSoup(page_response.text, 'html.parser')
             posts = soup.find_all('li', class_='col-lg-8 col-md-6 col-sm-4 col-xs-3')
             logger.info("..........Site Page one Anime Posts..........")
             for post in posts:
@@ -49,7 +49,7 @@ class XiaoheimiScraper:
         current_date_without_time = datetime.now().date()
         for name, url in matched_posts.items():
             page_response = requests.get(url, headers=self.header)
-            soup = BeautifulSoup(page_response.text, 'lxml')
+            soup = BeautifulSoup(page_response.text, 'html.parser')
             post_update = soup.find('span', class_='text-red').text.split(' / ')
             last_updated_date_without_time = parser.parse(post_update[1]).date()
             if last_updated_date_without_time >= current_date_without_time:
@@ -109,7 +109,7 @@ class XiaoheimiScraper:
     # It uses yt-dlp to download the file from hls stream
     def video_downloader(self, video_url: str, download_location: Path) -> None:
         page_response = requests.get(video_url, headers=self.header)
-        soup = BeautifulSoup(page_response.text, 'lxml')
+        soup = BeautifulSoup(page_response.text, 'html.parser')
         file_name = soup.title.string.strip(' 在线播放 - 小宝影院 - 在线视频')
         for match in re.finditer(r'(\d+)', file_name):
             number = match.group(0)

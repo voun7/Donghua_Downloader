@@ -29,7 +29,6 @@ def main() -> None:
         ["UCJSAZ5pbDi8StbSbJI1riEg", "UCJS5PJXcAIpXkBOjPNvK7Uw"],
         ["史上第一祖师爷", "从姑获鸟开始", "掌门低调点", "大主宰"]
     )
-    youtube.match_to_youtube_videos(["UCYkn7e_zaRR_UxOrJR0RVdg"], ["万古龙神"])
     youtube.playlist_downloader(playlist_download_dir)
 
     xiaoheimi = XiaoheimiScraper()

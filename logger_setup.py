@@ -1,8 +1,13 @@
 import logging
 import sys
 from logging.handlers import TimedRotatingFileHandler
+from pathlib import Path
 
 import graypy
+
+log_dir = Path(f"{Path.cwd()}/logs")
+if not log_dir.exists():
+    log_dir.mkdir()
 
 
 def get_log() -> None:

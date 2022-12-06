@@ -5,12 +5,13 @@ from pathlib import Path
 
 import graypy
 
-log_dir = Path(f"{Path.cwd()}/logs")
-if not log_dir.exists():
-    log_dir.mkdir()
-
 
 def get_log() -> None:
+    # Create folder for file logs
+    log_dir = Path(f"{Path.cwd()}/logs")
+    if not log_dir.exists():
+        log_dir.mkdir()
+
     # Create a custom base_logger
     base_logger = logging.getLogger()
     base_logger.setLevel(logging.DEBUG)

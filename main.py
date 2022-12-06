@@ -19,7 +19,7 @@ def main() -> None:
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
     youtube_channel_ids = ["UC80ztI40QAXzWL94eoRzWow", "UCBIiQ5Hlsadi1HQl8dufZag", "UC8r57bRU8OrpXnLFNC0ym7Q"]
     anime_list = [keyword for folder in destination_dir.iterdir() for keyword in re.findall(r'\((.*?)\)', folder.name)]
-    anime_list_two = ["徒弟个个是大佬", "徒弟都是女魔头", "被迫成为反派赘婿", "异皇重生", "妖道至尊", "祖师出山"]
+    anime_list_two = ["徒弟个个是大佬", "徒弟都是女魔头", "被迫成为反派赘婿", "异皇重生", "妖道至尊", "祖师出山", "的99个女主"]
 
     # Arguments
     youtube = YouTube(playlist_id)

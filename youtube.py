@@ -68,7 +68,7 @@ class YouTube:
         for item in response['items']:
             video_playlist_id = item['id']
             video_title = item['snippet']['title']
-            if video_title != "Deleted video":
+            if video_title != "Deleted video" and video_title != "Private video":
                 iso_upload_time = item['contentDetails']['videoPublishedAt']
                 upload_time = parser.parse(iso_upload_time).astimezone()
                 time_diff = current_time - upload_time
@@ -81,7 +81,7 @@ class YouTube:
                     delete_request = self.youtube.playlistItems().delete(id=video_playlist_id)
                     delete_request.execute()
             else:
-                logger.warning(f"Removing deleted video: {video_playlist_id} from playlist.")
+                logger.warning(f"Removing deleted or private video: {video_playlist_id} from playlist.")
                 delete_request = self.youtube.playlistItems().delete(id=video_playlist_id)
                 delete_request.execute()
 

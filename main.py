@@ -27,7 +27,7 @@ def main() -> None:
     youtube.match_to_youtube_videos(youtube_channel_ids, anime_list)
     youtube.match_to_youtube_videos(
         ["UCJSAZ5pbDi8StbSbJI1riEg", "UCJS5PJXcAIpXkBOjPNvK7Uw"],
-        ["史上第一祖师爷", "从姑获鸟开始", "掌门低调点", "大主宰"]
+        ["从姑获鸟开始", "掌门低调点", "大主宰"]
     )
     youtube.playlist_downloader(playlist_download_dir)
 

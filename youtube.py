@@ -94,7 +94,12 @@ class YouTube:
         for item in channel_response['items']:
             upload_id = item['contentDetails']['relatedPlaylists']['uploads']
         request = self.youtube.playlistItems().list(part="snippet", maxResults=self.max_results, playlistId=upload_id)
-        response = request.execute()
+        try:
+            response = request.execute()
+        except Exception as error:
+            logger.error(f"Youtube Channel: {channel_id} request failed")
+            logger.exception(error)
+            return {}
         current_time = datetime.now().astimezone()
         video_id_and_title = {}
         for item in response['items']:

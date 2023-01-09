@@ -32,7 +32,7 @@ def main() -> None:
     youtube_channel_ids = ["UC80ztI40QAXzWL94eoRzWow", "UCBIiQ5Hlsadi1HQl8dufZag", "UC8r57bRU8OrpXnLFNC0ym7Q"]
 
     xh_anime_list = ["徒弟个个是大佬", "徒弟都是女魔头", "被迫成为反派赘婿", "异皇重生", "妖道至尊", "祖师出山",
-                     "仙武帝尊", "龙城争霸", "九霄帝神"]
+                     "仙武帝尊", "龙城争霸", "九霄帝神", "逆天邪神"]
     yt_anime_list = filter_anime_list(anime_list, xh_anime_list)
 
     # Arguments

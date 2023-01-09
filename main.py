@@ -9,6 +9,16 @@ from youtube import YouTube
 logger = logging.getLogger(__name__)
 
 
+def filter_anime_list(anime_list: list, xh_anime_list: list) -> list:
+    """
+    Prevent anime from being in two lists at the same time
+    """
+    for anime in xh_anime_list:
+        if anime in anime_list:
+            anime_list.remove(anime)
+    return anime_list
+
+
 def main() -> None:
     get_log()
     logger.debug("Logging Started")

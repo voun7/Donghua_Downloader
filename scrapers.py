@@ -43,7 +43,7 @@ class XiaoheimiScraper:
 
     # This method takes a post's url check if its recent and gets
     # the latest default number of video links.
-    def get_latest_video_links(self, matched_posts: dict, default_num_videos: int = 3) -> list:
+    def get_latest_video_links(self, matched_posts: dict, default_num_videos: int = 5) -> list:
         logger.info("..........Checking for latest videos..........")
         latest_video_links = []
         current_date_without_time = datetime.now().date()

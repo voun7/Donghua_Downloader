@@ -29,6 +29,8 @@ def main() -> None:
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
     anime_list = [keyword for folder in destination_dir.iterdir() for keyword in re.findall(r'\((.*?)\)', folder.name)]
 
+    # To obtain the channel id you can view the source code of the channel page
+    # and find either data-channel-external-id or "externalId"
     youtube_channel_ids = ["UC80ztI40QAXzWL94eoRzWow", "UCBIiQ5Hlsadi1HQl8dufZag", "UCXmOpN9pg1hJBRkHODL00EA"]
 
     xh_anime_list = [

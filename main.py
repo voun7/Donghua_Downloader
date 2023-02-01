@@ -32,9 +32,8 @@ def main() -> None:
     youtube_channel_ids = ["UC80ztI40QAXzWL94eoRzWow", "UCBIiQ5Hlsadi1HQl8dufZag", "UCXmOpN9pg1hJBRkHODL00EA"]
 
     xh_anime_list = [
-        "徒弟个个是大佬", "徒弟都是女魔头", "被迫成为反派赘婿", "异皇重生", "妖道至尊", "祖师出山", "仙武帝尊",
-        "龙城争霸", "逆天邪神", "绝世战魂", "伏天圣主", "我是大仙尊", "一剑独尊", "诸天纪动态动画", "逆天战神",
-        "盖世帝尊", "混沌金乌"
+        "徒弟个个是大佬", "徒弟都是女魔头", "被迫成为反派赘婿", "妖道至尊", "仙武帝尊", "龙城争霸", "逆天邪神",
+        "绝世战魂", "我是大仙尊", "一剑独尊", "诸天纪动态动画", "逆天战神", "盖世帝尊", "混沌金乌"
     ]
     yt_anime_list = filter_anime_list(anime_list, xh_anime_list)
 
@@ -42,7 +41,6 @@ def main() -> None:
     youtube = YouTube(playlist_id)
     youtube.clear_playlist()
     youtube.match_to_youtube_videos(youtube_channel_ids, yt_anime_list)
-    youtube.match_to_youtube_videos(["UCJS5PJXcAIpXkBOjPNvK7Uw"], ["大主宰"])
     youtube.match_to_youtube_videos(["UCJSAZ5pbDi8StbSbJI1riEg"], ["最强神王", "妙手神医"])
     youtube.playlist_downloader(playlist_download_dir)
 

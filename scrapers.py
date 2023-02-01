@@ -134,4 +134,4 @@ class XiaoheimiScraper:
             logger.info("Downloads finished!")
         end = time.perf_counter()
         total_time = end - start
-        logger.info(f"Total download time: {total_time}")
+        logger.info(f"Total download time: {total_time}\n")

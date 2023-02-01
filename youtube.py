@@ -238,4 +238,4 @@ class YouTube:
             ydl.download(self.playlist_id)
         end = time.perf_counter()
         total_time = end - start
-        logger.info(f"Total time downloading playlist took: {total_time}")
+        logger.info(f"Total time downloading playlist took: {total_time}\n")

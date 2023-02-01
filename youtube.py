@@ -229,7 +229,7 @@ class YouTube:
             'ignoreerrors': True,
             'socket_timeout': 120,
             'wait_for_video': (1, 600),
-            'download_archive': 'logs/yt_dlp_downloads_archive.txt',
+            'download_archive': 'logs/youtube_downloads_archive.txt',
             'format': 'bestvideo[height>720][ext=mp4]+bestaudio[ext=m4a]',
             'ffmpeg_location': 'ffmpeg/bin',
             'outtmpl': str(download_location) + '/%(title)s.%(ext)s'

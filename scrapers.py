@@ -98,7 +98,7 @@ class XiaoheimiScraper:
             'ignoreerrors': True,
             'socket_timeout': 120,
             'wait_for_video': (1, 600),
-            'download_archive': 'logs/yt_dlp_downloads_archive.txt',
+            'download_archive': 'logs/xiaoheimi_downloads_archive.txt',
             'ffmpeg_location': 'ffmpeg/bin',
             'outtmpl': str(download_location) + '/' + file_name + '.%(ext)s'
         }

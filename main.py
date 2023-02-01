@@ -38,12 +38,14 @@ def main() -> None:
     yt_anime_list = filter_anime_list(anime_list, xh_anime_list)
 
     # Arguments
+    logger.info("Checking youtube for recent anime upload matches...")
     youtube = YouTube(playlist_id)
     youtube.clear_playlist()
     youtube.match_to_youtube_videos(youtube_channel_ids, yt_anime_list)
     youtube.match_to_youtube_videos(["UCJSAZ5pbDi8StbSbJI1riEg"], ["最强神王", "妙手神医"])
     youtube.playlist_downloader(playlist_download_dir)
 
+    logger.info("Checking xiaoheimi for recent anime upload matches...")
     xiaoheimi = XiaoheimiScraper()
     matched_urls = xiaoheimi.match_to_recent_videos(xh_anime_list)
     xiaoheimi.download_all_videos(matched_urls, playlist_download_dir)

@@ -45,6 +45,8 @@ def main() -> None:
     youtube.clear_playlist()
     youtube.match_to_youtube_videos(youtube_channel_ids, yt_anime_list)
     youtube.match_to_youtube_videos(["UCJSAZ5pbDi8StbSbJI1riEg"], ["最强神王", "妙手神医"])
+    youtube.match_to_youtube_videos(["UCJS5PJXcAIpXkBOjPNvK7Uw"], ["神武天尊", "一剑独尊"])
+
     youtube.playlist_downloader(playlist_download_dir)
 
     logger.info("Checking xiaoheimi for recent anime upload matches...")

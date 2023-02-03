@@ -21,9 +21,6 @@ def filter_anime_list(anime_list: list, *name_lists: list) -> list:
 
 
 def main() -> None:
-    get_log()
-    logger.debug("Logging Started")
-
     # Variables
     playlist_download_dir = Path(r"\\192.168.0.111\General File Sharing\From YouTube\Chinese Anime For Subbing")
     destination_dir = playlist_download_dir / "##Currently Airing"
@@ -52,8 +49,9 @@ def main() -> None:
     matched_urls = xiaoheimi.match_to_recent_videos(xh_anime_list)
     xiaoheimi.download_all_videos(matched_urls, playlist_download_dir)
 
-    logger.debug("Logging Ended\n")
-
 
 if __name__ == '__main__':
+    get_log()
+    logger.debug("Logging Started")
     main()
+    logger.debug("Logging Ended\n")

@@ -12,9 +12,9 @@ def update_and_run():
     result = subprocess.run(["git", "pull"], capture_output=True)
 
     if "Already up to date" in str(result.stdout):
-        logger.info(f"Local repository is up to date. {result}")
+        logger.info(f"Local repository is up to date. \n{result}\n")
     else:
-        logger.warning(f"Local repository is not up to date. {result}")
+        logger.warning(f"Local repository is not up to date. \n{result}\n")
 
     from main import main
     main()

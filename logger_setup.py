@@ -47,7 +47,6 @@ def my_namer(default_name):
     base_filename, ext, date = default_name.split(".")
     return f"{base_filename}.{date}.{ext}"
 
-
 # # Use the following to add logger to other modules.
 # import logging
 # logger = logging.getLogger(__name__)

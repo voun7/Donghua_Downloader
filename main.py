@@ -9,13 +9,14 @@ from youtube import YouTube
 logger = logging.getLogger(__name__)
 
 
-def filter_anime_list(anime_list: list, xh_anime_list: list) -> list:
+def filter_anime_list(anime_list: list, *name_lists: list) -> list:
     """
     Prevent anime from being in two lists at the same time
     """
-    for anime in xh_anime_list:
-        if anime in anime_list:
-            anime_list.remove(anime)
+    for an_list in name_lists:
+        for anime in an_list:
+            if anime in anime_list:
+                anime_list.remove(anime)
     return anime_list
 
 
@@ -38,7 +39,7 @@ def main() -> None:
         "徒弟个个是大佬", "徒弟都是女魔头", "被迫成为反派赘婿", "妖道至尊", "仙武帝尊", "龙城争霸", "逆天邪神",
         "绝世战魂", "我是大仙尊", "诸天纪动态动画", "逆天战神", "盖世帝尊", "混沌金乌"
     ]
-    yt_anime_list = filter_anime_list(anime_list, xh_anime_list)
+    yt_anime_list = filter_anime_list(anime_list, xh_anime_list, anime_list_two)
 
     # Arguments
     logger.info("Checking youtube for recent anime upload matches...")

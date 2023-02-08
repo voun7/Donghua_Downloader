@@ -24,6 +24,9 @@ def main() -> None:
     # Variables
     playlist_download_dir = Path(r"\\192.168.0.111\General File Sharing\From YouTube\Chinese Anime For Subbing")
     destination_dir = playlist_download_dir / "##Currently Airing"
+    download_archives = playlist_download_dir / "Download Archives"
+    if not download_archives.exists():
+        download_archives.mkdir()
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
     anime_list = [keyword for folder in destination_dir.iterdir() for keyword in re.findall(r'\((.*?)\)', folder.name)]
 
@@ -42,12 +45,12 @@ def main() -> None:
     youtube.clear_playlist()
     youtube.match_to_youtube_videos(youtube_channel_ids, yt_anime_list)
     youtube.match_to_youtube_videos(["UCJSAZ5pbDi8StbSbJI1riEg", "UCJS5PJXcAIpXkBOjPNvK7Uw"], anime_list_two)
-    youtube.playlist_downloader(playlist_download_dir)
+    youtube.playlist_downloader(playlist_download_dir, download_archives)
 
     logger.info("Checking xiaoheimi for recent anime upload matches...")
     xiaoheimi = XiaoheimiScraper()
     matched_urls = xiaoheimi.match_to_recent_videos(xh_anime_list)
-    xiaoheimi.download_all_videos(matched_urls, playlist_download_dir)
+    xiaoheimi.download_all_videos(matched_urls, playlist_download_dir, download_archives)
 
 
 if __name__ == '__main__':

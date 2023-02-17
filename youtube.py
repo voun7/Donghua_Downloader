@@ -223,7 +223,7 @@ class YouTube:
                 logger.info('Done downloading file, now post-processing ...')
 
         ydl_opts = {
-            'logger': logger.getChild('yt_dlp').setLevel(logging.INFO),
+            'logger': logger.getChild('yt_dlp'),
             'progress_hooks': [my_hook],
             # 'noprogress': True,
             'ignoreerrors': True,

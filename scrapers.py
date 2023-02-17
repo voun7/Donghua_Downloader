@@ -92,7 +92,7 @@ class XiaoheimiScraper:
                 logger.info('Done downloading file, now post-processing ...')
 
         ydl_opts = {
-            'logger': logger.getChild('yt_dlp'),
+            'logger': logger.setLevel(logging.INFO),
             'progress_hooks': [my_hook],
             # 'noprogress': True,
             'ignoreerrors': True,

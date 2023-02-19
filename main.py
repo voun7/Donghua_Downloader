@@ -34,7 +34,7 @@ def main() -> None:
     # and find either data-channel-external-id or "externalId"
     youtube_channel_ids = ["UC80ztI40QAXzWL94eoRzWow", "UCBIiQ5Hlsadi1HQl8dufZag", "UCXmOpN9pg1hJBRkHODL00EA"]
 
-    anime_list_two = ["最强神王", "妙手神医", "神武天尊", "一剑独尊", "逆天邪神", "逆天战神"]
+    anime_list_two = ["最强神王", "妙手神医", "神武天尊", "一剑独尊", "逆天邪神", "逆天战神", "我不过是个大罗金仙"]
     xh_anime_list = ["徒弟个个是大佬", "徒弟都是女魔头", "被迫成为反派赘婿", "妖道至尊", "仙武帝尊", "龙城争霸",
                      "绝世战魂", "我是大仙尊", "诸天纪动态动画", "盖世帝尊", "混沌金乌", "一人之下"]
     yt_anime_list = filter_anime_list(anime_list, xh_anime_list, anime_list_two)

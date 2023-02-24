@@ -1,4 +1,5 @@
 import logging
+import re
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -9,6 +10,7 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+from pycnnum import cn2num
 from yt_dlp import YoutubeDL
 
 logger = logging.getLogger(__name__)
@@ -190,6 +192,90 @@ class YouTube:
                 insert_request.execute()
             else:
                 logger.warning(f"Video ID: {passed_video_id} already in playlist, Video Title: {passed_video_title}")
+
+    @staticmethod
+    def title_filter(name: str) -> str:
+        """
+        This function takes a name searches for the chinese number characters
+        and replaces them all with numbers, then removes the keywords from the name.
+        It converts the character it doesn't recognize to english with pycnnum.
+        """
+        filtered_name = name
+        ch_num_pattern = re.compile(r'第([\u4e00-\u9fff]+)[集季话]')
+        en_keyword_pattern = re.compile(r'[Ss](\d+)')
+        ch_keyword = re.search(r'第(\d+)[集季话]', filtered_name)
+        ch_key_and_num = re.search(r'季[-\d]', filtered_name)
+
+        if ch_num_pattern.search(filtered_name):
+            logger.debug("match in ch num")
+            chinese_numbers = ch_num_pattern.finditer(filtered_name)
+            for match in chinese_numbers:
+                ch_num_match = match.group(0)
+                ch_num_in_english = str(cn2num(match.group(1)))
+                filtered_name = filtered_name.replace(ch_num_match, f"第{ch_num_in_english}集")
+        if en_keyword_pattern.search(filtered_name) and ch_keyword:
+            logger.debug("match in en key and ch key")
+            en_keyword = en_keyword_pattern.finditer(filtered_name)
+            for match in en_keyword:
+                en_char_match = match.group(0)
+                logger.debug(f"en_char_match: {en_char_match}")
+                en_char_match_num = match.group(1)
+                filtered_name = filtered_name.replace(en_char_match, f"第{en_char_match_num}集")
+        if ch_key_and_num:
+            logger.debug("match in ch key and num")
+            filtered_name = filtered_name.replace('第', '')
+        return filtered_name
+
+    def resolved_title(self, name: str, title: str) -> str:
+        """
+        This function uses the name of the folder and appends it with the
+        numbers in english or chinese that appear in the title name.
+        The numbers that match keyword '第' at the start and ends with either keywords '集','季','话'
+        are mostly used for determining the file name.
+        """
+        filtered_name = self.title_filter(title)
+        logger.debug(f"Filtered name: {filtered_name}")
+        symbol_finder = re.search(r'\d+\s?[-~]\s?\d+', filtered_name)
+        keyword_number_list = re.findall(r'第(\d+)[集季话]', filtered_name)
+        all_name_numbers = re.findall(r'(\d+)', filtered_name)
+
+        if symbol_finder:
+            logger.debug("symbol finder using all name numbers")
+            number_list = all_name_numbers
+            logger.debug(f"number list: {number_list}")
+        elif keyword_number_list:
+            logger.debug("using keyword numbers")
+            number_list = keyword_number_list
+            logger.debug(f"number list: {number_list}")
+        else:
+            logger.debug("using all name numbers")
+            number_list = all_name_numbers
+            logger.debug(f"number list: {number_list}")
+
+        if symbol_finder:
+            if len(number_list) == 2:
+                first_ep_num = number_list[0]
+                last_ep_num = number_list[1]
+                new_name = name + " EP" + first_ep_num + '-' + last_ep_num
+                return new_name
+            else:
+                season_num = number_list[0]
+                first_ep_num = number_list[1]
+                last_ep_num = number_list[2]
+                new_name = name + " S" + season_num + " EP" + first_ep_num + '-' + last_ep_num
+                return new_name
+        else:
+            if len(number_list) == 1:
+                ep_num = number_list[0]
+                new_name = name + " EP" + ep_num
+                return new_name
+            elif len(number_list) > 1:
+                season_number = number_list[0]
+                episode_number = number_list[1]
+                new_name = name + " S" + season_number + " EP" + episode_number
+                return new_name
+            else:
+                return filtered_name
 
     def match_to_youtube_videos(self, youtube_channel_ids: list, file_names: list) -> None:
         """

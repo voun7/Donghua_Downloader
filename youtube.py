@@ -292,16 +292,20 @@ class YouTube:
         if not all_recent_uploads:
             logger.info("No recent video uploads!")
         logger.info("..........Checking for video matches..........")
-        matched_video_ids = []
+        matched_videos = {}
         for name in file_names:
             for video_id, video_title in all_recent_uploads.items():
                 if name in video_title:
+                    resolved_name = self.resolved_title(name, video_title)
                     logger.info(f"Folder name: {name} matches "
-                                f"Video ID: {video_id}, "
-                                f"Video Title: {video_title}")
-                    matched_video_ids.append(video_id)
-        if matched_video_ids:
-            passed_check_videos = self.check_video(matched_video_ids)
+                                f"Video ID: {video_id}, Video Title: {video_title}")
+                    if resolved_name not in list(matched_videos.values()):
+                        logger.info(f"Resolved Name: {resolved_name} added to matches.")
+                        matched_videos[video_id] = resolved_name
+                    else:
+                        logger.warning(f"Resolved Name: {resolved_name} already exists in matches, will not be added.")
+        if matched_videos:
+            passed_check_videos = self.check_video(list(matched_videos.keys()))
             self.add_video_to_playlist(passed_check_videos)
         else:
             logger.warning("No video matches!")

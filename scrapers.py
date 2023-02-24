@@ -54,9 +54,13 @@ class XiaoheimiScraper:
             last_updated_date_without_time = parser.parse(post_update[1]).date()
             if last_updated_date_without_time >= current_date_without_time:
                 latest_video_number = int(post_update[0].strip('更新至集全'))
-                video_start_num = latest_video_number - default_num_videos + 1
+                if latest_video_number < default_num_videos:
+                    num_videos = latest_video_number
+                else:
+                    num_videos = default_num_videos
+                video_start_num = latest_video_number - num_videos + 1
                 logger.info(f"Post named: {name} is new, latest video number: {latest_video_number}. "
-                            f"Last {default_num_videos} video numbers: {video_start_num}-{latest_video_number}")
+                            f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")
                 for video_number in range(video_start_num, latest_video_number + 1):
                     video_post = soup.find('li', {"title": f"{video_number}"})
                     video_link = self.base_url + video_post.find('a').get('href')

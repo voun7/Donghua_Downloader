@@ -240,9 +240,15 @@ class YouTube:
         all_name_numbers = re.findall(r'(\d+)', filtered_name)
 
         if symbol_finder:
-            logger.debug("symbol finder using all name numbers")
-            number_list = all_name_numbers
-            logger.debug(f"number list: {number_list}")
+            symbol_number_list = re.findall(r'第(\d+)[-~](\d+)[集季话]', filtered_name)
+            if symbol_number_list:
+                logger.debug("symbol finder using symbol numbers")
+                number_list = symbol_number_list[0]
+                logger.debug(f"number list: {number_list}")
+            else:
+                logger.debug("symbol finder using all name numbers")
+                number_list = all_name_numbers
+                logger.debug(f"number list: {number_list}")
         elif keyword_number_list:
             logger.debug("using keyword numbers")
             number_list = keyword_number_list

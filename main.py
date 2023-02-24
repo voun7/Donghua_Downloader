@@ -32,19 +32,18 @@ def main() -> None:
 
     # To obtain the channel id you can view the source code of the channel page
     # and find either data-channel-external-id or "externalId"
-    youtube_channel_ids = ["UC80ztI40QAXzWL94eoRzWow", "UCBIiQ5Hlsadi1HQl8dufZag", "UCXmOpN9pg1hJBRkHODL00EA"]
+    youtube_channel_ids = ["UC80ztI40QAXzWL94eoRzWow", "UCBIiQ5Hlsadi1HQl8dufZag", "UCXmOpN9pg1hJBRkHODL00EA",
+                           "UCJSAZ5pbDi8StbSbJI1riEg", "UCJS5PJXcAIpXkBOjPNvK7Uw", "UCYkn7e_zaRR_UxOrJR0RVdg"]
 
-    anime_list_two = ["最强神王", "妙手神医", "神武天尊", "一剑独尊", "逆天邪神", "逆天战神", "我不过是个大罗金仙"]
-    xh_anime_list = ["徒弟个个是大佬", "徒弟都是女魔头", "被迫成为反派赘婿", "妖道至尊", "仙武帝尊", "龙城争霸",
-                     "绝世战魂", "我是大仙尊", "诸天纪动态动画", "盖世帝尊", "混沌金乌", "一人之下"]
-    yt_anime_list = filter_anime_list(anime_list, xh_anime_list, anime_list_two)
+    xh_anime_list = ["徒弟个个是大佬", "徒弟都是女魔头", "被迫成为反派赘婿", "妖道至尊", "仙武帝尊", "绝世战魂",
+                     "诸天纪动态动画", "盖世帝尊", "混沌金乌", "一人之下"]
+    yt_anime_list = filter_anime_list(anime_list, xh_anime_list)
 
     # Arguments
     logger.info("Checking youtube for recent anime upload matches...")
     youtube = YouTube(playlist_id)
     youtube.clear_playlist()
     youtube.match_to_youtube_videos(youtube_channel_ids, yt_anime_list)
-    youtube.match_to_youtube_videos(["UCJSAZ5pbDi8StbSbJI1riEg", "UCJS5PJXcAIpXkBOjPNvK7Uw"], anime_list_two)
     youtube.playlist_downloader(playlist_download_dir, download_archives)
 
     logger.info("Checking xiaoheimi for recent anime upload matches...")

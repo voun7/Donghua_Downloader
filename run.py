@@ -1,5 +1,6 @@
 import logging
 import subprocess
+import sys
 
 from logger_setup import get_log
 
@@ -15,6 +16,8 @@ def update_and_run():
         logger.info(f"Local repository is up to date. \n{result}\n")
     else:
         logger.warning(f"Local repository is not up to date. \n{result}\n")
+        req = subprocess.run([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"], capture_output=True)
+        logger.info(f"Updating requirements...\n {req}")
 
     from main import main
     main()

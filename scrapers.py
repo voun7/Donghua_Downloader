@@ -22,8 +22,10 @@ class XiaoheimiScraper:
                           'Chrome/106.0.0.0 Safari/537.36'
         }
 
-    # This method returns all the anime's posted on the sites first page.
     def get_page_one_anime_posts(self) -> dict:
+        """
+        This method returns all the anime's posted on the sites first page.
+        """
         video_name_and_link = {}
         payload = '/index.php/vod/show/area/大陆/id/4.html'
         try:
@@ -41,9 +43,11 @@ class XiaoheimiScraper:
             logger.exception(error)
             logger.critical("Program failed to access website!\n")
 
-    # This method takes a post's url check if its recent and gets
-    # the latest default number of video links.
     def get_latest_video_links(self, matched_posts: dict, default_num_videos: int = 5) -> list:
+        """
+        This method takes a post's url check if its recent and gets
+        the latest default number of video links.
+        """
         logger.info("..........Checking for latest videos..........")
         latest_video_links = []
         current_date_without_time = datetime.now().date()
@@ -70,8 +74,10 @@ class XiaoheimiScraper:
                 logger.warning(f"Post named: {name} is not recent, Last Updated: {last_updated_date_without_time}")
         return latest_video_links
 
-    # This method checks if anime matches a recent post from the site.
     def match_to_recent_videos(self, anime_list: list) -> list:
+        """
+        This method checks if anime matches a recent post from the site.
+        """
         posts = self.get_page_one_anime_posts()
         matched_posts = {}
         logger.info("..........Matching names to site recent post..........")
@@ -109,9 +115,11 @@ class XiaoheimiScraper:
         with YoutubeDL(ydl_opts) as ydl:
             ydl.download(download_link)
 
-    # This method uses the video url to find the video download link.
-    # It uses yt-dlp to download the file from hls stream
     def video_downloader(self, video_url: str, download_location: Path, download_archives: Path) -> None:
+        """
+        This method uses the video url to find the video download link.
+        It uses yt-dlp to download the file from hls stream.
+        """
         page_response = requests.get(video_url, headers=self.header)
         soup = BeautifulSoup(page_response.text, 'html.parser')
         file_name = soup.title.string.strip(' 在线播放 - 小宝影院 - 在线视频')

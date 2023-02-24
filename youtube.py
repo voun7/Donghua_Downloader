@@ -27,8 +27,10 @@ class YouTube:
             logger.exception(error)
             logger.critical("Program failed to authenticate!\n")
 
-    # This method authenticates the program
     def get_authenticated_service(self) -> None:
+        """
+        This method authenticates the program.
+        """
         scopes = ["https://www.googleapis.com/auth/youtube.force-ssl"]
         api_service_name = "youtube"
         api_version = "v3"
@@ -52,8 +54,10 @@ class YouTube:
                 token.write(creds.to_json())
         self.youtube = build(api_service_name, api_version, credentials=creds)
 
-    # This method will remove videos in the playlist that where uploaded more than the default duration.
     def clear_playlist(self) -> None:
+        """
+        This method will remove videos in the playlist that where uploaded more than the default duration.
+        """
         logger.info(f"..........Removing videos in playlist uploaded more than {self.default_duration}..........")
         request = self.youtube.playlistItems().list(
             part="snippet,contentDetails", maxResults=self.max_results, playlistId=self.playlist_id
@@ -85,9 +89,11 @@ class YouTube:
                 delete_request = self.youtube.playlistItems().delete(id=video_playlist_id)
                 delete_request.execute()
 
-    # This method uses the channel id and finds the upload id then returns
-    # the video id and title for the videos uploaded less than the default time.
     def get_channel_recent_video_uploads(self, channel_id: str) -> dict:
+        """
+        This method uses the channel id and finds the upload id then returns
+        the video id and title for the videos uploaded less than the default time.
+        """
         upload_id = None
         channel_request = self.youtube.channels().list(part="contentDetails", id=channel_id)
         channel_response = channel_request.execute()
@@ -119,9 +125,11 @@ class YouTube:
                 video_id_and_title[video_id] = video_title
         return video_id_and_title
 
-    # This method will check if the videos are the correct duration and High Definition
-    # then returns video ids with no duplicates that meet the requirements.
     def check_video(self, matched_video_ids: list) -> dict:
+        """
+        This method will check if the videos are the correct duration and High Definition
+        then returns video ids with no duplicates that meet the requirements.
+        """
         logger.info("..........Checking matched videos for duration and quality..........")
         min_duration = timedelta(minutes=4)
         max_duration = timedelta(minutes=20)
@@ -155,8 +163,10 @@ class YouTube:
             videos_in_playlist[video_id] = video_title
         return videos_in_playlist
 
-    # This method will check if videos is in playlist and add it otherwise.
     def add_video_to_playlist(self, passed_videos: dict) -> None:
+        """
+        This method will check if videos is in playlist and add it otherwise.
+        """
         logger.info("..........Adding videos to playlist..........")
         videos_in_playlist = self.get_videos_in_playlist()
         if not passed_videos:
@@ -181,9 +191,11 @@ class YouTube:
             else:
                 logger.warning(f"Video ID: {passed_video_id} already in playlist, Video Title: {passed_video_title}")
 
-    # This function matches the names in the list to recently uploaded YouTube videos
-    # from the channels and adds them to the playlist.
     def match_to_youtube_videos(self, youtube_channel_ids: list, file_names: list) -> None:
+        """
+        This function matches the names in the list to recently uploaded YouTube videos
+        from the channels and adds them to the playlist.
+        """
         logger.info(f"..........Checking channel(s) for recent video uploads "
                     f"in the last {self.default_duration}..........")
         start = time.perf_counter()
@@ -211,8 +223,10 @@ class YouTube:
         total_time = end - start
         logger.info(f"Total time matching recent uploads and adding to playlist took: {total_time}")
 
-    # This method uses yt_dlp to download videos from playlist
     def playlist_downloader(self, download_location: Path, download_archives: Path) -> None:
+        """
+        This method uses yt_dlp to download videos from playlist.
+        """
         logger.info("..........Downloading videos from playlist..........")
         start = time.perf_counter()
 

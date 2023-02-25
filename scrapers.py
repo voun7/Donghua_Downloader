@@ -14,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class XiaoheimiScraper:
-    def __init__(self) -> None:
+    def __init__(self, download_archives) -> None:
+        self.download_archives = download_archives
         self.base_url = 'https://xiaoheimi.net'
         self.header = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
@@ -93,8 +94,7 @@ class XiaoheimiScraper:
             logger.info("No post matches found!")
             return []
 
-    @staticmethod
-    def download_video(download_link: str, file_name: str, download_location: Path, download_archives: Path) -> None:
+    def download_video(self, download_link: str, file_name: str, download_location: Path) -> None:
         def my_hook(d: dict) -> None:
             if d['status'] == 'error':
                 logger.exception('An error has occurred ...')
@@ -108,14 +108,14 @@ class XiaoheimiScraper:
             'ignoreerrors': True,
             'socket_timeout': 120,
             'wait_for_video': (1, 600),
-            'download_archive': download_archives / "xiaoheimi_downloads_archive.txt",
+            'download_archive': self.download_archives / "xiaoheimi_downloads_archive.txt",
             'ffmpeg_location': 'ffmpeg/bin',
             'outtmpl': str(download_location) + '/' + file_name + '.%(ext)s'
         }
         with YoutubeDL(ydl_opts) as ydl:
             ydl.download(download_link)
 
-    def video_downloader(self, video_url: str, download_location: Path, download_archives: Path) -> None:
+    def video_downloader(self, video_url: str, download_location: Path) -> None:
         """
         This method uses the video url to find the video download link.
         It uses yt-dlp to download the file from hls stream.
@@ -133,17 +133,16 @@ class XiaoheimiScraper:
             download_link = match[1].replace("\\", '')
         logger.info(f"Downloading Post: {video_url}, File name: {file_name}")
         logger.debug(f"Download link: {download_link}")
-        self.download_video(download_link, file_name, download_location, download_archives)
+        self.download_video(download_link, file_name, download_location)
 
-    def download_all_videos(self, video_urls: list, download_location: Path, download_archives: Path) -> None:
+    def download_all_videos(self, video_urls: list, download_location: Path) -> None:
         logger.info("..........Downloading matched recent site videos..........")
         start = time.perf_counter()
         if not video_urls:
             logger.info("No Video(s) to Download!")
         else:
             with concurrent.futures.ThreadPoolExecutor() as executor:
-                _ = [executor.submit(self.video_downloader, url, download_location, download_archives)
-                     for url in video_urls]
+                _ = [executor.submit(self.video_downloader, url, download_location) for url in video_urls]
             logger.info("Downloads finished!")
         end = time.perf_counter()
         total_time = end - start

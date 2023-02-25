@@ -19,8 +19,9 @@ logger = logging.getLogger(__name__)
 
 # This class makes calls to the YouTube API
 class YouTube:
-    def __init__(self, playlist_id: str) -> None:
+    def __init__(self, playlist_id: str, download_archives: Path) -> None:
         self.playlist_id = playlist_id
+        self.download_archives = download_archives
         self.youtube = None
         self.max_results = 50
         self.default_duration = timedelta(hours=12)
@@ -321,7 +322,7 @@ class YouTube:
         total_time = end - start
         logger.info(f"Total time matching recent uploads and adding to playlist took: {total_time}")
 
-    def playlist_downloader(self, download_location: Path, download_archives: Path) -> None:
+    def playlist_downloader(self, download_location: Path) -> None:
         """
         This method uses yt_dlp to download videos from playlist.
         """
@@ -341,7 +342,7 @@ class YouTube:
             'ignoreerrors': True,
             'socket_timeout': 120,
             'wait_for_video': (1, 600),
-            'download_archive': download_archives / "youtube_downloads_archive.txt",
+            'download_archive': self.download_archives / "youtube_downloads_archive.txt",
             'format': 'bestvideo[height>720][ext=mp4]+bestaudio[ext=m4a]',
             'ffmpeg_location': 'ffmpeg/bin',
             'outtmpl': str(download_location) + '/%(title)s.%(ext)s'

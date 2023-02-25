@@ -41,15 +41,15 @@ def main() -> None:
 
     # Arguments
     logger.info("Checking youtube for recent anime upload matches...")
-    youtube = YouTube(playlist_id)
+    youtube = YouTube(playlist_id, download_archives)
     youtube.clear_playlist()
     youtube.match_to_youtube_videos(youtube_channel_ids, yt_anime_list)
-    youtube.playlist_downloader(playlist_download_dir, download_archives)
+    youtube.playlist_downloader(playlist_download_dir)
 
     logger.info("Checking xiaoheimi for recent anime upload matches...")
-    xiaoheimi = XiaoheimiScraper()
+    xiaoheimi = XiaoheimiScraper(download_archives)
     matched_urls = xiaoheimi.match_to_recent_videos(xh_anime_list)
-    xiaoheimi.download_all_videos(matched_urls, playlist_download_dir, download_archives)
+    xiaoheimi.download_all_videos(matched_urls, playlist_download_dir)
 
 
 if __name__ == '__main__':

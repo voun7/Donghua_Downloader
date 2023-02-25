@@ -72,6 +72,7 @@ class YouTube:
             logger.info(f"{num_of_videos_in_playlist} Video(s) in playlist.")
         else:
             logger.info("No videos in playlist!")
+            return
         current_time = datetime.now().astimezone()
         for item in response['items']:
             video_playlist_id = item['id']

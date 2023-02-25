@@ -128,7 +128,7 @@ class YouTube:
                 video_id_and_title[video_id] = video_title
         return video_id_and_title
 
-    def check_video(self, matched_video_ids: list) -> dict:
+    def check_video(self, matched_videos: dict) -> dict:
         """
         This method will check if the videos are the correct duration and High Definition
         then returns video ids with no duplicates that meet the requirements.
@@ -137,7 +137,7 @@ class YouTube:
         min_duration = timedelta(minutes=4)
         max_duration = timedelta(minutes=20)
         passed_check_videos = {}
-        for video_id in matched_video_ids:
+        for video_id, video_details in matched_videos.items():
             request = self.youtube.videos().list(part="snippet,contentDetails", id=video_id)
             response = request.execute()
             for item in response['items']:
@@ -146,7 +146,7 @@ class YouTube:
                 content_duration = isodate.parse_duration(iso_content_duration)
                 definition = item['contentDetails']['definition']
                 if min_duration < content_duration < max_duration and definition == "hd":
-                    passed_check_videos[video_id] = video_title
+                    passed_check_videos[video_id] = video_details[0], video_details[1], video_title
                     logger.info(f"Video ID: {video_id} passed check. "
                                 f"Duration: {content_duration}, Quality: {definition}, Video Title: {video_title}")
                 else:
@@ -306,9 +306,10 @@ class YouTube:
                     resolved_name = self.resolved_title(name, video_title)
                     logger.info(f"Folder name: {name} matches "
                                 f"Video ID: {video_id}, Video Title: {video_title}")
-                    if resolved_name not in list(matched_videos.values()):
+                    resolved_names = [elem[1] for elem in matched_videos.values()]
+                    if resolved_name not in resolved_names:
                         logger.info(f"Resolved Name: {resolved_name} added to matches.")
-                        matched_videos[video_id] = resolved_name
+                        matched_videos[video_id] = name, resolved_name
                     else:
                         logger.warning(f"Resolved Name: {resolved_name} already exists in matches, will not be added.")
         if matched_videos:

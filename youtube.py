@@ -309,10 +309,11 @@ class YouTube:
                                 f"Video ID: {video_id}, Video Title: {video_title}")
                     resolved_names = [elem[1] for elem in matched_videos.values()]
                     if resolved_name not in resolved_names:
-                        logger.info(f"Resolved Name: {resolved_name} added to matches.")
+                        logger.info(f"Video ID: {video_id}, Resolved name: {resolved_name} added to matches.")
                         matched_videos[video_id] = name, resolved_name
                     else:
-                        logger.warning(f"Resolved Name: {resolved_name} already exists in matches, will not be added.")
+                        logger.warning(f"Video ID: {video_id}, "
+                                       f"Resolved name: {resolved_name} already exists in matches, will not be added.")
         if matched_videos:
             quality_checked_videos = self.quality_check_videos(matched_videos)
             self.add_video_to_playlist(quality_checked_videos)

@@ -218,7 +218,6 @@ class YouTube:
                 logger.warning(f"Video ID: {video_id}, Resolved name: {resolved_name} is already in the archive")
             else:
                 logger.info(f"Video ID: {video_id}, Resolved name: {resolved_name} is being added to the archive")
-                resolved_names.append(resolved_name)
                 archive_checked_videos[video_id] = video_title
                 new_resolved_names.append(resolved_name + "\n")
         with open(resolved_names_archive, 'a', encoding="utf-8") as text_file:

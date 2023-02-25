@@ -128,7 +128,7 @@ class YouTube:
                 video_id_and_title[video_id] = video_title
         return video_id_and_title
 
-    def check_video(self, matched_videos: dict) -> dict:
+    def quality_check_videos(self, matched_videos: dict) -> dict:
         """
         This method will check if the videos are the correct duration and High Definition
         then returns video ids with no duplicates that meet the requirements.
@@ -313,8 +313,8 @@ class YouTube:
                     else:
                         logger.warning(f"Resolved Name: {resolved_name} already exists in matches, will not be added.")
         if matched_videos:
-            passed_check_videos = self.check_video(list(matched_videos.keys()))
-            self.add_video_to_playlist(passed_check_videos)
+            quality_checked_videos = self.quality_check_videos(matched_videos)
+            self.add_video_to_playlist(quality_checked_videos)
         else:
             logger.warning("No video matches!")
         end = time.perf_counter()

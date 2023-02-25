@@ -195,6 +195,34 @@ class YouTube:
             else:
                 logger.warning(f"Video ID: {passed_video_id} already in playlist, Video Title: {passed_video_title}")
 
+    def archive_check(self, quality_checked_videos: dict) -> dict:
+        """
+        Check if videos have been archived previously and archive new videos.
+        This method will use the resolved name to prevent previously archived
+        resolved names from being added to playlist.
+        """
+        logger.info("..........Checking archive for resolved name matches..........")
+        resolved_names_archive = self.download_archives / "resolved_names_archive.txt"
+        if resolved_names_archive.exists():
+            resolved_names = resolved_names_archive.read_text(encoding="utf-8").splitlines()
+        else:
+            resolved_names = []
+        archive_checked_videos = {}
+        new_resolved_names = []
+        for video_id, video_details in quality_checked_videos.items():
+            resolved_name = video_details[1]
+            video_title = video_details[2]
+            if resolved_name in resolved_names:
+                logger.warning(f"Video ID: {video_id}, Resolved name: {resolved_name} is already in the archive")
+            else:
+                logger.info(f"Video ID: {video_id}, Resolved name: {resolved_name} is being added to the archive")
+                resolved_names.append(resolved_name)
+                archive_checked_videos[video_id] = video_title
+                new_resolved_names.append(resolved_name + "\n")
+        with open(resolved_names_archive, 'a', encoding="utf-8") as text_file:
+            text_file.writelines(new_resolved_names)
+        return archive_checked_videos
+
     @staticmethod
     def title_filter(name: str) -> str:
         """
@@ -316,7 +344,8 @@ class YouTube:
                                        f"Resolved name: {resolved_name} already exists in matches, will not be added.")
         if matched_videos:
             quality_checked_videos = self.quality_check_videos(matched_videos)
-            self.add_video_to_playlist(quality_checked_videos)
+            archive_checked_videos = self.archive_check(quality_checked_videos)
+            self.add_video_to_playlist(archive_checked_videos)
         else:
             logger.warning("No video matches!")
         end = time.perf_counter()

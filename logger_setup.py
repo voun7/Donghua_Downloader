@@ -6,38 +6,49 @@ from pathlib import Path
 import graypy
 
 
+def get_console_handler() -> logging.handlers:
+    console_handler = logging.StreamHandler(sys.stdout)
+    console_handler.setLevel(logging.INFO)
+    # The console sends only messages by default no need for formatter.
+    return console_handler
+
+
+def get_server_handler(log_format) -> logging.handlers:
+    """
+    Sends logs to the graylog server.
+    """
+    server_handler = graypy.GELFUDPHandler('192.168.0.108', 12201)
+    server_handler.setLevel(logging.INFO)
+    server_handler.setFormatter(log_format)
+    return server_handler
+
+
+def get_file_handler(log_format) -> logging.handlers:
+    log_file = "./logs/runtime.log"
+    file_handler = TimedRotatingFileHandler(log_file, when='midnight', interval=1, backupCount=7, encoding='utf-8')
+    file_handler.namer = my_namer
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(log_format)
+    return file_handler
+
+
 def get_log() -> None:
-    # Create folder for file logs
+    # Create folder for file logs.
     log_dir = Path(f"{Path.cwd()}/logs")
     if not log_dir.exists():
         log_dir.mkdir()
 
-    # Create a custom base_logger
-    base_logger = logging.getLogger()
-    base_logger.setLevel(logging.DEBUG)
+    # Create a custom logger.
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
 
-    # Create handlers
-    file_handler = TimedRotatingFileHandler(
-        'logs/runtime.log', when='midnight', interval=1, backupCount=7, encoding='utf-8'
-    )
-    file_handler.namer = my_namer
-    file_handler.setLevel(logging.DEBUG)
-    console_handler = logging.StreamHandler(stream=sys.stdout)
-    console_handler.setLevel(logging.INFO)
-    # Sends logs to the graylog server
-    server_handler = graypy.GELFUDPHandler('192.168.0.108', 12201)
-    server_handler.setLevel(logging.DEBUG)
+    # Create formatters and add it to handlers.
+    log_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
-    # Create formatters and add it to handlers
-    main_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    # The console sends only messages by default no need for formatter
-    file_handler.setFormatter(main_format)
-    server_handler.setFormatter(main_format)
-
-    # Add handlers to the base_logger
-    base_logger.addHandler(file_handler)
-    base_logger.addHandler(console_handler)
-    base_logger.addHandler(server_handler)
+    # Add handlers to the logger.
+    logger.addHandler(get_console_handler())
+    logger.addHandler(get_server_handler(log_format))
+    logger.addHandler(get_file_handler(log_format))
 
 
 def my_namer(default_name):

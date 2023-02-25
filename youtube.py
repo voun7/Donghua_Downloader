@@ -2,6 +2,7 @@ import logging
 import re
 import time
 from datetime import datetime, timedelta
+from itertools import chain
 from pathlib import Path
 
 import isodate
@@ -240,10 +241,10 @@ class YouTube:
         all_name_numbers = re.findall(r'(\d+)', filtered_name)
 
         if symbol_finder:
-            symbol_number_list = re.findall(r'第(\d+)[-~](\d+)[集季话]', filtered_name)
+            symbol_number_list = re.findall(r'第(\d+)[-~]*(\d*)[集季话]', filtered_name)
             if symbol_number_list:
                 logger.debug("symbol finder using symbol numbers")
-                number_list = symbol_number_list[0]
+                number_list = list(filter(None, chain.from_iterable(symbol_number_list)))
                 logger.debug(f"number list: {number_list}")
             else:
                 logger.debug("symbol finder using all name numbers")

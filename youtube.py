@@ -139,7 +139,7 @@ class YouTube:
         min_duration = timedelta(minutes=4)
         max_duration = timedelta(minutes=20)
         passed_check_videos = {}
-        for video_id, video_details in matched_videos.items():
+        for video_id, resolved_name in matched_videos.items():
             request = self.youtube.videos().list(part="snippet,contentDetails", id=video_id)
             response = request.execute()
             for item in response['items']:
@@ -148,7 +148,7 @@ class YouTube:
                 content_duration = isodate.parse_duration(iso_content_duration)
                 definition = item['contentDetails']['definition']
                 if min_duration < content_duration < max_duration and definition == "hd":
-                    passed_check_videos[video_id] = video_details[0], video_details[1], video_title
+                    passed_check_videos[video_id] = resolved_name, video_title
                     logger.info(f"Video ID: {video_id} passed check. "
                                 f"Duration: {content_duration}, Quality: {definition}, Video Title: {video_title}")
                 else:
@@ -212,8 +212,8 @@ class YouTube:
         archive_checked_videos = {}
         new_resolved_names = []
         for video_id, video_details in quality_checked_videos.items():
-            resolved_name = video_details[1]
-            video_title = video_details[2]
+            resolved_name = video_details[0]
+            video_title = video_details[1]
             if resolved_name in resolved_names:
                 logger.warning(f"Video ID: {video_id}, Resolved name: {resolved_name} is already in the archive")
             else:
@@ -338,10 +338,9 @@ class YouTube:
                     resolved_name = self.resolved_title(name, video_title)
                     logger.info(f"Folder name: {name} matches "
                                 f"Video ID: {video_id}, Video Title: {video_title}")
-                    resolved_names = [elem[1] for elem in matched_videos.values()]
-                    if resolved_name not in resolved_names:
+                    if resolved_name not in list(matched_videos.values()):
                         logger.info(f"Video ID: {video_id}, Resolved name: {resolved_name} added to matches.")
-                        matched_videos[video_id] = name, resolved_name
+                        matched_videos[video_id] = resolved_name
                     else:
                         logger.warning(f"Video ID: {video_id}, "
                                        f"Resolved name: {resolved_name} already exists in matches, will not be added.")

@@ -172,9 +172,9 @@ class YouTube:
         This method will check if videos is in playlist and add it otherwise.
         """
         logger.info("..........Adding videos to playlist..........")
-        videos_in_playlist = self.get_videos_in_playlist()
         if not passed_videos:
             logger.warning("No videos to add to playlist!")
+        videos_in_playlist = self.get_videos_in_playlist()
         for passed_video_id, passed_video_title in passed_videos.items():
             if passed_video_id not in list(videos_in_playlist.keys()):
                 logger.info(f"Video ID: {passed_video_id} is being added to playlist, "

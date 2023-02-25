@@ -329,6 +329,7 @@ class YouTube:
             all_recent_uploads.update(uploads)
         if not all_recent_uploads:
             logger.info("No recent video uploads!")
+            return
         logger.info("..........Checking for video matches..........")
         matched_videos = {}
         for name in file_names:

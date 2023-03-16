@@ -35,8 +35,7 @@ def main() -> None:
     youtube_channel_ids = ["UC80ztI40QAXzWL94eoRzWow", "UCBIiQ5Hlsadi1HQl8dufZag", "UCXmOpN9pg1hJBRkHODL00EA",
                            "UCJSAZ5pbDi8StbSbJI1riEg", "UCJS5PJXcAIpXkBOjPNvK7Uw", "UCYkn7e_zaRR_UxOrJR0RVdg"]
 
-    xh_anime_list = ["徒弟个个是大佬", "徒弟都是女魔头", "被迫成为反派赘婿", "妖道至尊", "混沌金乌", "一人之下",
-                     "仙武帝尊", "唐寅在异界"]
+    xh_anime_list = ["徒弟个个是大佬", "徒弟都是女魔头", "妖道至尊", "混沌金乌", "仙武帝尊", "唐寅在异界"]
     yt_anime_list = filter_anime_list(anime_list, xh_anime_list)
 
     # Arguments

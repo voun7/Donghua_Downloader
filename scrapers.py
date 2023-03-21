@@ -27,13 +27,13 @@ class XiaoheimiScraper:
         """
         This method returns all the anime's posted on the sites first page.
         """
+        logger.info("..........Site Page one Anime Posts..........")
         video_name_and_link = {}
         payload = '/index.php/vod/show/area/大陆/id/4.html'
         try:
             page_response = requests.get(self.base_url + payload, headers=self.header)
             soup = BeautifulSoup(page_response.text, 'html.parser')
             posts = soup.find_all('li', class_='col-lg-8 col-md-6 col-sm-4 col-xs-3')
-            logger.info("..........Site Page one Anime Posts..........")
             for post in posts:
                 post_name = post.find('h4', class_='title text-overflow').text
                 post_url = self.base_url + post.find('a').get('href')

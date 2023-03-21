@@ -32,6 +32,7 @@ class XiaoheimiScraper:
         payload = '/index.php/vod/show/area/大陆/id/4.html'
         try:
             page_response = requests.get(self.base_url + payload, headers=self.header)
+            logger.info(f"Page Response = {page_response}")
             soup = BeautifulSoup(page_response.text, 'html.parser')
             posts = soup.find_all('li', class_='col-lg-8 col-md-6 col-sm-4 col-xs-3')
             for post in posts:

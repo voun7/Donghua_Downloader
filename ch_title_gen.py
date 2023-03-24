@@ -18,7 +18,7 @@ class ChineseTitleGenerator:
 
         # Regex patterns for name.
         self.all_number_pattern = re.compile(r'(\d+)')
-        self.ep_range_pattern = re.compile(r'(?:第(\d+)[集季话])?.?第(\d+)[-~](\d+)[集季话]')
+        self.ep_range_pattern = re.compile(r'(?:第(\d+)[集季话])?.?第?(\d+)[-~](\d+)[集季话]')
         self.ch_keyword_pattern = re.compile(r'第(\d+)[集季话]')
         self.ch_num_pattern = re.compile(r'第([\u4e00-\u9fff]+)[集季话]')
         self.en_keyword_pattern = re.compile(r'[Ss](\d+)')
@@ -34,9 +34,6 @@ class ChineseTitleGenerator:
         else:
             self.suffixes = ""
         self.name = file_path.stem
-
-    def _ep_range_name_filter(self) -> None:
-        pass
 
     def filter_name(self) -> None:
         """
@@ -67,9 +64,6 @@ class ChineseTitleGenerator:
             logger.debug("ch_key_and_num_pattern match in name")
             # removes chinese keyword prefix
             self.filtered_name = self.filtered_name.replace('第', '')
-
-        if self.ep_range_pattern.search(self.filtered_name):
-            self._ep_range_name_filter()
 
     def set_number_list(self) -> None:
         """

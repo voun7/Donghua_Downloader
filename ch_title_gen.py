@@ -31,6 +31,8 @@ class ChineseTitleGenerator:
         file_path = Path(self.name)
         if file_path.exists():
             self.suffixes = "".join(file_path.suffixes)
+        else:
+            self.suffixes = ""
         self.name = file_path.stem
 
     def _ep_range_name_filter(self) -> None:
@@ -61,7 +63,6 @@ class ChineseTitleGenerator:
                 en_char_match_num = match.group(1)
                 self.filtered_name = self.filtered_name.replace(en_char_match, f"第{en_char_match_num}集")
 
-        logger.debug(self.ch_key_and_num_pattern.search(self.filtered_name))
         if self.ch_key_and_num_pattern.search(self.filtered_name):
             logger.debug("ch_key_and_num_pattern match in name")
             # removes chinese keyword prefix
@@ -116,6 +117,7 @@ class ChineseTitleGenerator:
         :param base_name: the name that will be used as the foundation for new title generated
         :return: a new generated title.
         """
+        logger.debug(f"Initial name: {name}")
         self.name = name
         self.base_name = base_name
         self.set_suffixes()

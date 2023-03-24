@@ -244,7 +244,7 @@ class YouTube:
         for name in file_names:
             for video_id, video_title in all_recent_uploads.items():
                 if name in video_title:
-                    resolved_name = gen.generate_title(name, video_title)
+                    resolved_name = gen.generate_title(video_title, name)
                     logger.info(f"Folder name: {name} matches "
                                 f"Video ID: {video_id}, Video Title: {video_title}")
                     if resolved_name not in list(matched_videos.values()):

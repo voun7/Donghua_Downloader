@@ -80,6 +80,9 @@ class ChineseTitleGenerator:
             logger.debug("using all_number_pattern numbers")
             self.number_list = self.all_number_pattern.findall(self.filtered_name)
 
+    def remove_leading_zeros(self) -> None:
+        self.number_list = [ele.lstrip('0') for ele in self.number_list]
+
     def _set_ep_range_title(self) -> None:
         if len(self.number_list) == 2:
             first_ep_num = self.number_list[0]
@@ -120,5 +123,7 @@ class ChineseTitleGenerator:
         logger.debug(f"filtered name: {self.filtered_name}")
         self.set_number_list()
         logger.debug(f"number list: {self.number_list}")
+        self.remove_leading_zeros()
+        logger.debug(f"leading zeros removed: {self.number_list}")
         self.set_title()
         return self.name

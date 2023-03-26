@@ -22,7 +22,7 @@ class ChineseTitleGenerator:
         self.ch_keyword_pattern = re.compile(r'第(\d+)[集季话]')
         self.ch_num_pattern = re.compile(r'第([\u4e00-\u9fff]+)[集季话]')
         self.en_keyword_pattern = re.compile(r'[Ss](\d+)')
-        self.ch_key_and_num_pattern = re.compile(r'集|季[-\d]')
+        self.ch_key_and_num_pattern = re.compile(r'[集季][-\d]')
 
     def set_suffixes(self) -> None:
         """

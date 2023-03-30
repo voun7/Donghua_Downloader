@@ -41,6 +41,11 @@ class ChineseTitleGenerator:
         """
         self.filtered_name = self.name
 
+        miscellaneous_strings = ["1080P"]
+        for ch in miscellaneous_strings:
+            if ch in self.name:
+                self.filtered_name = self.filtered_name.replace(ch, '')
+
         # change the chinese number in the name to regular numbers.
         if self.ch_num_pattern.search(self.filtered_name):
             logger.debug("ch_num_pattern match in name")

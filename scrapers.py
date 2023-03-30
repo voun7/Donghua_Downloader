@@ -45,7 +45,7 @@ class XiaoheimiScraper:
             logger.exception(error)
             logger.critical("Program failed to access website!\n")
 
-    def get_latest_video_links(self, matched_posts: dict, default_num_videos: int = 5) -> list:
+    def get_latest_video_links(self, matched_posts: dict, default_num_videos: int = 3) -> list:
         """
         This method takes a post's url check if its recent and gets
         the latest default number of video links.

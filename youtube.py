@@ -135,7 +135,7 @@ class YouTube:
         then returns video ids with no duplicates that meet the requirements.
         """
         logger.info("..........Checking matched videos for duration and quality..........")
-        min_duration = timedelta(minutes=4)
+        min_duration = timedelta(minutes=3)
         max_duration = timedelta(minutes=20)
         passed_check_videos = {}
         for video_id, resolved_name in matched_videos.items():

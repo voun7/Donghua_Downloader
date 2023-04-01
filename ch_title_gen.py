@@ -89,17 +89,17 @@ class ChineseTitleGenerator:
         """
         Decides how the number list will be derived depending on the matching regex.
         """
-        if self.en_key_season_ep_pattern.search(self.name):
-            logger.debug("using en_key_season_ep_pattern numbers")
-            captured_groups = self.en_key_season_ep_pattern.findall(self.name)
-            self.number_list = list(filter(None, chain.from_iterable(captured_groups)))
-        elif self.ch_key_range_pattern.search(self.filtered_name):
+        if self.ch_key_range_pattern.search(self.filtered_name):
             logger.debug("using ch_key_range_pattern numbers")
             captured_groups = self.ch_key_range_pattern.findall(self.filtered_name)
             self.number_list = list(filter(None, chain.from_iterable(captured_groups)))
         elif self.range_pattern.search(self.filtered_name):
             logger.debug("using range_pattern numbers")
             self.number_list = self.all_number_pattern.findall(self.filtered_name)
+        elif self.en_key_season_ep_pattern.search(self.name):
+            logger.debug("using en_key_season_ep_pattern numbers")
+            captured_groups = self.en_key_season_ep_pattern.findall(self.name)
+            self.number_list = list(filter(None, chain.from_iterable(captured_groups)))
         elif self.ch_keyword_pattern.search(self.filtered_name):
             logger.debug("using ch_keyword_pattern numbers")
             self.number_list = self.ch_keyword_pattern.findall(self.filtered_name)

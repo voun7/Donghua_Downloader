@@ -18,11 +18,15 @@ class ChineseTitleGenerator:
 
         # Regex patterns for name.
         self.all_number_pattern = re.compile(r'(\d+)')
-        self.ep_range_pattern = re.compile(r'(?:第(\d+)[集季话])?.?第?(\d+)[-~](\d+)[集季话]')
+        self.range_pattern = re.compile(r'\d+[-~]\d+')
+        # Regex for english characters
+        self.en_key_ch_key_pattern = re.compile(r'[Ss](\d+)')
+        self.en_key_season_ep_pattern = re.compile(r'(?:[Ss](\d+).*)?(?:E|EP|ep)(\d+)')
+        # Regex for chinese characters
+        self.ch_key_and_num_pattern = re.compile(r'[集季][-\d]')
         self.ch_keyword_pattern = re.compile(r'第(\d+)[集季话]')
         self.ch_num_pattern = re.compile(r'第([\u4e00-\u9fff]+)[集季话]')
-        self.en_keyword_pattern = re.compile(r'[Ss](\d+)')
-        self.ch_key_and_num_pattern = re.compile(r'[集季][-\d]')
+        self.ch_key_range_pattern = re.compile(r'(?:第(\d+)[集季话].*)?第(\d+)[-~](\d+)[集季话]')
 
     def set_suffixes(self) -> None:
         """
@@ -35,35 +39,46 @@ class ChineseTitleGenerator:
             self.suffixes = ""
         self.name = file_path.stem
 
+    def miscellaneous_strings_filter(self):
+        miscellaneous_strings = ["1080P"]
+        for ch in miscellaneous_strings:
+            if ch in self.filtered_name:
+                self.filtered_name = self.filtered_name.replace(ch, '')
+
+    def chinese_num_filter(self):
+        """
+        Change the chinese number in the name to regular numbers.
+        """
+        if self.ch_num_pattern.search(self.filtered_name):
+            logger.debug("ch_num_pattern match in name")
+            matches = self.ch_num_pattern.finditer(self.filtered_name)
+            for match in matches:
+                ch_num_match = match.group(0)
+                ch_num_in_english = str(cn2num(match.group(1)))
+                self.filtered_name = self.filtered_name.replace(ch_num_match, f"第{ch_num_in_english}集")
+
+    def en_key_ch_key_filter(self):
+        """
+        Replace the english keyword representing the season in the title with a chinese keyword.
+        """
+        if self.en_key_ch_key_pattern.search(self.filtered_name):
+            logger.debug("en_key_ch_key_pattern match in name")
+            matches = self.en_key_ch_key_pattern.finditer(self.filtered_name)
+            for match in matches:
+                en_char_match = match.group(0)
+                logger.debug(f"en_char_match: {en_char_match}")
+                en_char_match_num = match.group(1)
+                self.filtered_name = self.filtered_name.replace(en_char_match, f"第{en_char_match_num}集")
+
     def filter_name(self) -> None:
         """
         Make the name easier for regex patterns to find relevant numbers.
         """
         self.filtered_name = self.name
 
-        miscellaneous_strings = ["1080P"]
-        for ch in miscellaneous_strings:
-            if ch in self.name:
-                self.filtered_name = self.filtered_name.replace(ch, '')
-
-        # change the chinese number in the name to regular numbers.
-        if self.ch_num_pattern.search(self.filtered_name):
-            logger.debug("ch_num_pattern match in name")
-            chinese_numbers = self.ch_num_pattern.finditer(self.filtered_name)
-            for match in chinese_numbers:
-                ch_num_match = match.group(0)
-                ch_num_in_english = str(cn2num(match.group(1)))
-                self.filtered_name = self.filtered_name.replace(ch_num_match, f"第{ch_num_in_english}集")
-
-        # replace the english keyword representing the season in the title with a chinese keyword.
-        if self.en_keyword_pattern.search(self.filtered_name):
-            logger.debug("en_keyword_pattern match in name")
-            en_keyword = self.en_keyword_pattern.finditer(self.filtered_name)
-            for match in en_keyword:
-                en_char_match = match.group(0)
-                logger.debug(f"en_char_match: {en_char_match}")
-                en_char_match_num = match.group(1)
-                self.filtered_name = self.filtered_name.replace(en_char_match, f"第{en_char_match_num}集")
+        self.miscellaneous_strings_filter()
+        self.chinese_num_filter()
+        self.en_key_ch_key_filter()
 
         if self.ch_key_and_num_pattern.search(self.filtered_name):
             logger.debug("ch_key_and_num_pattern match in name")
@@ -74,10 +89,17 @@ class ChineseTitleGenerator:
         """
         Decides how the number list will be derived depending on the matching regex.
         """
-        if self.ep_range_pattern.search(self.filtered_name):
-            logger.debug("using ep_range_pattern numbers")
-            result = self.ep_range_pattern.findall(self.filtered_name)
-            self.number_list = list(filter(None, chain.from_iterable(result)))
+        if self.en_key_season_ep_pattern.search(self.name):
+            logger.debug("using en_key_season_ep_pattern numbers")
+            captured_groups = self.en_key_season_ep_pattern.findall(self.name)
+            self.number_list = list(filter(None, chain.from_iterable(captured_groups)))
+        elif self.ch_key_range_pattern.search(self.filtered_name):
+            logger.debug("using ch_key_range_pattern numbers")
+            captured_groups = self.ch_key_range_pattern.findall(self.filtered_name)
+            self.number_list = list(filter(None, chain.from_iterable(captured_groups)))
+        elif self.range_pattern.search(self.filtered_name):
+            logger.debug("using range_pattern numbers")
+            self.number_list = self.all_number_pattern.findall(self.filtered_name)
         elif self.ch_keyword_pattern.search(self.filtered_name):
             logger.debug("using ch_keyword_pattern numbers")
             self.number_list = self.ch_keyword_pattern.findall(self.filtered_name)
@@ -100,7 +122,7 @@ class ChineseTitleGenerator:
             self.name = f"{self.base_name} S{season_num} EP{first_ep_num}-{last_ep_num}{self.suffixes}"
 
     def set_title(self) -> None:
-        if self.ep_range_pattern.search(self.filtered_name):
+        if self.range_pattern.search(self.filtered_name):
             self._set_ep_range_title()
             return
 
@@ -132,3 +154,12 @@ class ChineseTitleGenerator:
         logger.debug(f"leading zeros removed: {self.number_list}")
         self.set_title()
         return self.name
+
+
+if __name__ == '__main__':
+    # Change debug logs to print when testing.
+    test_folder = Path(r"")
+    gen = ChineseTitleGenerator()
+    for file in test_folder.iterdir():
+        new_name = gen.generate_title(str(file), "base name")
+        print(f"New Name: {new_name}\n")

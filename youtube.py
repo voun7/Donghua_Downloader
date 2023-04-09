@@ -48,9 +48,9 @@ class YouTube:
             creds = Credentials.from_authorized_user_file(str(token_file), scopes)
         # If there are no (valid) credentials available, let the user log in.
         if not creds or not creds.valid:
-            logger.debug("Credentials validity are being checked!")
+            logger.debug("Issue with token detected. Credentials validity are being rechecked!")
             if creds and creds.expired and creds.refresh_token:
-                logger.debug("Credentials are being refreshed.")
+                logger.debug("Token Credentials are being refreshed.")
                 creds.refresh(Request())
             else:
                 logger.critical("Credentials did not work! Local login in is required!")

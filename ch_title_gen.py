@@ -40,7 +40,7 @@ class ChineseTitleGenerator:
         self.name = file_path.stem
 
     def miscellaneous_strings_filter(self):
-        miscellaneous_strings = ["1080P"]
+        miscellaneous_strings = ["1080P", "4K"]
         for ch in miscellaneous_strings:
             if ch in self.filtered_name:
                 self.filtered_name = self.filtered_name.replace(ch, '')

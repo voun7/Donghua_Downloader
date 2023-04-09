@@ -243,10 +243,11 @@ class YouTube:
         gen = ChineseTitleGenerator()
         for name in file_names:
             for video_id, video_title in all_recent_uploads.items():
-                if name in video_title:
+                if name in video_title:  # Match found.
                     resolved_name = gen.generate_title(video_title, name)
                     logger.info(f"Folder name: {name} matches "
                                 f"Video ID: {video_id}, Video Title: {video_title}")
+                    # Prevent matching video with same name from different channels.
                     if resolved_name not in list(matched_videos.values()):
                         logger.info(f"Video ID: {video_id}, Resolved name: {resolved_name} added to matches.")
                         matched_videos[video_id] = resolved_name

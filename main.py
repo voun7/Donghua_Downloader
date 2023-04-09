@@ -33,7 +33,8 @@ def main() -> None:
     # To obtain the channel id you can view the source code of the channel page
     # and find either data-channel-external-id or "externalId"
     youtube_channel_ids = ["UC80ztI40QAXzWL94eoRzWow", "UCBIiQ5Hlsadi1HQl8dufZag", "UCXmOpN9pg1hJBRkHODL00EA",
-                           "UCJSAZ5pbDi8StbSbJI1riEg", "UCJS5PJXcAIpXkBOjPNvK7Uw", "UCYkn7e_zaRR_UxOrJR0RVdg"]
+                           "UCJSAZ5pbDi8StbSbJI1riEg", "UCJS5PJXcAIpXkBOjPNvK7Uw", "UCYkn7e_zaRR_UxOrJR0RVdg",
+                           "UCpsQzjI6BLuxrH6XNUHSWCQ"]
 
     xh_anime_list = ["徒弟个个是大佬", "徒弟都是女魔头", "妖道至尊", "混沌金乌", "仙武帝尊", "唐寅在异界", "我是大仙尊"]
     yt_anime_list = filter_anime_list(anime_list, xh_anime_list)

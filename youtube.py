@@ -16,7 +16,7 @@ from ch_title_gen import ChineseTitleGenerator
 logger = logging.getLogger(__name__)
 
 
-# This class makes calls to the YouTube API
+# This class makes calls to the YouTube API.
 class YouTube:
     def __init__(self, playlist_id: str, download_archives: Path) -> None:
         self.playlist_id = playlist_id
@@ -44,15 +44,19 @@ class YouTube:
         # created automatically when the authorization flow completes for the first
         # time.
         if token_file.exists():
+            logger.debug("Token file exists and is being used.")
             creds = Credentials.from_authorized_user_file(str(token_file), scopes)
         # If there are no (valid) credentials available, let the user log in.
         if not creds or not creds.valid:
+            logger.debug("Credentials validity are being checked!")
             if creds and creds.expired and creds.refresh_token:
+                logger.debug("Credentials are being refreshed.")
                 creds.refresh(Request())
             else:
+                logger.critical("Credentials did not work! Local login in is required!")
                 flow = InstalledAppFlow.from_client_secrets_file(client_secrets_file, scopes)
                 creds = flow.run_local_server()
-            # Save the credentials for the next run
+            # Save the credentials for the next run.
             with open(token_file, 'w') as token:
                 token.write(creds.to_json())
         self.youtube = build(api_service_name, api_version, credentials=creds)

@@ -223,6 +223,7 @@ class YouTube:
                 logger.info(f"Video ID: {video_id}, Resolved name: {resolved_name} is being added to the archive")
                 archive_checked_videos[video_id] = video_title
                 new_resolved_names.append(resolved_name + "\n")
+        logger.debug(f"new_resolved_names: {new_resolved_names}")
         with open(resolved_names_archive, 'a', encoding="utf-8") as text_file:
             text_file.writelines(new_resolved_names)
         return archive_checked_videos

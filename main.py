@@ -36,7 +36,7 @@ def main() -> None:
                            "UCJSAZ5pbDi8StbSbJI1riEg", "UCJS5PJXcAIpXkBOjPNvK7Uw", "UCYkn7e_zaRR_UxOrJR0RVdg",
                            "UCpsQzjI6BLuxrH6XNUHSWCQ"]
 
-    xh_anime_list = ["徒弟个个是大佬", "徒弟都是女魔头", "妖道至尊", "混沌金乌", "仙武帝尊", "唐寅在异界", "我是大仙尊"]
+    xh_anime_list = ["徒弟个个是大佬", "徒弟都是女魔头", "混沌金乌", "仙武帝尊", "唐寅在异界", "我是大仙尊"]
     yt_anime_list = filter_anime_list(anime_list, xh_anime_list)
 
     # Arguments

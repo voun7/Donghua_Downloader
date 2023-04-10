@@ -41,9 +41,9 @@ class ChineseTitleGenerator:
 
     def miscellaneous_strings_filter(self):
         miscellaneous_strings = ["1080P", "4K"]
-        for ch in miscellaneous_strings:
-            if ch in self.filtered_name:
-                self.filtered_name = self.filtered_name.replace(ch, '')
+        for char in miscellaneous_strings:
+            if char in self.filtered_name:
+                self.filtered_name = self.filtered_name.replace(char, '')
 
     def chinese_num_filter(self):
         """

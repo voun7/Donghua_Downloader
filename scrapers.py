@@ -108,9 +108,11 @@ class XiaoheimiScraper:
             archive_content = []
 
         if file_name in archive_content:
+            logger.debug(f"File: {file_name} is in archive.")
             return True
         else:
             if archive_id:
+                logger.debug(f"File: {file_name} is being written to archive.")
                 with open(archive_file, 'a', encoding="utf-8") as text_file:
                     text_file.write(file_name + "\n")
             return False

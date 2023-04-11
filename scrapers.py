@@ -154,7 +154,7 @@ class XiaoheimiScraper:
         """
         page_response = requests.get(video_url, headers=self.header)
         soup = BeautifulSoup(page_response.text, 'html.parser')
-        file_name = soup.title.string.strip(' 在线播放 - 小宝影院 - 在线视频')
+        file_name = soup.title.string.strip(' 在线播放 - 小宝影院 - 在线视频').replace('-', ' ')
         for match in re.finditer(r'(\d+)', file_name):
             number = match.group(0)
             file_name = file_name.replace(number, f"第{number}集")

@@ -19,11 +19,11 @@ class ChineseTitleGenerator:
         # Regex patterns for name.
         self.all_number_pattern = re.compile(r'(\d+)')
         self.range_pattern = re.compile(r'\d+[-~]\d+')
-        # Regex for english characters
+        # Regex for english characters.
         self.en_key_ch_key_pattern = re.compile(r'[Ss](\d+)')
         self.en_key_season_ep_pattern = re.compile(r'(?:[Ss](\d+).*)?(?:E|EP|ep)(\d+)')
-        # Regex for chinese characters
-        self.ch_key_and_num_pattern = re.compile(r'[集季][-\d]')
+        # Regex for chinese characters.
+        self.ch_key_and_num_pattern = re.compile(r'[集季][-\d]')  # Consider removing, not need for most cases.
         self.ch_keyword_pattern = re.compile(r'第(\d+)[集季话]')
         self.ch_num_pattern = re.compile(r'第([\u4e00-\u9fff]+)[集季话]')
         self.ch_key_range_pattern = re.compile(r'(?:第(\d+)[集季话].*)?第(\d+)[-~](\d+)[集季话]')
@@ -39,13 +39,16 @@ class ChineseTitleGenerator:
             self.suffixes = ""
         self.name = file_path.stem
 
-    def miscellaneous_strings_filter(self):
+    def miscellaneous_strings_filter(self) -> None:
+        """
+        Remove common strings from name that may lead to incorrect generated name.
+        """
         miscellaneous_strings = ["1080P", "4K"]
         for char in miscellaneous_strings:
             if char in self.filtered_name:
                 self.filtered_name = self.filtered_name.replace(char, '')
 
-    def chinese_num_filter(self):
+    def chinese_num_filter(self) -> None:
         """
         Change the chinese number in the name to regular numbers.
         """
@@ -57,9 +60,10 @@ class ChineseTitleGenerator:
                 ch_num_in_english = str(cn2num(match.group(1)))
                 self.filtered_name = self.filtered_name.replace(ch_num_match, f"第{ch_num_in_english}集")
 
-    def en_key_ch_key_filter(self):
+    def en_key_ch_key_filter(self) -> None:
         """
         Replace the english keyword representing the season in the title with a chinese keyword.
+        Only works on names that have season keyword in english but no episode keyword.
         """
         if self.en_key_ch_key_pattern.search(self.filtered_name):
             logger.debug("en_key_ch_key_pattern match in name")
@@ -82,7 +86,7 @@ class ChineseTitleGenerator:
 
         if self.ch_key_and_num_pattern.search(self.filtered_name):
             logger.debug("ch_key_and_num_pattern match in name")
-            # removes chinese keyword prefix
+            # Removes chinese keyword prefix to allow all numbers to be captured instead.
             self.filtered_name = self.filtered_name.replace('第', '')
 
     def set_number_list(self) -> None:
@@ -108,9 +112,15 @@ class ChineseTitleGenerator:
             self.number_list = self.all_number_pattern.findall(self.filtered_name)
 
     def remove_leading_zeros(self) -> None:
+        """
+        Remove leading zeros from name to increase consistency in generated names.
+        """
         self.number_list = [ele.lstrip('0') for ele in self.number_list]
 
     def _set_ep_range_title(self) -> None:
+        """
+        Use the numbers in the number list and base name to build a new name for names with range in them.
+        """
         if len(self.number_list) == 2:
             first_ep_num = self.number_list[0]
             last_ep_num = self.number_list[1]
@@ -122,6 +132,14 @@ class ChineseTitleGenerator:
             self.name = f"{self.base_name} S{season_num} EP{first_ep_num}-{last_ep_num}{self.suffixes}"
 
     def set_title(self) -> None:
+        """
+        Use the numbers in the number list and base name to build a new name.
+        """
+        if len(self.number_list) == 0:
+            logger.debug(f"{self.name} has no numbers")
+            self.name = f"{self.name}{self.suffixes}"
+            return
+
         if self.range_pattern.search(self.filtered_name):
             self._set_ep_range_title()
             return
@@ -137,9 +155,9 @@ class ChineseTitleGenerator:
     def generate_title(self, name: str, base_name: str) -> str:
         """
         Runs the title generation process.
-        :param name: the name or file path of the title.
-        :param base_name: the name that will be used as the foundation for new title generated
-        :return: a new generated title.
+        :param name: The name or file path of the title.
+        :param base_name: The name that will be used as the foundation for new title generated.
+        :return: A new generated title or same name if no numbers found.
         """
         logger.debug(f"Initial name: {name}")
         self.name = name

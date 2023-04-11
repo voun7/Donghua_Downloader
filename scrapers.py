@@ -163,8 +163,7 @@ class XiaoheimiScraper:
         download_link = None
         for match in download_match:
             download_link = match[1].replace("\\", '')
-        logger.info(f"Downloading Post: {video_url}, File name: {file_name}")
-        logger.debug(f"Download link: {download_link}")
+        logger.debug(f"Downloading Post: {video_url}, File name: {file_name}, Download link: {download_link}")
         self.m3u8_video_download(download_link, file_name, download_location)
 
     def download_all_videos(self, video_urls: list, download_location: Path) -> None:

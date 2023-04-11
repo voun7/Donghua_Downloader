@@ -1,6 +1,7 @@
 import concurrent.futures
 import logging
 import re
+import subprocess
 import time
 from datetime import datetime
 from pathlib import Path
@@ -8,7 +9,6 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 from dateutil import parser
-from yt_dlp import YoutubeDL
 
 logger = logging.getLogger(__name__)
 
@@ -95,26 +95,48 @@ class XiaoheimiScraper:
             logger.info("No post matches found!")
             return []
 
-    def download_video(self, download_link: str, file_name: str, download_location: Path) -> None:
-        def my_hook(d: dict) -> None:
-            if d['status'] == 'error':
-                logger.exception('An error has occurred ...')
-            if d['status'] == 'finished':
-                logger.info('Done downloading file, now post-processing ...')
+    def check_download_archive(self, download_link, archive_id=False):
+        archive_file = self.download_archives / "xiaoheimi_downloads_archive.txt"
+        link_id_pattern = re.compile(r"/(\w+)\.m3u8")
+        link_id = link_id_pattern.search(download_link)[1]
+        if archive_file.exists():
+            archive_content = archive_file.read_text().splitlines()
+        else:
+            archive_content = []
 
-        ydl_opts = {
-            'logger': logger.setLevel(logging.INFO),
-            'progress_hooks': [my_hook],
-            # 'noprogress': True,
-            'ignoreerrors': True,
-            'socket_timeout': 120,
-            'wait_for_video': (1, 600),
-            'download_archive': self.download_archives / "xiaoheimi_downloads_archive.txt",
-            'ffmpeg_location': 'ffmpeg/bin',
-            'outtmpl': str(download_location) + '/' + file_name + '.%(ext)s'
-        }
-        with YoutubeDL(ydl_opts) as ydl:
-            ydl.download(download_link)
+        if link_id in archive_content:
+            return True
+        else:
+            if archive_id:
+                with open(archive_file, 'a') as text_file:
+                    text_file.write(link_id + "\n")
+            return False
+
+    def m3u8_video_download(self, download_link: str, file_name: str, download_location: Path) -> None:
+        file_path = Path(f"{download_location}/{file_name}.mp4")
+        if file_path.exists() or self.check_download_archive(download_link):
+            logger.info(f"File: {file_path.name} exists or is recorded in the archive, skipping download...")
+            return
+        # Make a request to the m3u8 file link.
+        response = requests.get(download_link)
+        # Remove embedded advertisement fragments from the response text.
+        advert_tag = "#EXT-X-DISCONTINUITY\n"
+        advert_pattern = re.compile(re.escape(advert_tag) + "(.*?)" + re.escape(advert_tag), re.DOTALL)
+        ad_free_m3u8_text = advert_pattern.sub("", response.text)
+
+        temp_m3u8_file = Path(f"{file_path.name}_filtered_playlist.m3u8")
+        temp_m3u8_file.write_text(ad_free_m3u8_text)
+
+        # Use ffmpeg to download and convert the modified playlist.
+        command = ['ffmpeg/bin/ffmpeg', '-protocol_whitelist', 'file,http,https,tcp,tls', '-i', str(temp_m3u8_file),
+                   '-c', 'copy', str(file_path)]
+        subprocess.run(command, stderr=subprocess.DEVNULL)
+        # Clean up the filtered playlist file.
+        temp_m3u8_file.unlink()
+
+        if file_path.exists():
+            logger.info(f"File: {file_path.name}, downloaded successfully and link id is being added to archive!")
+            self.check_download_archive(download_link, True)
 
     def video_downloader(self, video_url: str, download_location: Path) -> None:
         """
@@ -134,7 +156,7 @@ class XiaoheimiScraper:
             download_link = match[1].replace("\\", '')
         logger.info(f"Downloading Post: {video_url}, File name: {file_name}")
         logger.debug(f"Download link: {download_link}")
-        self.download_video(download_link, file_name, download_location)
+        self.m3u8_video_download(download_link, file_name, download_location)
 
     def download_all_videos(self, video_urls: list, download_location: Path) -> None:
         logger.info("..........Downloading matched recent site videos..........")

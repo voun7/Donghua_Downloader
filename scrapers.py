@@ -95,26 +95,24 @@ class XiaoheimiScraper:
             logger.info("No post matches found!")
             return []
 
-    def check_download_archive(self, download_link: str, archive_id: bool = False) -> bool:
+    def check_download_archive(self, file_name: str, archive_id: bool = False) -> bool:
         """
-        Check if download link is in archive.
-        :param download_link: url of file
+        Check if file name is in archive.
+        :param file_name: name of file.
         :param archive_id: whether to save link to archive.
         """
         archive_file = self.download_archives / "xiaoheimi_downloads_archive.txt"
-        link_id_pattern = re.compile(r"/(\w+)\.m3u8")
-        link_id = link_id_pattern.search(download_link)[1]
         if archive_file.exists():
-            archive_content = archive_file.read_text().splitlines()
+            archive_content = archive_file.read_text(encoding="utf-8").splitlines()
         else:
             archive_content = []
 
-        if link_id in archive_content:
+        if file_name in archive_content:
             return True
         else:
             if archive_id:
-                with open(archive_file, 'a') as text_file:
-                    text_file.write(link_id + "\n")
+                with open(archive_file, 'a', encoding="utf-8") as text_file:
+                    text_file.write(file_name + "\n")
             return False
 
     def m3u8_video_download(self, download_link: str, file_name: str, download_location: Path) -> None:
@@ -123,8 +121,8 @@ class XiaoheimiScraper:
         Embedded advertisements links will be removed.
         """
         file_path = Path(f"{download_location}/{file_name}.mp4")
-        if file_path.exists() or self.check_download_archive(download_link):
-            logger.info(f"File: {file_path.name} exists or is recorded in the archive, skipping download...")
+        if file_path.exists() or self.check_download_archive(file_name):
+            logger.info(f"File: {file_name} exists or is recorded in the archive, skipping download...")
             return
         # Make a request to the m3u8 file link.
         response = requests.get(download_link)
@@ -133,7 +131,7 @@ class XiaoheimiScraper:
         advert_pattern = re.compile(re.escape(advert_tag) + "(.*?)" + re.escape(advert_tag), re.DOTALL)
         ad_free_m3u8_text = advert_pattern.sub("", response.text)
 
-        temp_m3u8_file = Path(f"{file_path.name}_filtered_playlist.m3u8")
+        temp_m3u8_file = Path(f"{file_name}_filtered_playlist.m3u8")
         temp_m3u8_file.write_text(ad_free_m3u8_text)
 
         # Use ffmpeg to download and convert the modified playlist.
@@ -145,7 +143,7 @@ class XiaoheimiScraper:
 
         if file_path.exists():
             logger.info(f"File: {file_path.name}, downloaded successfully and link id is being added to archive!")
-            self.check_download_archive(download_link, True)
+            self.check_download_archive(file_name, True)
 
     def video_downloader(self, video_url: str, download_location: Path) -> None:
         """

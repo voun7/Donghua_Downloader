@@ -126,7 +126,7 @@ class XiaoheimiScraper:
             return
         # Make a request to the m3u8 file link.
         response = requests.get(download_link)
-        # Remove embedded advertisement fragments from the response text.
+        # Remove embedded advertisement fragments from the response text if any.
         advert_tag = "#EXT-X-DISCONTINUITY\n"
         advert_pattern = re.compile(re.escape(advert_tag) + "(.*?)" + re.escape(advert_tag), re.DOTALL)
         ad_free_m3u8_text = advert_pattern.sub("", response.text)

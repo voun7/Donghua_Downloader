@@ -95,7 +95,12 @@ class XiaoheimiScraper:
             logger.info("No post matches found!")
             return []
 
-    def check_download_archive(self, download_link, archive_id=False):
+    def check_download_archive(self, download_link: str, archive_id: bool = False) -> bool:
+        """
+        Check if download link is in archive.
+        :param download_link: url of file
+        :param archive_id: whether to save link to archive.
+        """
         archive_file = self.download_archives / "xiaoheimi_downloads_archive.txt"
         link_id_pattern = re.compile(r"/(\w+)\.m3u8")
         link_id = link_id_pattern.search(download_link)[1]
@@ -113,6 +118,10 @@ class XiaoheimiScraper:
             return False
 
     def m3u8_video_download(self, download_link: str, file_name: str, download_location: Path) -> None:
+        """
+        Use m3u8 link to download video and create mp4 file.
+        Embedded advertisements links will be removed.
+        """
         file_path = Path(f"{download_location}/{file_name}.mp4")
         if file_path.exists() or self.check_download_archive(download_link):
             logger.info(f"File: {file_path.name} exists or is recorded in the archive, skipping download...")

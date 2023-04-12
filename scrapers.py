@@ -133,7 +133,7 @@ class XiaoheimiScraper:
         advert_pattern = re.compile(re.escape(advert_tag) + "(.*?)" + re.escape(advert_tag), re.DOTALL)
         ad_free_m3u8_text = advert_pattern.sub("", response.text)
 
-        temp_m3u8_file = Path(f"{file_name}_filtered_playlist.m3u8")
+        temp_m3u8_file = Path(f"{download_location}/{file_name}_filtered_playlist.m3u8")
         temp_m3u8_file.write_text(ad_free_m3u8_text)
 
         # Use ffmpeg to download and convert the modified playlist.

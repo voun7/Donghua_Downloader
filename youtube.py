@@ -137,6 +137,8 @@ class YouTube:
         """
         This method will check if the videos are the correct duration and High Definition
         then returns video ids with no duplicates that meet the requirements.
+        :param matched_videos: Dictionary containing the video id as key and resolved name as value.
+        :return: Dictionary containing video id as key, resolved name and video title as values.
         """
         logger.info("..........Checking matched videos for duration and quality..........")
         min_duration = timedelta(minutes=3)
@@ -174,6 +176,7 @@ class YouTube:
     def add_video_to_playlist(self, passed_videos: dict) -> None:
         """
         This method will check if videos is in playlist and add it otherwise.
+        :param passed_videos: Dictionary containing the video id as key and video title as value.
         """
         logger.info("..........Adding videos to playlist..........")
         if not passed_videos:
@@ -205,6 +208,8 @@ class YouTube:
         Check if videos have been archived previously and archive new videos.
         This method will use the resolved name to prevent previously archived
         resolved names from being added to playlist.
+        :param quality_checked_videos: Dictionary containing video id as key, resolved name and video title as values.
+        :return: Dictionary containing the video id as key and video title as value.
         """
         logger.info("..........Checking archive for resolved name matches..........")
         resolved_names_archive = self.download_archives / "resolved_names_archive.txt"

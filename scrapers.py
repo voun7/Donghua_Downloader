@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 class XiaoheimiScraper:
     def __init__(self, download_archives) -> None:
         self.download_archives = download_archives
+        self.parser = "html.parser"
         self.base_url = 'https://xiaoheimi.net'
         self.header = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
@@ -33,7 +34,7 @@ class XiaoheimiScraper:
         try:
             page_response = requests.get(self.base_url + payload, headers=self.header)
             logger.info(f"Page Response = {page_response}")
-            soup = BeautifulSoup(page_response.text, 'html.parser')
+            soup = BeautifulSoup(page_response.text, self.parser)
             posts = soup.find_all('li', class_='col-lg-8 col-md-6 col-sm-4 col-xs-3')
             for post in posts:
                 post_name = post.find('h4', class_='title text-overflow').text
@@ -55,7 +56,7 @@ class XiaoheimiScraper:
         current_date_without_time = datetime.now().date()
         for name, url in matched_posts.items():
             page_response = requests.get(url, headers=self.header)
-            soup = BeautifulSoup(page_response.text, 'html.parser')
+            soup = BeautifulSoup(page_response.text, self.parser)
             post_update = soup.find('span', class_='text-red').text.split(' / ')
             last_updated_date_without_time = parser.parse(post_update[1]).date()
             if last_updated_date_without_time >= current_date_without_time:
@@ -153,7 +154,7 @@ class XiaoheimiScraper:
         It uses yt-dlp to download the file from hls stream.
         """
         page_response = requests.get(video_url, headers=self.header)
-        soup = BeautifulSoup(page_response.text, 'html.parser')
+        soup = BeautifulSoup(page_response.text, self.parser)
         file_name = soup.title.string.strip(' 在线播放 - 小宝影院 - 在线视频').replace('-', ' ')
         for match in re.finditer(r'(\d+)', file_name):
             number = match.group(0)

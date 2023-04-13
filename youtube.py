@@ -102,11 +102,9 @@ class YouTube:
         This method uses the channel id and finds the upload id then returns
         the video id and title for the videos uploaded less than the default time.
         """
-        upload_id = None
         channel_request = self.youtube.channels().list(part="contentDetails", id=channel_id)
         channel_response = channel_request.execute()
-        for item in channel_response['items']:
-            upload_id = item['contentDetails']['relatedPlaylists']['uploads']
+        upload_id = channel_response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
         request = self.youtube.playlistItems().list(part="snippet", maxResults=self.max_results, playlistId=upload_id)
         try:
             response = request.execute()

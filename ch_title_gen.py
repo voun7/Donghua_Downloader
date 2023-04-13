@@ -18,7 +18,7 @@ class ChineseTitleGenerator:
 
         # Regex patterns for name.
         self.all_number_pattern = re.compile(r'(\d+)')
-        self.range_pattern = re.compile(r'\d+[-~]\d+')
+        self.range_pattern = re.compile(r'\d+\s*[-~]\s*\d+')
         # Regex for english characters.
         self.en_key_ch_key_pattern = re.compile(r'[Ss](\d+)')
         self.en_key_season_ep_pattern = re.compile(r'(?:[Ss](\d+).*)?(?:E|EP|ep)(\d+)')
@@ -26,7 +26,7 @@ class ChineseTitleGenerator:
         self.ch_key_and_num_pattern = re.compile(r'[集季][-\d]')  # Consider removing, not need for most cases.
         self.ch_keyword_pattern = re.compile(r'第(\d+)[集季话]')
         self.ch_num_pattern = re.compile(r'第([\u4e00-\u9fff]+)[集季话]')
-        self.ch_key_range_pattern = re.compile(r'(?:第(\d+)[集季话].*)?第(\d+)[-~](\d+)[集季话]')
+        self.ch_key_range_pattern = re.compile(r'(?:第(\d+)[集季话].*)?第(\d+)\s*[-~]\s*(\d+)[集季话]')
 
     def set_suffixes(self) -> None:
         """

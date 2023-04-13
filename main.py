@@ -9,9 +9,9 @@ from youtube import YouTube
 logger = logging.getLogger(__name__)
 
 
-def filter_anime_list(anime_list: list, *name_lists: list) -> list:
+def filter_youtube_anime_list(anime_list: list, *name_lists: list) -> list:
     """
-    Prevent anime from being in two lists at the same time
+    Prevent anime list for YouTube from having anime's that are in other lists.
     """
     for an_list in name_lists:
         for anime in an_list:
@@ -38,7 +38,7 @@ def main() -> None:
 
     xh_anime_list = ["徒弟个个是大佬", "徒弟都是女魔头", "混沌金乌", "仙武帝尊", "唐寅在异界", "我是大仙尊", "盖世帝尊",
                      "炼气练了三千年", "妖道至尊"]
-    yt_anime_list = filter_anime_list(anime_list, xh_anime_list)
+    yt_anime_list = filter_youtube_anime_list(anime_list, xh_anime_list)
 
     # Arguments
     try:

@@ -212,7 +212,7 @@ class YouTube:
         :return: Dictionary containing the video id as key and video title as value.
         """
         logger.info("..........Checking archive for resolved name matches..........")
-        resolved_names_archive = self.download_archives / "resolved_names_archive.txt"
+        resolved_names_archive = self.download_archives / "youtube_resolved_names_archive.txt"
         if resolved_names_archive.exists():
             resolved_names = resolved_names_archive.read_text(encoding="utf-8").splitlines()
         else:

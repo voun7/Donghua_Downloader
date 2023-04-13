@@ -152,11 +152,11 @@ class YouTube:
                 definition = item['contentDetails']['definition']
                 if min_duration < content_duration < max_duration and definition == "hd":
                     passed_check_videos[video_id] = resolved_name, video_title
-                    logger.info(f"Video ID: {video_id} passed check. "
-                                f"Duration: {content_duration}, Quality: {definition}, Video Title: {video_title}")
+                    logger.info(f"Video ID: {video_id} passed check. Duration: {content_duration}, "
+                                f"Quality: {definition}, Resolved name: {resolved_name}, Video Title: {video_title}")
                 else:
-                    logger.warning(f"Video ID: {video_id} failed check. "
-                                   f"Duration: {content_duration}, Quality: {definition}, Video Title: {video_title}")
+                    logger.warning(f"Video ID: {video_id} failed check. Duration: {content_duration}, "
+                                   f"Quality: {definition}, Resolved name: {resolved_name}, Video Title: {video_title}")
         return passed_check_videos
 
     def get_videos_in_playlist(self) -> dict:

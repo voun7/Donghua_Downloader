@@ -30,7 +30,7 @@ def main() -> None:
         logger.info("Checking youtube for recent anime upload matches...")
         youtube = YouTube(playlist_id, download_archives)
         youtube.clear_playlist()
-        youtube.match_to_youtube_videos(youtube_channel_ids, yt_anime_list)
+        youtube.match_to_youtube_videos(youtube_channel_ids, anime_list)
         youtube.playlist_downloader(playlist_download_dir)
     except Exception as error:
         logger.exception(f"An error occurred while running youtube script! Error: {error}")
@@ -38,7 +38,7 @@ def main() -> None:
     try:
         logger.info("Checking xiaoheimi for recent anime upload matches...")
         xiaoheimi = XiaoheimiScraper(download_archives)
-        matched_urls = xiaoheimi.match_to_recent_videos(xh_anime_list)
+        matched_urls = xiaoheimi.match_to_recent_videos(anime_list)
         xiaoheimi.download_all_videos(matched_urls, playlist_download_dir)
     except Exception as error:
         logger.exception(f"An error occurred while running xiaoheimi script! Error: {error}")

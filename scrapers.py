@@ -17,7 +17,11 @@ logger = logging.getLogger(__name__)
 
 class XiaoheimiScraper:
     def __init__(self, download_archives) -> None:
-        self.download_archives = download_archives
+        self.download_archives = download_archives / "resolved_names_download_archive.txt"
+        self.archive_content = []
+        self.new_archive_names = []
+        if self.download_archives.exists():
+            self.archive_content = self.download_archives.read_text(encoding="utf-8").splitlines()
         self.parser = "html.parser"
         self.base_url = 'https://xiaoheimi.net'
         self.header = {
@@ -100,26 +104,25 @@ class XiaoheimiScraper:
             logger.info("No post matches found!")
             return {}
 
-    def check_download_archive(self, file_name: str, archive_id: bool = False) -> bool:
+    def update_download_archive(self) -> None:
+        """
+        Updated the names download archive with the new names.
+        """
+        with open(self.download_archives, 'a', encoding="utf-8") as text_file:
+            text_file.writelines(self.new_archive_names)
+
+    def check_download_archive(self, file_name: str) -> bool:
         """
         Check if file name is in archive.
         :param file_name: name of file.
-        :param archive_id: whether to save link to archive.
         """
-        archive_file = self.download_archives / "resolved_names_download_archive.txt"
-        if archive_file.exists():
-            archive_content = archive_file.read_text(encoding="utf-8").splitlines()
-        else:
-            archive_content = []
+        if "S1 " in file_name:  # For cases were the first season indicator is included.
+            file_name = file_name.replace("S1 ", "")
 
-        if file_name in archive_content:
+        if file_name in self.archive_content:
             logger.debug(f"File: {file_name} is in archive.")
             return True
         else:
-            if archive_id:
-                logger.debug(f"File: {file_name} is being written to archive.")
-                with open(archive_file, 'a', encoding="utf-8") as text_file:
-                    text_file.write(file_name + "\n")
             return False
 
     def m3u8_video_download(self, file_name: str, video_match_name: str, download_link: str,
@@ -153,8 +156,8 @@ class XiaoheimiScraper:
         temp_m3u8_file.unlink()
 
         if file_path.exists():
-            logger.info(f"File: {file_path.name}, downloaded successfully and resolved name is being added to archive!")
-            self.check_download_archive(resolved_name, True)
+            logger.info(f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded successfully!")
+            self.new_archive_names.append(resolved_name + "\n")
 
     def video_downloader(self, video_match: tuple, download_location: Path) -> None:
         """
@@ -186,6 +189,7 @@ class XiaoheimiScraper:
             with concurrent.futures.ThreadPoolExecutor() as executor:
                 _ = [executor.submit(self.video_downloader, video, download_location)
                      for video in video_matches.items()]
+            self.update_download_archive()
             logger.info("Downloads finished!")
         end = time.perf_counter()
         total_time = end - start

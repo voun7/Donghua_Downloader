@@ -109,7 +109,8 @@ class XiaoheimiScraper:
         Updated the names download archive with the new names.
         """
         if self.new_archive_names:
-            logger.info("Archive updated with new name.")
+            logger.info("Archive updated with new names.")
+            logger.debug(f"new_archive_names: {self.new_archive_names}")
             with open(self.download_archives, 'a', encoding="utf-8") as text_file:
                 text_file.writelines(self.new_archive_names)
 

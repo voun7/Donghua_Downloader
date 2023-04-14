@@ -20,6 +20,7 @@ class XiaoheimiScraper:
         self.download_archives = download_archives / "resolved_names_download_archive.txt"
         self.archive_content = []
         self.new_archive_names = []
+        self.video_num_per_post = 3  # The number of recent videos that will downloaded per post.
         if self.download_archives.exists():
             self.archive_content = self.download_archives.read_text(encoding="utf-8").splitlines()
         self.parser = "html.parser"
@@ -52,10 +53,9 @@ class XiaoheimiScraper:
             logger.exception(error)
             logger.critical("Program failed to access website!\n")
 
-    def get_latest_video_links(self, matched_posts: dict, default_num_videos: int = 3) -> dict:
+    def get_latest_video_links(self, matched_posts: dict) -> dict:
         """
-        This method takes a post's url check if its recent and gets
-        the latest default number of video links.
+        This method takes a post's url check if its recent and gets the latest number of video links.
         """
         logger.info("..........Checking for latest videos..........")
         latest_video_links = {}
@@ -69,10 +69,10 @@ class XiaoheimiScraper:
             last_updated_date_without_time = parser.parse(post_update[1]).date()
             if last_updated_date_without_time >= current_date_without_time:
                 latest_video_number = int(post_update[0].strip('更新至集全'))
-                if latest_video_number < default_num_videos:
+                if latest_video_number < self.video_num_per_post:  # Prevents asking for more videos than are available.
                     num_videos = latest_video_number
                 else:
-                    num_videos = default_num_videos
+                    num_videos = self.video_num_per_post
                 video_start_num = latest_video_number - num_videos + 1
                 logger.info(f"Post named: {post_name} is new, latest video number: {latest_video_number}. "
                             f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")

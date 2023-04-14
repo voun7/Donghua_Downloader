@@ -10,6 +10,8 @@ import requests
 from bs4 import BeautifulSoup
 from dateutil import parser
 
+from ch_title_gen import ChineseTitleGenerator
+
 logger = logging.getLogger(__name__)
 
 
@@ -104,7 +106,7 @@ class XiaoheimiScraper:
         :param file_name: name of file.
         :param archive_id: whether to save link to archive.
         """
-        archive_file = self.download_archives / "xiaoheimi_downloads_archive.txt"
+        archive_file = self.download_archives / "resolved_names_download_archive.txt"
         if archive_file.exists():
             archive_content = archive_file.read_text(encoding="utf-8").splitlines()
         else:
@@ -120,14 +122,18 @@ class XiaoheimiScraper:
                     text_file.write(file_name + "\n")
             return False
 
-    def m3u8_video_download(self, download_link: str, file_name: str, download_location: Path) -> None:
+    def m3u8_video_download(self, file_name: str, video_match_name: str, download_link: str,
+                            download_location: Path) -> None:
         """
         Use m3u8 link to download video and create mp4 file.
         Embedded advertisements links will be removed.
         """
         file_path = Path(f"{download_location}/{file_name}.mp4")
-        if file_path.exists() or self.check_download_archive(file_name):
-            logger.info(f"File: {file_name} exists or is recorded in the archive, skipping download...")
+        gen = ChineseTitleGenerator()
+        resolved_name = gen.generate_title(file_name, video_match_name)
+        if file_path.exists() or self.check_download_archive(resolved_name):
+            logger.info(f"Resolved name: {resolved_name}, File: {file_name} exists "
+                        f"or is recorded in the archive, skipping download...")
             return
         # Make a request to the m3u8 file link.
         response = requests.get(download_link)
@@ -148,7 +154,7 @@ class XiaoheimiScraper:
 
         if file_path.exists():
             logger.info(f"File: {file_path.name}, downloaded successfully and link id is being added to archive!")
-            self.check_download_archive(file_name, True)
+            self.check_download_archive(resolved_name, True)
 
     def video_downloader(self, video_match: tuple, download_location: Path) -> None:
         """

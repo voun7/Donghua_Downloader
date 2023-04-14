@@ -54,7 +54,9 @@ class XiaoheimiScraper:
         logger.info("..........Checking for latest videos..........")
         latest_video_links = []
         current_date_without_time = datetime.now().date()
-        for name, url in matched_posts.items():
+        for match_name, match_details in matched_posts.items():
+            post_name = match_details[0]
+            url = match_details[1]
             page_response = requests.get(url, headers=self.header)
             soup = BeautifulSoup(page_response.text, self.parser)
             post_update = soup.find('span', class_='text-red').text.split(' / ')
@@ -66,7 +68,7 @@ class XiaoheimiScraper:
                 else:
                     num_videos = default_num_videos
                 video_start_num = latest_video_number - num_videos + 1
-                logger.info(f"Post named: {name} is new, latest video number: {latest_video_number}. "
+                logger.info(f"Post named: {post_name} is new, latest video number: {latest_video_number}. "
                             f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")
                 for video_number in range(video_start_num, latest_video_number + 1):
                     video_post = soup.find('li', {"title": f"{video_number}"})
@@ -74,7 +76,7 @@ class XiaoheimiScraper:
                     logger.info(f"Video link: {video_link}")
                     latest_video_links.append(video_link)
             else:
-                logger.warning(f"Post named: {name} is not recent, Last Updated: {last_updated_date_without_time}")
+                logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date_without_time}")
         return latest_video_links
 
     def match_to_recent_videos(self, anime_list: list) -> list:
@@ -88,7 +90,7 @@ class XiaoheimiScraper:
             for post_name, post_url in posts.items():
                 if name in post_name:
                     logger.info(f"Anime: {name} matches Post Title: {post_name}, Post URL: {post_url}")
-                    matched_posts[post_name] = post_url
+                    matched_posts[name] = post_name, post_url
         if matched_posts:
             checked_video_urls = self.get_latest_video_links(matched_posts)
             return checked_video_urls

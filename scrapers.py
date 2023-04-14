@@ -153,7 +153,7 @@ class XiaoheimiScraper:
         temp_m3u8_file.unlink()
 
         if file_path.exists():
-            logger.info(f"File: {file_path.name}, downloaded successfully and link id is being added to archive!")
+            logger.info(f"File: {file_path.name}, downloaded successfully and resolved name is being added to archive!")
             self.check_download_archive(resolved_name, True)
 
     def video_downloader(self, video_match: tuple, download_location: Path) -> None:

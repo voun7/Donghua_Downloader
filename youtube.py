@@ -20,7 +20,8 @@ logger = logging.getLogger(__name__)
 class YouTube:
     def __init__(self, playlist_id: str, download_archives: Path) -> None:
         self.playlist_id = playlist_id
-        self.download_archives = download_archives
+        self.resolved_names_archive = download_archives / "resolved_names_download_archive.txt"
+        self.youtube_download_archive = download_archives / "youtube_downloads_archive.txt"
         self.youtube = None
         self.max_results = 50
         self.default_duration = timedelta(hours=12)
@@ -210,9 +211,8 @@ class YouTube:
         :return: Dictionary containing the video id as key and video title as value.
         """
         logger.info("..........Checking archive for resolved name matches..........")
-        resolved_names_archive = self.download_archives / "resolved_names_download_archive.txt"
-        if resolved_names_archive.exists():
-            resolved_names = resolved_names_archive.read_text(encoding="utf-8").splitlines()
+        if self.resolved_names_archive.exists():
+            resolved_names = self.resolved_names_archive.read_text(encoding="utf-8").splitlines()
         else:
             resolved_names = []
         archive_checked_videos = {}
@@ -227,7 +227,7 @@ class YouTube:
                 archive_checked_videos[video_id] = video_title
                 new_resolved_names.append(resolved_name + "\n")
         logger.debug(f"new_resolved_names: {new_resolved_names}")
-        with open(resolved_names_archive, 'a', encoding="utf-8") as text_file:
+        with open(self.resolved_names_archive, 'a', encoding="utf-8") as text_file:
             text_file.writelines(new_resolved_names)
         return archive_checked_videos
 
@@ -292,7 +292,7 @@ class YouTube:
             'ignoreerrors': True,
             'socket_timeout': 120,
             'wait_for_video': (1, 600),
-            'download_archive': self.download_archives / "youtube_downloads_archive.txt",
+            'download_archive': self.youtube_download_archive,
             'format': 'bestvideo[height>720][ext=mp4]+bestaudio[ext=m4a]',
             'ffmpeg_location': 'ffmpeg/bin',
             'outtmpl': str(download_location) + '/%(title)s.%(ext)s'

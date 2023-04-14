@@ -46,13 +46,13 @@ class XiaoheimiScraper:
             logger.exception(error)
             logger.critical("Program failed to access website!\n")
 
-    def get_latest_video_links(self, matched_posts: dict, default_num_videos: int = 3) -> list:
+    def get_latest_video_links(self, matched_posts: dict, default_num_videos: int = 3) -> dict:
         """
         This method takes a post's url check if its recent and gets
         the latest default number of video links.
         """
         logger.info("..........Checking for latest videos..........")
-        latest_video_links = []
+        latest_video_links = {}
         current_date_without_time = datetime.now().date()
         for match_name, match_details in matched_posts.items():
             post_name = match_details[0]
@@ -74,12 +74,12 @@ class XiaoheimiScraper:
                     video_post = soup.find('li', {"title": f"{video_number}"})
                     video_link = self.base_url + video_post.find('a').get('href')
                     logger.info(f"Video link: {video_link}")
-                    latest_video_links.append(video_link)
+                    latest_video_links[video_link] = match_name
             else:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date_without_time}")
         return latest_video_links
 
-    def match_to_recent_videos(self, anime_list: list) -> list:
+    def match_to_recent_videos(self, anime_list: list) -> dict:
         """
         This method checks if anime matches a recent post from the site.
         """
@@ -96,7 +96,7 @@ class XiaoheimiScraper:
             return checked_video_urls
         else:
             logger.info("No post matches found!")
-            return []
+            return {}
 
     def check_download_archive(self, file_name: str, archive_id: bool = False) -> bool:
         """
@@ -150,11 +150,13 @@ class XiaoheimiScraper:
             logger.info(f"File: {file_path.name}, downloaded successfully and link id is being added to archive!")
             self.check_download_archive(file_name, True)
 
-    def video_downloader(self, video_url: str, download_location: Path) -> None:
+    def video_downloader(self, video_match: tuple, download_location: Path) -> None:
         """
         This method uses the video url to find the video download link.
         It uses yt-dlp to download the file from hls stream.
         """
+        video_url = video_match[0]
+        video_match_name = video_match[1]
         page_response = requests.get(video_url, headers=self.header)
         soup = BeautifulSoup(page_response.text, self.parser)
         file_name = soup.title.string.strip(' 在线播放 - 小宝影院 - 在线视频').replace('-', ' ')
@@ -167,16 +169,17 @@ class XiaoheimiScraper:
         for match in download_match:
             download_link = match[1].replace("\\", '')
         logger.debug(f"Downloading Post: {video_url}, File name: {file_name}, Download link: {download_link}")
-        self.m3u8_video_download(download_link, file_name, download_location)
+        self.m3u8_video_download(file_name, video_match_name, download_link, download_location)
 
-    def download_all_videos(self, video_urls: list, download_location: Path) -> None:
+    def download_all_videos(self, video_matches: dict, download_location: Path) -> None:
         logger.info("..........Downloading matched recent site videos..........")
         start = time.perf_counter()
-        if not video_urls:
+        if not video_matches:
             logger.info("No Video(s) to Download!")
         else:
             with concurrent.futures.ThreadPoolExecutor() as executor:
-                _ = [executor.submit(self.video_downloader, url, download_location) for url in video_urls]
+                _ = [executor.submit(self.video_downloader, video, download_location)
+                     for video in video_matches.items()]
             logger.info("Downloads finished!")
         end = time.perf_counter()
         total_time = end - start

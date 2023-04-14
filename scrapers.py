@@ -108,21 +108,24 @@ class XiaoheimiScraper:
         """
         Updated the names download archive with the new names.
         """
-        with open(self.download_archives, 'a', encoding="utf-8") as text_file:
-            text_file.writelines(self.new_archive_names)
+        if self.new_archive_names:
+            with open(self.download_archives, 'a', encoding="utf-8") as text_file:
+                text_file.writelines(self.new_archive_names)
 
     def check_download_archive(self, file_name: str) -> bool:
         """
         Check if file name is in archive.
         :param file_name: name of file.
         """
+        name_no_s1 = None
         if "S1 " in file_name:  # For cases were the first season indicator is included.
-            file_name = file_name.replace("S1 ", "")
+            name_no_s1 = file_name.replace("S1 ", "")
 
-        if file_name in self.archive_content:
+        if any(name in self.archive_content for name in [file_name, name_no_s1]):
             logger.debug(f"File: {file_name} is in archive.")
             return True
         else:
+            logger.debug(f"File: {file_name} is not in archive.")
             return False
 
     def m3u8_video_download(self, file_name: str, video_match_name: str, download_link: str,
@@ -134,10 +137,13 @@ class XiaoheimiScraper:
         file_path = Path(f"{download_location}/{file_name}.mp4")
         gen = ChineseTitleGenerator()
         resolved_name = gen.generate_title(file_name, video_match_name)
-        if file_path.exists() or self.check_download_archive(resolved_name):
-            logger.info(f"Resolved name: {resolved_name}, File: {file_name} exists "
-                        f"or is recorded in the archive, skipping download...")
+        if file_path.exists():
+            logger.info(f"Resolved name: {resolved_name}, File: {file_name} exists in directory. Skipping download!")
             return
+        if self.check_download_archive(resolved_name):
+            logger.info(f"Resolved name: {resolved_name}, File: {file_name} exists in the archive. Skipping download!")
+            return
+
         # Make a request to the m3u8 file link.
         response = requests.get(download_link)
         # Remove embedded advertisement fragments from the response text if any.

@@ -212,15 +212,18 @@ class YouTube:
         """
         logger.info("..........Checking archive for resolved name matches..........")
         if self.resolved_names_archive.exists():
-            resolved_names = self.resolved_names_archive.read_text(encoding="utf-8").splitlines()
+            archive_content = self.resolved_names_archive.read_text(encoding="utf-8").splitlines()
         else:
-            resolved_names = []
+            archive_content = []
         archive_checked_videos = {}
         new_resolved_names = []
         for video_id, video_details in quality_checked_videos.items():
             resolved_name = video_details[0]
             video_title = video_details[1]
-            if resolved_name in resolved_names:
+            name_no_s1 = None
+            if "S1 " in resolved_name:  # For cases were the first season indicator is included.
+                name_no_s1 = resolved_name.replace("S1 ", "")
+            if any(name in archive_content for name in [resolved_name, name_no_s1]):
                 logger.warning(f"Video ID: {video_id}, Resolved name: {resolved_name} is already in the archive")
             else:
                 logger.info(f"Video ID: {video_id}, Resolved name: {resolved_name} is being added to the archive")

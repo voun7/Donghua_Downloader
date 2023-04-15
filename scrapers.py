@@ -61,8 +61,7 @@ class XiaoheimiScraper:
         latest_video_links = {}
         current_date_without_time = datetime.now().date()
         for match_name, match_details in matched_posts.items():
-            post_name = match_details[0]
-            url = match_details[1]
+            post_name, url = match_details[0], match_details[1]
             page_response = requests.get(url, headers=self.header)
             soup = BeautifulSoup(page_response.text, self.parser)
             post_update = soup.find('span', class_='text-red').text.split(' / ')

@@ -36,11 +36,9 @@ class YouTube:
         This method authenticates the program.
         """
         scopes = ["https://www.googleapis.com/auth/youtube.force-ssl"]
-        api_service_name = "youtube"
-        api_version = "v3"
+        api_service_name, api_version, creds = "youtube", "v3", None
         client_secrets_file = "credentials/OAuth 2.0 Client ID.json"
         token_file = Path("credentials/token.json")
-        creds = None
         # The file token.json stores the user's access and refresh tokens, and is
         # created automatically when the authorization flow completes for the first
         # time.
@@ -211,16 +209,11 @@ class YouTube:
         :return: Dictionary containing the video id as key and video title as value.
         """
         logger.info("..........Checking archive for resolved name matches..........")
+        archive_content, archive_checked_videos, new_resolved_names = [], {}, []
         if self.resolved_names_archive.exists():
             archive_content = self.resolved_names_archive.read_text(encoding="utf-8").splitlines()
-        else:
-            archive_content = []
-        archive_checked_videos = {}
-        new_resolved_names = []
         for video_id, video_details in quality_checked_videos.items():
-            resolved_name = video_details[0]
-            video_title = video_details[1]
-            name_no_s1 = None
+            resolved_name, video_title, name_no_s1 = video_details[0], video_details[1], None
             if "S1 " in resolved_name:  # For cases were the first season indicator is included.
                 name_no_s1 = resolved_name.replace("S1 ", "")
             if any(name in archive_content for name in [resolved_name, name_no_s1]):

@@ -2,7 +2,7 @@ import logging
 import re
 from pathlib import Path
 
-from logger_setup import get_log
+from utilities.logger_setup import get_log
 from scrapers import XiaoheimiScraper
 from youtube import YouTube
 

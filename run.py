@@ -2,7 +2,7 @@ import logging
 import subprocess
 import sys
 
-from logger_setup import get_log
+from utilities.logger_setup import get_log
 
 logger = logging.getLogger(__name__)
 

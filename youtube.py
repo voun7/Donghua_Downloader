@@ -11,7 +11,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from yt_dlp import YoutubeDL
 
-from ch_title_gen import ChineseTitleGenerator
+from utilities.ch_title_gen import ChineseTitleGenerator
 
 logger = logging.getLogger(__name__)
 

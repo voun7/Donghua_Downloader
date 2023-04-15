@@ -34,7 +34,7 @@ def get_file_handler(log_format) -> logging.handlers:
 
 def get_log() -> None:
     # Create folder for file logs.
-    log_dir = Path(f"{Path.cwd()}/logs")
+    log_dir = Path(f"./logs")
     if not log_dir.exists():
         log_dir.mkdir()
 

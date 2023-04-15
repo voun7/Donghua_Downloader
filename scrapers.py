@@ -131,8 +131,7 @@ class XiaoheimiScraper:
     def m3u8_video_download(self, file_name: str, video_match_name: str, download_link: str,
                             download_location: Path) -> None:
         """
-        Use m3u8 link to download video and create mp4 file.
-        Embedded advertisements links will be removed.
+        Use m3u8 link to download video and create mp4 file. Embedded advertisements links will be removed.
         """
         file_path = Path(f"{download_location}/{file_name}.mp4")
         gen = ChineseTitleGenerator()

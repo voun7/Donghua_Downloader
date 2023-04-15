@@ -171,8 +171,7 @@ class XiaoheimiScraper:
         This method uses the video url to find the video download link.
         It uses yt-dlp to download the file from hls stream.
         """
-        video_url = video_match[0]
-        video_match_name = video_match[1]
+        video_url, video_match_name, download_link = video_match[0], video_match[1], None
         page_response = requests.get(video_url, headers=self.header)
         soup = BeautifulSoup(page_response.text, self.parser)
         file_name = soup.title.string.strip(' 在线播放 - 小宝影院 - 在线视频').replace('-', ' ')
@@ -181,7 +180,6 @@ class XiaoheimiScraper:
             file_name = file_name.replace(number, f"第{number}集")
         download_script = soup.find(class_='embed-responsive clearfix')
         download_match = re.finditer(r'"url":"(.*?)"', str(download_script))
-        download_link = None
         for match in download_match:
             download_link = match[1].replace("\\", '')
         logger.debug(f"Downloading Post: {video_url}, File name: {file_name}, Download link: {download_link}")

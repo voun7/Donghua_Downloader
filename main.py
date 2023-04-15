@@ -2,8 +2,8 @@ import logging
 import re
 from pathlib import Path
 
-from utilities.logger_setup import get_log
 from scrapers import XiaoheimiScraper
+from utilities.logger_setup import get_log
 from youtube import YouTube
 
 logger = logging.getLogger(__name__)

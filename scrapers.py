@@ -140,10 +140,11 @@ class XiaoheimiScraper:
         gen = ChineseTitleGenerator()
         resolved_name = gen.generate_title(file_name, video_match_name)
         if file_path.exists():
-            logger.info(f"Resolved name: {resolved_name}, File: {file_name} exists in directory. Skipping download!")
+            logger.warning(f"Resolved name: {resolved_name}, File: {file_name} exists in directory. Skipping download!")
             return
         if self.check_download_archive(resolved_name):
-            logger.info(f"Resolved name: {resolved_name}, File: {file_name} exists in the archive. Skipping download!")
+            logger.warning(f"Resolved name: {resolved_name}, File: {file_name} exists in the archive. "
+                           f"Skipping download!")
             return
 
         # Make a request to the m3u8 file link.

@@ -144,22 +144,20 @@ class XiaoheimiScraper:
             logger.warning(f"Resolved name: {resolved_name}, File: {file_name} exists in the archive. "
                            f"Skipping download!")
             return
-
         # Make a request to the m3u8 file link.
         response = requests.get(download_link)
         # Remove embedded advertisement fragments from the response text if any.
         advert_tag = "#EXT-X-DISCONTINUITY\n"
         advert_pattern = re.compile(re.escape(advert_tag) + "(.*?)" + re.escape(advert_tag), re.DOTALL)
         ad_free_m3u8_text = advert_pattern.sub("", response.text)
-
+        # Create temp ad filtered m3u8 playlist.
         temp_m3u8_file = Path(f"{download_location}/{file_name}_filtered_playlist.m3u8")
         temp_m3u8_file.write_text(ad_free_m3u8_text)
-
         # Use ffmpeg to download and convert the modified playlist.
         command = ['ffmpeg/bin/ffmpeg', '-protocol_whitelist', 'file,http,https,tcp,tls', '-i', str(temp_m3u8_file),
                    '-c', 'copy', str(file_path)]
         subprocess.run(command, stderr=subprocess.DEVNULL)
-        # Clean up the filtered playlist file.
+        # Clean up the temp filtered playlist file.
         temp_m3u8_file.unlink()
 
         if file_path.exists():

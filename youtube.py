@@ -234,18 +234,36 @@ class YouTube:
             text_file.writelines(new_resolved_names)
         return archive_checked_videos
 
+    def get_all_channel_uploads(self, youtube_channel_ids: list) -> dict:
+        """
+        Get recent updates from all the channel ids.
+        """
+        logger.info(f"..........Checking channel(s) for recent video uploads "
+                    f"in the last {self.default_duration}..........")
+        all_recent_uploads = {}
+        for channel_id in youtube_channel_ids:
+            uploads = self.get_channel_recent_video_uploads(channel_id)
+            all_recent_uploads.update(uploads)
+        return all_recent_uploads
+
+    def check_matches(self, matched_videos: dict) -> None:
+        """
+        Run matched videos through checks and add videos that passed to playlist.
+        """
+        if matched_videos:
+            quality_checked_videos = self.quality_check_videos(matched_videos)
+            archive_checked_videos = self.archive_check(quality_checked_videos)
+            self.add_video_to_playlist(archive_checked_videos)
+        else:
+            logger.warning("No video matches!")
+
     def match_to_youtube_videos(self, youtube_channel_ids: list, file_names: list) -> None:
         """
         This function matches the names in the list to recently uploaded YouTube videos
         from the channels and adds them to the playlist.
         """
-        logger.info(f"..........Checking channel(s) for recent video uploads "
-                    f"in the last {self.default_duration}..........")
         start = time.perf_counter()
-        all_recent_uploads = {}
-        for channel_id in youtube_channel_ids:
-            uploads = self.get_channel_recent_video_uploads(channel_id)
-            all_recent_uploads.update(uploads)
+        all_recent_uploads = self.get_all_channel_uploads(youtube_channel_ids)
         if not all_recent_uploads:
             logger.info("No recent video uploads!")
             return
@@ -265,12 +283,7 @@ class YouTube:
                     else:
                         logger.warning(f"Video ID: {video_id}, "
                                        f"Resolved name: {resolved_name} already exists in matches, will not be added.")
-        if matched_videos:
-            quality_checked_videos = self.quality_check_videos(matched_videos)
-            archive_checked_videos = self.archive_check(quality_checked_videos)
-            self.add_video_to_playlist(archive_checked_videos)
-        else:
-            logger.warning("No video matches!")
+        self.check_matches(matched_videos)
         end = time.perf_counter()
         total_time = end - start
         logger.info(f"Total time matching recent uploads and adding to playlist took: {total_time}")

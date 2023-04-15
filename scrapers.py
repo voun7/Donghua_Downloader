@@ -18,8 +18,7 @@ logger = logging.getLogger(__name__)
 class XiaoheimiScraper:
     def __init__(self, download_archives) -> None:
         self.download_archives = download_archives / "resolved_names_download_archive.txt"
-        self.archive_content = []
-        self.new_archive_names = []
+        self.archive_content = self.new_archive_names = []
         self.video_num_per_post = 3  # The number of recent videos that will downloaded per post.
         if self.download_archives.exists():
             self.archive_content = self.download_archives.read_text(encoding="utf-8").splitlines()

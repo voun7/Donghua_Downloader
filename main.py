@@ -14,6 +14,8 @@ def main() -> None:
     playlist_download_dir = Path(r"\\192.168.0.111\General File Sharing\From YouTube\Chinese Anime For Subbing")
     destination_dir = playlist_download_dir / "##Currently Airing"
     download_archives = playlist_download_dir / "Download Archives"
+    resolved_names_download_archive = download_archives / "resolved_names_download_archive.txt"
+    youtube_download_archive = download_archives / "youtube_downloads_archive.txt"
     if not download_archives.exists():
         download_archives.mkdir()
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
@@ -28,18 +30,18 @@ def main() -> None:
     # Arguments
     try:
         logger.info("Checking youtube for recent anime upload matches...")
-        youtube = YouTube(playlist_id, download_archives)
+        youtube = YouTube(playlist_id, resolved_names_download_archive)
         youtube.clear_playlist()
         youtube.match_to_youtube_videos(youtube_channel_ids, anime_list)
-        youtube.playlist_downloader(playlist_download_dir)
+        youtube.playlist_downloader(playlist_download_dir, youtube_download_archive)
     except Exception as error:
         logger.exception(f"An error occurred while running youtube script! Error: {error}")
 
     try:
         logger.info("Checking xiaoheimi for recent anime upload matches...")
-        xiaoheimi = XiaoheimiScraper(download_archives)
+        xiaoheimi = XiaoheimiScraper()
         matched_urls = xiaoheimi.match_to_recent_videos(anime_list)
-        xiaoheimi.download_all_videos(matched_urls, playlist_download_dir)
+        xiaoheimi.download_all_videos(matched_urls, playlist_download_dir, resolved_names_download_archive)
     except Exception as error:
         logger.exception(f"An error occurred while running xiaoheimi script! Error: {error}")
 

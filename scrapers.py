@@ -70,7 +70,7 @@ class XiaoheimiScraper:
             if last_updated_date_without_time >= current_date_without_time:
                 latest_video_number = int(post_update[0].strip('更新至集全'))
                 if latest_video_number < self.video_num_per_post:  # Prevents asking for more videos than are available.
-                    num_videos = latest_video_number
+                    num_videos = latest_video_number  # This sets the number to download all videos of the post.
                 else:
                     num_videos = self.video_num_per_post
                 video_start_num = latest_video_number - num_videos + 1

@@ -1,7 +1,5 @@
-import concurrent.futures
 import logging
 import re
-import subprocess
 import time
 from datetime import datetime
 from pathlib import Path
@@ -10,18 +8,14 @@ import requests
 from bs4 import BeautifulSoup
 from dateutil import parser
 
-from ch_title_gen import ChineseTitleGenerator
+from utilities.downloader import ScrapperDownloader
 
 logger = logging.getLogger(__name__)
 
 
 class XiaoheimiScraper:
-    def __init__(self, download_archives) -> None:
-        self.download_archives = download_archives / "resolved_names_download_archive.txt"
-        self.archive_content = self.new_archive_names = []
+    def __init__(self) -> None:
         self.video_num_per_post = 3  # The number of recent videos that will downloaded per post.
-        if self.download_archives.exists():
-            self.archive_content = self.download_archives.read_text(encoding="utf-8").splitlines()
         self.parser = "html.parser"
         self.base_url = 'https://xiaoheimi.net'
         self.header = {
@@ -102,73 +96,11 @@ class XiaoheimiScraper:
             logger.info("No post matches found!")
             return {}
 
-    def update_download_archive(self) -> None:
-        """
-        Updated the names download archive with the new names.
-        """
-        if self.new_archive_names:
-            logger.info("Archive updated with new names.")
-            logger.debug(f"new_archive_names: {self.new_archive_names}")
-            with open(self.download_archives, 'a', encoding="utf-8") as text_file:
-                text_file.writelines(self.new_archive_names)
-
-    def check_download_archive(self, file_name: str) -> bool:
-        """
-        Check if file name is in archive.
-        :param file_name: name of file.
-        """
-        name_no_s1 = None
-        if "S1 " in file_name:  # For cases were the first season indicator is included.
-            name_no_s1 = file_name.replace("S1 ", "")
-
-        if any(name in self.archive_content for name in [file_name, name_no_s1]):
-            logger.debug(f"File: {file_name} is in archive.")
-            return True
-        else:
-            logger.debug(f"File: {file_name} is not in archive.")
-            return False
-
-    def m3u8_video_download(self, file_name: str, video_match_name: str, download_link: str,
-                            download_location: Path) -> None:
-        """
-        Use m3u8 link to download video and create mp4 file. Embedded advertisements links will be removed.
-        """
-        file_path = Path(f"{download_location}/{file_name}.mp4")
-        gen = ChineseTitleGenerator()
-        resolved_name = gen.generate_title(file_name, video_match_name)
-        if file_path.exists():
-            logger.warning(f"Resolved name: {resolved_name}, File: {file_name} exists in directory. Skipping download!")
-            return
-        if self.check_download_archive(resolved_name):
-            logger.warning(f"Resolved name: {resolved_name}, File: {file_name} exists in the archive. "
-                           f"Skipping download!")
-            return
-        # Make a request to the m3u8 file link.
-        response = requests.get(download_link)
-        # Remove embedded advertisement fragments from the response text if any.
-        advert_tag = "#EXT-X-DISCONTINUITY\n"
-        advert_pattern = re.compile(re.escape(advert_tag) + "(.*?)" + re.escape(advert_tag), re.DOTALL)
-        ad_free_m3u8_text = advert_pattern.sub("", response.text)
-        # Create temp ad filtered m3u8 playlist.
-        temp_m3u8_file = Path(f"{download_location}/{file_name}_filtered_playlist.m3u8")
-        temp_m3u8_file.write_text(ad_free_m3u8_text)
-        # Use ffmpeg to download and convert the modified playlist.
-        command = ['ffmpeg/bin/ffmpeg', '-protocol_whitelist', 'file,http,https,tcp,tls', '-i', str(temp_m3u8_file),
-                   '-c', 'copy', str(file_path)]
-        subprocess.run(command, stderr=subprocess.DEVNULL)
-        # Clean up the temp filtered playlist file.
-        temp_m3u8_file.unlink()
-
-        if file_path.exists():
-            logger.info(f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded successfully!")
-            self.new_archive_names.append(resolved_name + "\n")
-
-    def video_downloader(self, video_match: tuple, download_location: Path) -> None:
+    def get_video_download_link(self, video_url: str) -> tuple:
         """
         This method uses the video url to find the video download link.
-        It uses yt-dlp to download the file from hls stream.
         """
-        video_url, video_match_name, download_link = video_match[0], video_match[1], None
+        download_link = None
         page_response = requests.get(video_url, headers=self.header)
         soup = BeautifulSoup(page_response.text, self.parser)
         file_name = soup.title.string.strip(' 在线播放 - 小宝影院 - 在线视频').replace('-', ' ')
@@ -179,20 +111,20 @@ class XiaoheimiScraper:
         download_match = re.finditer(r'"url":"(.*?)"', str(download_script))
         for match in download_match:
             download_link = match[1].replace("\\", '')
-        logger.debug(f"Downloading Post: {video_url}, File name: {file_name}, Download link: {download_link}")
-        self.m3u8_video_download(file_name, video_match_name, download_link, download_location)
+        return download_link, file_name
 
-    def download_all_videos(self, video_matches: dict, download_location: Path) -> None:
-        logger.info("..........Downloading matched recent site videos..........")
-        start = time.perf_counter()
+    def download_all_videos(self, video_matches: dict, download_location: Path, download_archives: Path) -> None:
+        logger.info("..........Getting download links for video matches..........")
         if not video_matches:
-            logger.info("No Video(s) to Download!")
-        else:
-            with concurrent.futures.ThreadPoolExecutor() as executor:
-                _ = [executor.submit(self.video_downloader, video, download_location)
-                     for video in video_matches.items()]
-            self.update_download_archive()
-            logger.info("Downloads finished!")
+            logger.info("No Video Matches!")
+            return
+        start = time.perf_counter()
+        sd = ScrapperDownloader(download_location, download_archives)
+        all_download_details = {}
+        for video_link, match_name in video_matches.items():
+            download_link, file_name = self.get_video_download_link(video_link)
+            logger.info(f"File name: {file_name}, Download link: {download_link}")
+            all_download_details[download_link] = file_name, match_name
         end = time.perf_counter()
-        total_time = end - start
-        logger.info(f"Total download time: {total_time}\n")
+        logger.info(f"Total time: {end - start}")
+        sd.batch_downloader(all_download_details)

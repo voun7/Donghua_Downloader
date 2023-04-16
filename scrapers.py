@@ -11,6 +11,14 @@ logger = logging.getLogger(__name__)
 
 
 class ScrapperTools:
+    parser = "html.parser"
+    video_num_per_post = 3  # The number of recent videos that will downloaded per post.
+    header = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+                      'AppleWebKit/537.36 (KHTML, like Gecko) '
+                      'Chrome/106.0.0.0 Safari/537.36'
+    }
+
     @staticmethod
     def match_to_recent_videos(posts: dict, anime_list: list) -> dict:
         """
@@ -33,14 +41,7 @@ class ScrapperTools:
 
 class XiaoheimiScraper(ScrapperTools):
     def __init__(self) -> None:
-        self.video_num_per_post = 3  # The number of recent videos that will downloaded per post.
-        self.parser = "html.parser"
         self.base_url = 'https://xiaoheimi.net'
-        self.header = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                          'AppleWebKit/537.36 (KHTML, like Gecko) '
-                          'Chrome/106.0.0.0 Safari/537.36'
-        }
 
     def get_anime_posts(self, page: int = 1) -> dict:
         """
@@ -119,14 +120,7 @@ class XiaoheimiScraper(ScrapperTools):
 
 class AnimeBabyScrapper(ScrapperTools):
     def __init__(self) -> None:
-        self.video_num_per_post = 3  # The number of recent videos that will downloaded per post.
-        self.parser = "html.parser"
         self.base_url = "https://www.animebaby.top"
-        self.header = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                          'AppleWebKit/537.36 (KHTML, like Gecko) '
-                          'Chrome/106.0.0.0 Safari/537.36'
-        }
 
     def get_anime_posts(self, page: int = 1) -> dict:
         """

@@ -26,10 +26,10 @@ class ScrapperDownloader:
         Updated the names download archive with the new names.
         """
         if self.new_archive_names:
-            logger.info("Archive updated with new names.")
-            logger.debug(f"new_archive_names: {self.new_archive_names}")
+            logger.info(f"Archive updated with new names. Names: {self.new_archive_names}")
             with open(self.download_archive, 'a', encoding="utf-8") as text_file:
                 text_file.writelines(self.new_archive_names)
+            self.new_archive_names = []
 
     def check_download_archive(self, resolved_name, file_name) -> bool:
         """
@@ -125,6 +125,7 @@ class ScrapperDownloader:
 
         if file_path.exists():
             logger.info(f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded successfully!")
+            self.archive_content.append(resolved_name)
             self.new_archive_names.append(resolved_name + "\n")
         else:
             logger.warning(f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded failed!")

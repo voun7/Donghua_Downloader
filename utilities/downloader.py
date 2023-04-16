@@ -44,7 +44,7 @@ class ScrapperDownloader:
             return False
 
     def check_video_resolution(self, resolved_name: str, file_name: str, download_link: str,
-                               preferred_height: int = 1080) -> bool:
+                               minimum_height: int = 1080) -> bool:
         """
         Returns True if video fails resolution test and False otherwise.
         """
@@ -59,7 +59,7 @@ class ScrapperDownloader:
         width, height = int(resolution[0]), int(resolution[1])
         # Delete the downloaded file.
         temp_file.unlink()
-        if height < preferred_height:
+        if height < minimum_height:
             logger.warning(f"Resolved name: {resolved_name}, File: {file_name} failed resolution test! "
                            f"Resolution: {width} x {height}. Skipping download!")
             return True

@@ -73,7 +73,7 @@ class ScrapperDownloader:
         # run the command using subprocess.run()
         subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL)
 
-    def m3u8_video_download(self, download_link: str, download_details) -> None:
+    def video_downloader(self, download_link: str, download_details) -> None:
         """
         Use m3u8 link to download video and create mp4 file. Embedded advertisements links will be removed.
         """
@@ -114,7 +114,7 @@ class ScrapperDownloader:
             return
         start = time.perf_counter()
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            _ = [executor.submit(self.m3u8_video_download, download_link, download_details)
+            _ = [executor.submit(self.video_downloader, download_link, download_details)
                  for download_link, download_details in all_download_details.items()]
         self.update_download_archive()
         logger.info("Downloads finished!")

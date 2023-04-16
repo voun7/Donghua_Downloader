@@ -17,7 +17,7 @@ def main() -> None:
     download_archives_dir = playlist_download_dir / "Download Archives"
     download_archive = download_archives_dir / "resolved_names_download_archive.txt"
     youtube_download_archive = download_archives_dir / "youtube_downloads_archive.txt"
-    ffmpeg_path = "ffmpeg/bin/ffmpeg"
+    ffmpeg_path = "ffmpeg/bin"
     if not download_archives_dir.exists():
         download_archives_dir.mkdir()
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
@@ -35,7 +35,7 @@ def main() -> None:
         youtube = YouTube(playlist_id, download_archive)
         youtube.clear_playlist()
         youtube.match_to_youtube_videos(youtube_channel_ids, anime_list)
-        youtube.playlist_downloader(playlist_download_dir, youtube_download_archive)
+        youtube.playlist_downloader(playlist_download_dir, youtube_download_archive, ffmpeg_path)
     except Exception as error:
         logger.exception(f"An error occurred while running YouTube script! Error: {error}")
 

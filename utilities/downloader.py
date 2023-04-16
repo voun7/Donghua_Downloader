@@ -56,8 +56,8 @@ class ScrapperDownloader:
         temp_m3u8_file = Path(f"{self.download_location}/{file_name}_filtered_playlist.m3u8")
         temp_m3u8_file.write_text(ad_free_m3u8_text)
         # Use ffmpeg to download and convert the modified playlist.
-        ffmpeg_cmd = [self.ffmpeg_path, '-protocol_whitelist', 'file,http,https,tcp,tls', '-i', str(temp_m3u8_file),
-                      '-c', 'copy', str(file_path)]
+        ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-protocol_whitelist', 'file,http,https,tcp,tls', '-i',
+                      str(temp_m3u8_file), '-c', 'copy', str(file_path)]
         subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL)
         # Clean up the temp filtered playlist file.
         temp_m3u8_file.unlink()
@@ -69,7 +69,7 @@ class ScrapperDownloader:
         logger.debug(f"Link downloader being used for {file_name}.")
         file_path = Path(f"{self.download_location}/{file_name}.mp4")
         # set the ffmpeg command as a list
-        ffmpeg_cmd = [self.ffmpeg_path, '-i', download_link, '-c', 'copy', str(file_path)]
+        ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-i', download_link, '-c', 'copy', str(file_path)]
         # run the command using subprocess.run()
         subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL)
 

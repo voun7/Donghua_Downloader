@@ -87,7 +87,8 @@ class XiaoheimiScraper(ScrapperTools):
                 else:
                     num_videos = self.video_num_per_post
                 video_start_num = latest_video_number - num_videos + 1
-                logger.info(f"Post named: {post_name} is new, latest video number: {latest_video_number}. "
+                logger.info(f"Post named: {post_name} is new, last Updated: {last_updated_date_without_time}, "
+                            f"latest video number: {latest_video_number}. "
                             f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")
                 for video_number in range(video_start_num, latest_video_number + 1):
                     video_post = soup.find('li', {"title": f"{video_number}"})
@@ -172,7 +173,8 @@ class AnimeBabyScrapper(ScrapperTools):
                 else:
                     num_videos = self.video_num_per_post
                 video_start_num = latest_video_number - num_videos + 1
-                logger.info(f"Post named: {post_name} is new, latest video number: {latest_video_number}. "
+                logger.info(f"Post named: {post_name} is new, last Updated: {last_update_time}, "
+                            f"latest video number: {latest_video_number}. "
                             f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")
                 for video_number in range(video_start_num, latest_video_number + 1):
                     video_post = soup.find('a', {"title": f"播放{post_name}第{video_number:02d}集"})

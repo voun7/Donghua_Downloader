@@ -47,6 +47,7 @@ class ScrapperDownloader:
         """
         Remove embedded advertisements from m3u8 playlist.
         """
+        logger.debug(f"Advertisement detected in {file_name} and are being removed!")
         file_path = Path(f"{self.download_location}/{file_name}.mp4")
         # Remove embedded advertisement fragments from the response text if any.
         advert_pattern = re.compile(re.escape(advert_tag) + "(.*?)" + re.escape(advert_tag), re.DOTALL)
@@ -65,6 +66,7 @@ class ScrapperDownloader:
         """
         Download file with link.
         """
+        logger.debug(f"Link downloader being used for {file_name}.")
         file_path = Path(f"{self.download_location}/{file_name}.mp4")
         # set the ffmpeg command as a list
         ffmpeg_cmd = [self.ffmpeg_path, '-i', download_link, '-c', 'copy', str(file_path)]
@@ -91,10 +93,8 @@ class ScrapperDownloader:
         response_text = response.text
         advert_tag = "#EXT-X-DISCONTINUITY\n"
         if advert_tag in response_text:
-            logger.debug(f"{file_name} Advertisement detected and being removed!")
             self.ad_free_playlist_downloader(file_name, advert_tag, response_text)
         else:
-            logger.debug(f"Link downloader being used for {file_name}.")
             self.link_downloader(file_name, download_link)
 
         if file_path.exists():

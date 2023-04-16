@@ -175,12 +175,12 @@ class AnimeBabyScrapper(ScrapperTools):
                 logger.info(f"Post named: {post_name} is new, latest video number: {latest_video_number}. "
                             f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")
                 for video_number in range(video_start_num, latest_video_number + 1):
-                    video_post = soup.find(class_="sort-item")
-                    print(video_post)
-                    # video_link = ""
-                    # download_link, file_name = self.get_video_download_link(video_link)
-                    # logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
-                    # all_download_details[download_link] = file_name, match_name
+                    video_post = soup.find('a', {"title": f"播放{post_name}第{video_number}集"})
+                    file_name = f"{post_name} 第{video_number}集"
+                    video_link = self.base_url + video_post.get('href')
+                    download_link = self.get_video_download_link(video_link)
+                    logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
+                    all_download_details[download_link] = file_name, match_name
             else:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_update_time}")
         end = time.perf_counter()

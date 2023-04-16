@@ -87,6 +87,9 @@ class ScrapperDownloader:
         :param all_download_details: Should contain download link, file name and match name, in order.
         """
         logger.info("..........Using multithreading to download videos..........")
+        if not all_download_details:
+            logger.info("No Video Matches!")
+            return
         start = time.perf_counter()
         with concurrent.futures.ThreadPoolExecutor() as executor:
             _ = [executor.submit(self.m3u8_video_download, download_link, download_details)

@@ -14,11 +14,11 @@ def main() -> None:
     # Variables
     playlist_download_dir = Path(r"\\192.168.0.111\General File Sharing\From YouTube\Chinese Anime For Subbing")
     destination_dir = playlist_download_dir / "##Currently Airing"
-    download_archives = playlist_download_dir / "Download Archives"
-    resolved_names_download_archive = download_archives / "resolved_names_download_archive.txt"
-    youtube_download_archive = download_archives / "youtube_downloads_archive.txt"
-    if not download_archives.exists():
-        download_archives.mkdir()
+    download_archives_dir = playlist_download_dir / "Download Archives"
+    download_archive = download_archives_dir / "resolved_names_download_archive.txt"
+    youtube_download_archive = download_archives_dir / "youtube_downloads_archive.txt"
+    if not download_archives_dir.exists():
+        download_archives_dir.mkdir()
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
     anime_list = [keyword for folder in destination_dir.iterdir() for keyword in re.findall(r'\((.*?)\)', folder.name)]
 
@@ -31,7 +31,7 @@ def main() -> None:
     # Arguments
     try:
         logger.info("Checking youtube for recent anime upload matches...")
-        youtube = YouTube(playlist_id, resolved_names_download_archive)
+        youtube = YouTube(playlist_id, download_archive)
         youtube.clear_playlist()
         youtube.match_to_youtube_videos(youtube_channel_ids, anime_list)
         youtube.playlist_downloader(playlist_download_dir, youtube_download_archive)

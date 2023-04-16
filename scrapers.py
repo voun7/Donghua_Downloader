@@ -42,14 +42,14 @@ class XiaoheimiScraper(ScrapperTools):
                           'Chrome/106.0.0.0 Safari/537.36'
         }
 
-    def get_page_one_anime_posts(self) -> dict:
+    def get_anime_posts(self, page: int = 1) -> dict:
         """
-        This method returns all the anime's posted on the sites first page.
+        This method returns all the anime's posted on the sites given page.
         :return: Post name as key and url as value.
         """
-        logger.info("..........Site Page one Anime Posts..........")
+        logger.info(f"..........Site Page {page} Anime Posts..........")
         video_name_and_link = {}
-        payload = '/index.php/vod/show/area/大陆/id/4.html'
+        payload = f"/index.php/vod/show/area/大陆/id/4/page/{page}.html"
         try:
             page_response = requests.get(self.base_url + payload, headers=self.header)
             logger.info(f"Page Response = {page_response}")

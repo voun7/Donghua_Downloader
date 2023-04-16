@@ -43,7 +43,7 @@ def main() -> None:
     try:
         logger.info("Checking xiaoheimi for recent anime upload matches...")
         xiaoheimi = XiaoheimiScraper()
-        xiaoheimi_posts = xiaoheimi.get_page_one_anime_posts()
+        xiaoheimi_posts = xiaoheimi.get_anime_posts()
         matched_posts = xiaoheimi.match_to_recent_videos(xiaoheimi_posts, anime_list)
         matched_download_details = xiaoheimi.get_recent_posts_videos_download_link(matched_posts)
         sd.batch_downloader(matched_download_details)

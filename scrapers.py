@@ -67,13 +67,15 @@ class XiaoheimiScraper(ScrapperTools):
             logger.exception(error)
             logger.critical("Program failed to access website!\n")
 
-    def get_latest_video_links(self, matched_posts: dict) -> dict:
+    def get_recent_posts_videos_download_link(self, matched_posts: dict) -> dict:
         """
-        This method takes a post's url check if its recent and gets the latest number of video links.
+        Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
+        How many of the other recent post videos are determined by video_num_per_post value.
         """
-        logger.info("..........Checking for latest videos..........")
-        latest_video_links = {}
+        logger.info("..........Checking for latest videos download links..........")
+        all_download_details = {}
         current_date_without_time = datetime.now().date()
+        start = time.perf_counter()
         for match_name, match_details in matched_posts.items():
             post_name, url = match_details[0], match_details[1]
             page_response = requests.get(url, headers=self.header)
@@ -92,8 +94,9 @@ class XiaoheimiScraper(ScrapperTools):
                 for video_number in range(video_start_num, latest_video_number + 1):
                     video_post = soup.find('li', {"title": f"{video_number}"})
                     video_link = self.base_url + video_post.find('a').get('href')
-                    logger.info(f"Video link: {video_link}")
-                    latest_video_links[video_link] = match_name
+                    download_link, file_name = self.get_video_download_link(video_link)
+                    logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
+                    all_download_details[download_link] = file_name, match_name
             else:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date_without_time}")
         end = time.perf_counter()
@@ -116,19 +119,3 @@ class XiaoheimiScraper(ScrapperTools):
         for match in download_match:
             download_link = match[1].replace("\\", '')
         return download_link, file_name
-
-    def download_all_videos(self, video_matches: dict, download_location: Path, download_archives: Path) -> None:
-        logger.info("..........Getting download links for video matches..........")
-        if not video_matches:
-            logger.info("No Video Matches!")
-            return
-        start = time.perf_counter()
-        sd = ScrapperDownloader(download_location, download_archives)
-        all_download_details = {}
-        for video_link, match_name in video_matches.items():
-            download_link, file_name = self.get_video_download_link(video_link)
-            logger.info(f"File name: {file_name}, Download link: {download_link}")
-            all_download_details[download_link] = file_name, match_name
-        end = time.perf_counter()
-        logger.info(f"Total time: {end - start}")
-        sd.batch_downloader(all_download_details)

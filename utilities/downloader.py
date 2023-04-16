@@ -63,6 +63,8 @@ class ScrapperDownloader:
         advert_tag = "#EXT-X-DISCONTINUITY\n"
         advert_pattern = re.compile(re.escape(advert_tag) + "(.*?)" + re.escape(advert_tag), re.DOTALL)
         ad_free_m3u8_text = advert_pattern.sub("", response.text)
+        if advert_tag in response.text:
+            logger.debug(f"{file_name} Advertisement detected and removed!")
         # Create temp ad filtered m3u8 playlist.
         temp_m3u8_file = Path(f"{self.download_location}/{file_name}_filtered_playlist.m3u8")
         temp_m3u8_file.write_text(ad_free_m3u8_text)

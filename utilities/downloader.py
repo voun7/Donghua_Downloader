@@ -43,6 +43,29 @@ class ScrapperDownloader:
             logger.debug(f"File: {file_name} is not in archive.")
             return False
 
+    def check_video_resolution(self, resolved_name: str, file_name: str, download_link: str,
+                               preferred_height: int = 1080) -> bool:
+        """
+        Returns True if video fails resolution test and False otherwise.
+        """
+        temp_file = Path(f"{self.download_location}/{file_name}_res_check_temp.mp4")
+        duration = "10"  # Set the duration of the first fragment to download (in seconds).
+        ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-t', duration, '-i', download_link, '-c', 'copy', str(temp_file)]
+        subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL)
+        # Get the resolution of the downloaded video.
+        ffprobe_cmd = [f"{self.ffmpeg_path}/ffprobe", '-show_entries', 'stream=width,height', '-of', 'csv=p=0',
+                       str(temp_file)]
+        resolution = subprocess.check_output(ffprobe_cmd, stderr=subprocess.DEVNULL).decode().strip().split(',')
+        width, height = int(resolution[0]), int(resolution[1])
+        # Delete the downloaded file.
+        temp_file.unlink()
+        if height < preferred_height:
+            logger.warning(f"Resolved name: {resolved_name}, File: {file_name} failed resolution test! "
+                           f"Resolution: {width} x {height}. Skipping download!")
+            return True
+        else:
+            return False
+
     def ad_free_playlist_downloader(self, file_name: str, advert_tag: str, response_text: str) -> None:
         """
         Remove embedded advertisements from m3u8 playlist.
@@ -88,6 +111,8 @@ class ScrapperDownloader:
             return
         if download_link is None:
             logger.warning(f"Resolved name: {resolved_name}, File: {file_name} has invalid link. Skipping download!")
+            return
+        if self.check_video_resolution(resolved_name, file_name, download_link):
             return
         # Make a request to the m3u8 file link.
         response = requests.get(download_link)

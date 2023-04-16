@@ -35,12 +35,7 @@ class ScrapperDownloader:
         Check if file name is in archive.
         :param file_name: name of file.
         """
-        name_no_s1 = None
-        if "S1 " in file_name:  # For cases were the first season indicator is included.
-            logger.debug("s1 tag in file name")
-            name_no_s1 = file_name.replace("S1 ", "")
-
-        if any(name in self.archive_content for name in [file_name, name_no_s1]):
+        if file_name in self.archive_content:
             logger.debug(f"File: {file_name} is in archive.")
             return True
         else:

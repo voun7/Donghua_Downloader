@@ -40,7 +40,7 @@ class ScrapperDownloader:
                            f"Skipping download!")
             return True
         else:
-            logger.debug(f"File: {file_name} is not in archive.")
+            logger.debug(f"Resolved name: {resolved_name}, File: {file_name} is not in archive.")
             return False
 
     def check_video_resolution(self, resolved_name: str, file_name: str, download_link: str,

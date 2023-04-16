@@ -37,6 +37,7 @@ class ScrapperDownloader:
         """
         name_no_s1 = None
         if "S1 " in file_name:  # For cases were the first season indicator is included.
+            logger.debug("s1 tag in file name")
             name_no_s1 = file_name.replace("S1 ", "")
 
         if any(name in self.archive_content for name in [file_name, name_no_s1]):

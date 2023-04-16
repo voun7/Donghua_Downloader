@@ -2,13 +2,10 @@ import logging
 import re
 import time
 from datetime import datetime
-from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
 from dateutil import parser
-
-from utilities.downloader import ScrapperDownloader
 
 logger = logging.getLogger(__name__)
 

@@ -3,6 +3,7 @@ import re
 from pathlib import Path
 
 from scrapers import XiaoheimiScraper
+from utilities.downloader import ScrapperDownloader
 from utilities.logger_setup import get_log
 from youtube import YouTube
 
@@ -37,11 +38,15 @@ def main() -> None:
     except Exception as error:
         logger.exception(f"An error occurred while running youtube script! Error: {error}")
 
+    sd = ScrapperDownloader(playlist_download_dir, download_archive)
+
     try:
         logger.info("Checking xiaoheimi for recent anime upload matches...")
         xiaoheimi = XiaoheimiScraper()
-        matched_urls = xiaoheimi.match_to_recent_videos(anime_list)
-        xiaoheimi.download_all_videos(matched_urls, playlist_download_dir, resolved_names_download_archive)
+        xiaoheimi_posts = xiaoheimi.get_page_one_anime_posts()
+        matched_posts = xiaoheimi.match_to_recent_videos(xiaoheimi_posts, anime_list)
+        matched_download_details = xiaoheimi.get_recent_posts_videos_download_link(matched_posts)
+        sd.batch_downloader(matched_download_details)
     except Exception as error:
         logger.exception(f"An error occurred while running xiaoheimi script! Error: {error}")
 

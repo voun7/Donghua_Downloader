@@ -91,8 +91,9 @@ class XiaoheimiScraper(ScrapperTools):
                             f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")
                 for video_number in range(video_start_num, latest_video_number + 1):
                     video_post = soup.find('li', {"title": f"{video_number}"})
+                    file_name = f"{post_name} 第{video_number}集"
                     video_link = self.base_url + video_post.find('a').get('href')
-                    download_link, file_name = self.get_video_download_link(video_link)
+                    download_link = self.get_video_download_link(video_link)
                     logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
                     all_download_details[download_link] = file_name, match_name
             else:
@@ -101,22 +102,18 @@ class XiaoheimiScraper(ScrapperTools):
         logger.info(f"Total time: {end - start}\n")
         return all_download_details
 
-    def get_video_download_link(self, video_url: str) -> tuple:
+    def get_video_download_link(self, video_url: str) -> str:
         """
         This method uses the video url to find the video download link.
         """
         download_link = None
         page_response = requests.get(video_url, headers=self.header)
         soup = BeautifulSoup(page_response.text, self.parser)
-        file_name = soup.title.string.strip(' 在线播放 - 小宝影院 - 在线视频').replace('-', ' ')
-        for match in re.finditer(r'(\d+)', file_name):
-            number = match.group(0)
-            file_name = file_name.replace(number, f"第{number}集")
         download_script = soup.find(class_='embed-responsive clearfix')
         download_match = re.finditer(r'"url":"(.*?)"', str(download_script))
         for match in download_match:
             download_link = match[1].replace("\\", '')
-        return download_link, file_name
+        return download_link
 
 
 class AnimeBabyScrapper(ScrapperTools):

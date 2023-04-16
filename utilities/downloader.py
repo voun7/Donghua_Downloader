@@ -13,10 +13,10 @@ logger = logging.getLogger(__name__)
 
 
 class ScrapperDownloader:
-    def __init__(self, download_location: Path, download_archive: Path) -> None:
+    def __init__(self, download_location: Path, download_archive: Path, ffmpeg_path: str) -> None:
         self.download_archive = download_archive
         self.download_location = download_location
-        self.ffmpeg_path = "ffmpeg/bin/ffmpeg"
+        self.ffmpeg_path = ffmpeg_path
         self.archive_content = self.new_archive_names = []
         if self.download_archive.exists():
             self.archive_content = self.download_archive.read_text(encoding="utf-8").splitlines()

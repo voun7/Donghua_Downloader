@@ -17,6 +17,7 @@ def main() -> None:
     download_archives_dir = playlist_download_dir / "Download Archives"
     download_archive = download_archives_dir / "resolved_names_download_archive.txt"
     youtube_download_archive = download_archives_dir / "youtube_downloads_archive.txt"
+    ffmpeg_path = "ffmpeg/bin/ffmpeg"
     if not download_archives_dir.exists():
         download_archives_dir.mkdir()
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
@@ -38,7 +39,7 @@ def main() -> None:
     except Exception as error:
         logger.exception(f"An error occurred while running YouTube script! Error: {error}")
 
-    sd = ScrapperDownloader(playlist_download_dir, download_archive)
+    sd = ScrapperDownloader(playlist_download_dir, download_archive, ffmpeg_path)
 
     try:
         logger.info("Checking Xiaoheimi site for recent anime upload matches...")

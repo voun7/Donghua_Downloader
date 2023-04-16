@@ -39,7 +39,7 @@ def main() -> None:
     except Exception as error:
         logger.exception(f"An error occurred while running YouTube script! Error: {error}")
 
-    sd = ScrapperDownloader(playlist_download_dir, download_archive, ffmpeg_path, min_height_res=1080)
+    sd = ScrapperDownloader(playlist_download_dir, download_archive, ffmpeg_path, min_res_height=720)
 
     try:
         logger.info("Checking Xiaoheimi site for recent anime upload matches...")

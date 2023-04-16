@@ -31,13 +31,13 @@ class ScrapperDownloader:
             with open(self.download_archive, 'a', encoding="utf-8") as text_file:
                 text_file.writelines(self.new_archive_names)
 
-    def check_download_archive(self, file_name: str) -> bool:
+    def check_download_archive(self, resolved_name, file_name) -> bool:
         """
-        Check if file name is in archive.
-        :param file_name: name of file.
+        Check if the resolved name is in archive.
         """
-        if file_name in self.archive_content:
-            logger.debug(f"File: {file_name} is in archive.")
+        if resolved_name in self.archive_content:
+            logger.warning(f"Resolved name: {resolved_name}, File: {file_name} exists in the archive. "
+                           f"Skipping download!")
             return True
         else:
             logger.debug(f"File: {file_name} is not in archive.")
@@ -84,9 +84,7 @@ class ScrapperDownloader:
         if file_path.exists():
             logger.warning(f"Resolved name: {resolved_name}, File: {file_name} exists in directory. Skipping download!")
             return
-        if self.check_download_archive(resolved_name):
-            logger.warning(f"Resolved name: {resolved_name}, File: {file_name} exists in the archive. "
-                           f"Skipping download!")
+        if self.check_download_archive(resolved_name, file_name):
             return
         # Make a request to the m3u8 file link.
         response = requests.get(download_link)

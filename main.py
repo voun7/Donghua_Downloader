@@ -2,7 +2,7 @@ import logging
 import re
 from pathlib import Path
 
-from scrapers import XiaoheimiScraper
+from scrapers import XiaoheimiScraper, AnimeBabyScrapper
 from utilities.downloader import ScrapperDownloader
 from utilities.logger_setup import get_log
 from youtube import YouTube
@@ -50,15 +50,15 @@ def main() -> None:
     except Exception as error:
         logger.exception(f"An error occurred while running Xiaoheimi script! Error: {error}")
 
-    # try:
-    #     logger.info("Checking Anime baby site for recent anime upload matches...")
-    #     anime_baby = AnimeBabyScrapper()
-    #     anime_baby_posts = anime_baby.get_anime_posts()
-    #     matched_posts = anime_baby.match_to_recent_videos(anime_baby_posts, ["最强神王动态漫画"])
-    #     matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts)
-    #     sd.batch_downloader(matched_download_details)
-    # except Exception as error:
-    #     logger.exception(f"An error occurred while running Anime baby script! Error: {error}")
+    try:
+        logger.info("Checking Anime baby site for recent anime upload matches...")
+        anime_baby = AnimeBabyScrapper()
+        anime_baby_posts = anime_baby.get_anime_posts()
+        matched_posts = anime_baby.match_to_recent_videos(anime_baby_posts, anime_list)
+        matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts)
+        sd.batch_downloader(matched_download_details)
+    except Exception as error:
+        logger.exception(f"An error occurred while running Anime baby script! Error: {error}")
 
 
 if __name__ == '__main__':

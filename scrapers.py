@@ -175,7 +175,7 @@ class AnimeBabyScrapper(ScrapperTools):
                 logger.info(f"Post named: {post_name} is new, latest video number: {latest_video_number}. "
                             f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")
                 for video_number in range(video_start_num, latest_video_number + 1):
-                    video_post = soup.find('a', {"title": f"播放{post_name}第{video_number}集"})
+                    video_post = soup.find('a', {"title": f"播放{post_name}第{video_number:02d}集"})
                     file_name = f"{post_name} 第{video_number}集"
                     video_link = self.base_url + video_post.get('href')
                     download_link = self.get_video_download_link(video_link)
@@ -187,14 +187,11 @@ class AnimeBabyScrapper(ScrapperTools):
         logger.info(f"Total time: {end - start}\n")
         return all_download_details
 
-    def get_video_download_link(self, video_url: str) -> tuple:
+    def get_video_download_link(self, video_url: str) -> str:
         """
         This method uses the video url to find the video download link.
         """
-        download_link = None
         page_response = requests.get(video_url, headers=self.header)
         soup = BeautifulSoup(page_response.text, self.parser)
-        file_name = soup.title.string.strip()
-        # download_script = soup.find()
-        # download_match = re.finditer(r'"url":"(.*?)"', str(download_script))
-        return download_link, file_name
+        download_link = soup.find(id="bfurl").get('href')
+        return download_link

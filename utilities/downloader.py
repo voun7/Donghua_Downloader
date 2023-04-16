@@ -30,7 +30,7 @@ class ScrapperDownloader:
             logger.info(f"Archive updated with new names. Names: {self.new_archive_names}")
             with open(self.download_archive, 'a', encoding="utf-8") as text_file:
                 text_file.writelines(self.new_archive_names)
-            self.new_archive_names = []
+            self.new_archive_names = []  # Empty list after every update to prevent duplicates.
 
     def check_download_archive(self, resolved_name, file_name) -> bool:
         """

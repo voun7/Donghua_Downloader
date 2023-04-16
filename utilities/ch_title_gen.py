@@ -152,6 +152,14 @@ class ChineseTitleGenerator:
             episode_num = self.number_list[1]
             self.name = f"{self.base_name} S{season_num} EP{episode_num}{self.suffixes}"
 
+    def title_final_filter(self) -> None:
+        """
+        Add finishing touches to generated name after it has been set.
+        """
+        if "S1 " in self.name:  # For cases were the first season indicator is included. For uniformity in gen names.
+            logger.debug("removing S1 tag from title")
+            self.name = self.name.replace("S1 ", "")
+
     def generate_title(self, name: str, base_name: str) -> str:
         """
         Runs the title generation process.
@@ -171,6 +179,7 @@ class ChineseTitleGenerator:
         self.remove_leading_zeros()
         logger.debug(f"leading zeros removed: {self.number_list}")
         self.set_title()
+        self.title_final_filter()
         return self.name
 
 

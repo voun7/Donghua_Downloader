@@ -30,25 +30,25 @@ def main() -> None:
 
     # Arguments
     try:
-        logger.info("Checking youtube for recent anime upload matches...")
+        logger.info("Checking YouTube for recent anime upload matches...")
         youtube = YouTube(playlist_id, download_archive)
         youtube.clear_playlist()
         youtube.match_to_youtube_videos(youtube_channel_ids, anime_list)
         youtube.playlist_downloader(playlist_download_dir, youtube_download_archive)
     except Exception as error:
-        logger.exception(f"An error occurred while running youtube script! Error: {error}")
+        logger.exception(f"An error occurred while running YouTube script! Error: {error}")
 
     sd = ScrapperDownloader(playlist_download_dir, download_archive)
 
     try:
-        logger.info("Checking xiaoheimi for recent anime upload matches...")
+        logger.info("Checking Xiaoheimi for recent anime upload matches...")
         xiaoheimi = XiaoheimiScraper()
         xiaoheimi_posts = xiaoheimi.get_anime_posts()
         matched_posts = xiaoheimi.match_to_recent_videos(xiaoheimi_posts, anime_list)
         matched_download_details = xiaoheimi.get_recent_posts_videos_download_link(matched_posts)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
-        logger.exception(f"An error occurred while running xiaoheimi script! Error: {error}")
+        logger.exception(f"An error occurred while running Xiaoheimi script! Error: {error}")
 
 
 if __name__ == '__main__':

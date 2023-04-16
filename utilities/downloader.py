@@ -100,6 +100,8 @@ class ScrapperDownloader:
         if file_path.exists():
             logger.info(f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded successfully!")
             self.new_archive_names.append(resolved_name + "\n")
+        else:
+            logger.warning(f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded failed!")
 
     def batch_downloader(self, all_download_details: dict) -> None:
         """

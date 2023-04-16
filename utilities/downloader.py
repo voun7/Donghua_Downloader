@@ -16,6 +16,7 @@ class ScrapperDownloader:
     def __init__(self, download_location: Path, download_archive: Path) -> None:
         self.download_archive = download_archive
         self.download_location = download_location
+        self.ffmpeg_path = "ffmpeg/bin/ffmpeg"
         self.archive_content = self.new_archive_names = []
         if self.download_archive.exists():
             self.archive_content = self.download_archive.read_text(encoding="utf-8").splitlines()
@@ -42,6 +43,34 @@ class ScrapperDownloader:
             logger.debug(f"File: {file_name} is not in archive.")
             return False
 
+    def ad_free_playlist_downloader(self, file_name: str, advert_tag: str, response_text: str) -> None:
+        """
+        Remove embedded advertisements from m3u8 playlist.
+        """
+        file_path = Path(f"{self.download_location}/{file_name}.mp4")
+        # Remove embedded advertisement fragments from the response text if any.
+        advert_pattern = re.compile(re.escape(advert_tag) + "(.*?)" + re.escape(advert_tag), re.DOTALL)
+        ad_free_m3u8_text = advert_pattern.sub("", response_text)
+        # Create temp ad filtered m3u8 playlist.
+        temp_m3u8_file = Path(f"{self.download_location}/{file_name}_filtered_playlist.m3u8")
+        temp_m3u8_file.write_text(ad_free_m3u8_text)
+        # Use ffmpeg to download and convert the modified playlist.
+        ffmpeg_cmd = [self.ffmpeg_path, '-protocol_whitelist', 'file,http,https,tcp,tls', '-i', str(temp_m3u8_file),
+                      '-c', 'copy', str(file_path)]
+        subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL)
+        # Clean up the temp filtered playlist file.
+        temp_m3u8_file.unlink()
+
+    def link_downloader(self, file_name: str, download_link: str) -> None:
+        """
+        Download file with link.
+        """
+        file_path = Path(f"{self.download_location}/{file_name}.mp4")
+        # set the ffmpeg command as a list
+        ffmpeg_cmd = [self.ffmpeg_path, '-i', download_link, '-c', 'copy', str(file_path)]
+        # run the command using subprocess.run()
+        subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL)
+
     def m3u8_video_download(self, download_link: str, download_details) -> None:
         """
         Use m3u8 link to download video and create mp4 file. Embedded advertisements links will be removed.
@@ -59,21 +88,14 @@ class ScrapperDownloader:
             return
         # Make a request to the m3u8 file link.
         response = requests.get(download_link)
-        # Remove embedded advertisement fragments from the response text if any.
+        response_text = response.text
         advert_tag = "#EXT-X-DISCONTINUITY\n"
-        advert_pattern = re.compile(re.escape(advert_tag) + "(.*?)" + re.escape(advert_tag), re.DOTALL)
-        ad_free_m3u8_text = advert_pattern.sub("", response.text)
-        if advert_tag in response.text:
-            logger.debug(f"{file_name} Advertisement detected and removed!")
-        # Create temp ad filtered m3u8 playlist.
-        temp_m3u8_file = Path(f"{self.download_location}/{file_name}_filtered_playlist.m3u8")
-        temp_m3u8_file.write_text(ad_free_m3u8_text)
-        # Use ffmpeg to download and convert the modified playlist.
-        command = ['ffmpeg/bin/ffmpeg', '-protocol_whitelist', 'file,http,https,tcp,tls', '-i', str(temp_m3u8_file),
-                   '-c', 'copy', str(file_path)]
-        subprocess.run(command, stderr=subprocess.DEVNULL)
-        # Clean up the temp filtered playlist file.
-        temp_m3u8_file.unlink()
+        if advert_tag in response_text:
+            logger.debug(f"{file_name} Advertisement detected and being removed!")
+            self.ad_free_playlist_downloader(file_name, advert_tag, response_text)
+        else:
+            logger.debug(f"Link downloader being used for {file_name}.")
+            self.link_downloader(file_name, download_link)
 
         if file_path.exists():
             logger.info(f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded successfully!")

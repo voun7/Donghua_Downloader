@@ -13,10 +13,11 @@ logger = logging.getLogger(__name__)
 
 
 class ScrapperDownloader:
-    def __init__(self, download_location: Path, download_archive: Path, ffmpeg_path: str) -> None:
+    def __init__(self, download_location: Path, download_archive: Path, ffmpeg_path: str, min_height_res: int) -> None:
         self.download_archive = download_archive
         self.download_location = download_location
         self.ffmpeg_path = ffmpeg_path
+        self.min_height_res = min_height_res  # Minimum allowed height of video resolution.
         self.archive_content = self.new_archive_names = []
         if self.download_archive.exists():
             self.archive_content = self.download_archive.read_text(encoding="utf-8").splitlines()
@@ -43,10 +44,9 @@ class ScrapperDownloader:
             logger.debug(f"Resolved name: {resolved_name}, File: {file_name} is not in archive.")
             return False
 
-    def check_video_resolution(self, resolved_name: str, file_name: str, download_link: str,
-                               minimum_height: int = 1080) -> bool:
+    def check_video_resolution(self, resolved_name: str, file_name: str, download_link: str) -> bool:
         """
-        Returns True if video fails resolution test and False otherwise.
+        Returns True if video's height resolution is lower than the allowed minimum and False otherwise.
         """
         temp_file = Path(f"{self.download_location}/{file_name}_res_check_temp.mp4")
         duration = "10"  # Set the duration of the first fragment to download (in seconds).
@@ -59,7 +59,7 @@ class ScrapperDownloader:
         width, height = int(resolution[0]), int(resolution[1])
         # Delete the downloaded file.
         temp_file.unlink()
-        if height < minimum_height:
+        if height < self.min_height_res:
             logger.warning(f"Resolved name: {resolved_name}, File: {file_name} failed resolution test! "
                            f"Resolution: {width} x {height}. Skipping download!")
             return True

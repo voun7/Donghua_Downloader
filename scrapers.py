@@ -45,6 +45,7 @@ class XiaoheimiScraper(ScrapperTools):
     def get_page_one_anime_posts(self) -> dict:
         """
         This method returns all the anime's posted on the sites first page.
+        :return: Post name as key and url as value.
         """
         logger.info("..........Site Page one Anime Posts..........")
         video_name_and_link = {}

@@ -91,9 +91,9 @@ class ScrapperDownloader:
         """
         logger.debug(f"Link downloader being used for {file_name}.")
         file_path = Path(f"{self.download_location}/{file_name}.mp4")
-        # set the ffmpeg command as a list
+        # Set the ffmpeg command as a list.
         ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-i', download_link, '-c', 'copy', str(file_path)]
-        # run the command using subprocess.run()
+        # Run the command using subprocess.run().
         subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL)
 
     def video_downloader(self, download_link: str, download_details) -> None:

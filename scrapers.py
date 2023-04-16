@@ -13,7 +13,28 @@ from utilities.downloader import ScrapperDownloader
 logger = logging.getLogger(__name__)
 
 
-class XiaoheimiScraper:
+class ScrapperTools:
+    @staticmethod
+    def match_to_recent_videos(posts: dict, anime_list: list) -> dict:
+        """
+        This method checks if anime matches a recent post from the site.
+        :param posts: Posts should have name as key and url as value.
+        :param anime_list: List of anime's to be matched with posts.
+        :return: Anime names as key and post titles and urls as values.
+        """
+        matched_posts = {}
+        logger.info("..........Matching names to site recent post..........")
+        for name in anime_list:
+            for post_name, post_url in posts.items():
+                if name in post_name:
+                    logger.info(f"Anime: {name} matches Post Title: {post_name}, Post URL: {post_url}")
+                    matched_posts[name] = post_name, post_url
+        if not matched_posts:
+            logger.info("No post matches found!")
+        return matched_posts
+
+
+class XiaoheimiScraper(ScrapperTools):
     def __init__(self) -> None:
         self.video_num_per_post = 3  # The number of recent videos that will downloaded per post.
         self.parser = "html.parser"
@@ -75,26 +96,9 @@ class XiaoheimiScraper:
                     latest_video_links[video_link] = match_name
             else:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date_without_time}")
-        return latest_video_links
-
-    def match_to_recent_videos(self, anime_list: list) -> dict:
-        """
-        This method checks if anime matches a recent post from the site.
-        """
-        posts = self.get_page_one_anime_posts()
-        matched_posts = {}
-        logger.info("..........Matching names to site recent post..........")
-        for name in anime_list:
-            for post_name, post_url in posts.items():
-                if name in post_name:
-                    logger.info(f"Anime: {name} matches Post Title: {post_name}, Post URL: {post_url}")
-                    matched_posts[name] = post_name, post_url
-        if matched_posts:
-            checked_video_urls = self.get_latest_video_links(matched_posts)
-            return checked_video_urls
-        else:
-            logger.info("No post matches found!")
-            return {}
+        end = time.perf_counter()
+        logger.info(f"Total time: {end - start}\n")
+        return all_download_details
 
     def get_video_download_link(self, video_url: str) -> tuple:
         """

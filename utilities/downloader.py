@@ -86,6 +86,9 @@ class ScrapperDownloader:
             return
         if self.check_download_archive(resolved_name, file_name):
             return
+        if download_link is None:
+            logger.warning(f"Resolved name: {resolved_name}, File: {file_name} has invalid link. Skipping download!")
+            return
         # Make a request to the m3u8 file link.
         response = requests.get(download_link)
         response_text = response.text

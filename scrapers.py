@@ -167,7 +167,7 @@ class AnimeBabyScrapper(ScrapperTools):
             post_update = soup.find(string="更新：").parent.next_sibling.text.split("，")[0]
             last_update_time = parser.parse(post_update).date()
             if last_update_time >= current_date_without_time:
-                latest_video_number = int(soup.find(string="连载：").parent.next_sibling.text.strip("更新至集"))
+                latest_video_number = int(soup.find(string="连载：").parent.next_sibling.text.strip("更新至集第"))
                 if latest_video_number < self.video_num_per_post:  # Prevents asking for more videos than are available.
                     num_videos = latest_video_number  # This sets the number to download all videos of the post.
                 else:
@@ -179,7 +179,11 @@ class AnimeBabyScrapper(ScrapperTools):
                 for video_number in range(video_start_num, latest_video_number + 1):
                     video_post = soup.find('a', {"title": f"播放{post_name}第{video_number:02d}集"})
                     file_name = f"{post_name} 第{video_number}集"
-                    video_link = self.base_url + video_post.get('href')
+                    try:
+                        video_link = self.base_url + video_post.get('href')
+                    except Exception as error:
+                        video_link = None
+                        logger.error(f"Video link not found! Error: {error}")
                     download_link = self.get_video_download_link(video_link)
                     logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
                     all_download_details[download_link] = file_name, match_name
@@ -193,7 +197,8 @@ class AnimeBabyScrapper(ScrapperTools):
         """
         This method uses the video url to find the video download link.
         """
-        page_response = requests.get(video_url, headers=self.header)
-        soup = BeautifulSoup(page_response.text, self.parser)
-        download_link = soup.find(id="bfurl").get('href')
-        return download_link
+        if video_url:
+            page_response = requests.get(video_url, headers=self.header)
+            soup = BeautifulSoup(page_response.text, self.parser)
+            download_link = soup.find(id="bfurl").get('href')
+            return download_link

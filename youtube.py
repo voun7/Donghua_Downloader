@@ -215,9 +215,22 @@ class YouTube:
         for video_id, video_details in quality_checked_videos.items():
             resolved_name, video_title = video_details[0], video_details[1]
             if resolved_name in archive_content:
-                logger.warning(f"Video ID: {video_id}, Resolved name: {resolved_name} is already in the archive")
+                logger.warning(f"Video ID: {video_id}, Resolved name: {resolved_name} is already in the archive.")
+            elif self.ch_name_gen.range_pattern.search(video_title):
+                resolved_name_range = resolved_name.split("EP")
+                resolved_name_episodes = resolved_name_range[1].split("-")
+                # resolved_name_1 = f"{resolved_name_range[0]}EP{resolved_name_episodes[0]}"
+                resolved_name_2 = f"{resolved_name_range[0]}EP{resolved_name_episodes[1]}"
+                if resolved_name_2 in archive_content:
+                    logger.warning(f"Video ID: {video_id}, Resolved name: {resolved_name}, "
+                                   f"Last range: {resolved_name_2} is already in the archive.")
+                else:
+                    logger.info(f"Video ID: {video_id}, Resolved name: {resolved_name}, "
+                                f"Last range: {resolved_name_2} is being added to the archive.")
+                    archive_checked_videos[video_id] = video_title
+                    new_resolved_names.append(resolved_name_2 + "\n")
             else:
-                logger.info(f"Video ID: {video_id}, Resolved name: {resolved_name} is being added to the archive")
+                logger.info(f"Video ID: {video_id}, Resolved name: {resolved_name} is being added to the archive.")
                 archive_checked_videos[video_id] = video_title
                 new_resolved_names.append(resolved_name + "\n")
         logger.debug(f"new_resolved_names: {new_resolved_names}")

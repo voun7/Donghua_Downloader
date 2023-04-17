@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 
 class ScrapperDownloader:
     def __init__(self, download_location: Path, download_archive: Path, ffmpeg_path: str, min_res_height: int) -> None:
-        self.download_archive = download_archive
         self.download_location = download_location
+        self.download_archive = download_archive
         self.ffmpeg_path = ffmpeg_path
         self.min_res_height = min_res_height  # Minimum allowed height of video resolution.
         self.archive_content = self.new_archive_names = []

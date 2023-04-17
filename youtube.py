@@ -24,6 +24,7 @@ class YouTube:
         self.youtube = None
         self.max_results = 50
         self.default_duration = timedelta(hours=12)
+        self.ch_name_gen = ChineseTitleGenerator()
         try:
             self.get_authenticated_service()
         except Exception as error:
@@ -259,11 +260,10 @@ class YouTube:
             return
         logger.info("..........Checking for video matches..........")
         matched_videos = {}
-        gen = ChineseTitleGenerator()
         for name in file_names:
             for video_id, video_title in all_recent_uploads.items():
                 if name in video_title:  # Match found.
-                    resolved_name = gen.generate_title(video_title, name)
+                    resolved_name = self.ch_name_gen.generate_title(video_title, name)
                     logger.info(f"Folder name: {name} matches "
                                 f"Video ID: {video_id}, Video Title: {video_title}")
                     # Prevent matching video with same name from different channels.

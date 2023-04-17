@@ -213,7 +213,7 @@ class YouTube:
         if self.resolved_names_archive.exists():
             archive_content = self.resolved_names_archive.read_text(encoding="utf-8").splitlines()
         for video_id, video_details in quality_checked_videos.items():
-            resolved_name, video_title, name_no_s1 = video_details[0], video_details[1], None
+            resolved_name, video_title = video_details[0], video_details[1]
             if resolved_name in archive_content:
                 logger.warning(f"Video ID: {video_id}, Resolved name: {resolved_name} is already in the archive")
             else:

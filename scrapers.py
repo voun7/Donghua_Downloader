@@ -29,11 +29,11 @@ class ScrapperTools:
         """
         matched_posts = {}
         logger.info("..........Matching names to site recent post..........")
-        for name in anime_list:
+        for anime_name in anime_list:
             for post_name, post_url in posts.items():
-                if name in post_name:
-                    logger.info(f"Anime: {name} matches Post Title: {post_name}, Post URL: {post_url}")
-                    matched_posts[name] = post_name, post_url
+                if anime_name in post_name:
+                    logger.info(f"Anime: {anime_name} matches Post Title: {post_name}, Post URL: {post_url}")
+                    matched_posts[post_name] = anime_name, post_url
         if not matched_posts:
             logger.info("No post matches found!")
         return matched_posts
@@ -75,8 +75,8 @@ class XiaobaotvScraper(ScrapperTools):
         all_download_details = {}
         current_date_without_time = datetime.now().date()
         start = time.perf_counter()
-        for match_name, match_details in matched_posts.items():
-            post_name, url = match_details[0], match_details[1]
+        for post_name, match_details in matched_posts.items():
+            anime_name, url = match_details[0], match_details[1]
             page_response = requests.get(url, headers=self.header)
             soup = BeautifulSoup(page_response.text, self.parser)
             post_update = soup.find('span', class_='text-red').text.split(' / ')
@@ -97,7 +97,7 @@ class XiaobaotvScraper(ScrapperTools):
                     video_link = self.base_url + video_post.find('a').get('href')
                     download_link = self.get_video_download_link(video_link)
                     logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
-                    all_download_details[download_link] = file_name, match_name
+                    all_download_details[download_link] = file_name, anime_name
             else:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date_without_time}")
         end = time.perf_counter()
@@ -154,8 +154,8 @@ class AnimeBabyScrapper(ScrapperTools):
         all_download_details = {}
         current_date_without_time = datetime.now().date()
         start = time.perf_counter()
-        for match_name, match_details in matched_posts.items():
-            post_name, url = match_details[0], match_details[1]
+        for post_name, match_details in matched_posts.items():
+            anime_name, url = match_details[0], match_details[1]
             page_response = requests.get(url, headers=self.header)
             soup = BeautifulSoup(page_response.text, self.parser)
             post_update = soup.find(string="更新：").parent.next_sibling.text.split("，")[0]
@@ -180,7 +180,7 @@ class AnimeBabyScrapper(ScrapperTools):
                         logger.error(f"Video link not found! Error: {error}")
                     download_link = self.get_video_download_link(video_link)
                     logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
-                    all_download_details[download_link] = file_name, match_name
+                    all_download_details[download_link] = file_name, anime_name
             else:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_update_time}")
         end = time.perf_counter()

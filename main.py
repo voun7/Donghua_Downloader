@@ -2,7 +2,7 @@ import logging
 import re
 from pathlib import Path
 
-from scrapers import XiaoheimiScraper, AnimeBabyScrapper
+from scrapers import XiaobaotvScraper, AnimeBabyScrapper
 from utilities.downloader import ScrapperDownloader
 from utilities.logger_setup import get_log
 from youtube import YouTube
@@ -42,14 +42,14 @@ def main() -> None:
     sd = ScrapperDownloader(playlist_download_dir, download_archive, ffmpeg_path, min_res_height=1080)
 
     try:
-        logger.info("Checking Xiaoheimi site for recent anime upload matches...")
-        xiaoheimi = XiaoheimiScraper()
-        site_posts = xiaoheimi.get_anime_posts()
-        matched_posts = xiaoheimi.match_to_recent_videos(site_posts, anime_list)
-        matched_download_details = xiaoheimi.get_recent_posts_videos_download_link(matched_posts)
+        logger.info("Checking Xiaobaotv site for recent anime upload matches...")
+        xiaobaotv = XiaobaotvScraper()
+        site_posts = xiaobaotv.get_anime_posts()
+        matched_posts = xiaobaotv.match_to_recent_videos(site_posts, anime_list)
+        matched_download_details = xiaobaotv.get_recent_posts_videos_download_link(matched_posts)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
-        logger.exception(f"An error occurred while running Xiaoheimi script! Error: {error}")
+        logger.exception(f"An error occurred while running Xiaobaotv script! Error: {error}")
 
     try:
         logger.info("Checking Anime baby site for recent anime upload matches...")

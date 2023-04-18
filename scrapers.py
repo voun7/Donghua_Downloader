@@ -39,9 +39,9 @@ class ScrapperTools:
         return matched_posts
 
 
-class XiaoheimiScraper(ScrapperTools):
+class XiaobaotvScraper(ScrapperTools):
     def __init__(self) -> None:
-        self.base_url = 'https://xiaoheimi.net'
+        self.base_url = "https://xiaobaotv.net"
 
     def get_anime_posts(self, page: int = 1) -> dict:
         """
@@ -50,7 +50,7 @@ class XiaoheimiScraper(ScrapperTools):
         """
         logger.info(f"..........Site Page {page} Anime Posts..........")
         video_name_and_link = {}
-        payload = f"/index.php/vod/show/area/大陆/id/4/page/{page}.html"
+        payload = f"/index.php/vod/show/id/51/page/{page}.html"
         try:
             page_response = requests.get(self.base_url + payload, headers=self.header)
             logger.info(f"Page Response = {page_response}")

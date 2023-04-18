@@ -44,8 +44,8 @@ def main() -> None:
     try:
         logger.info("Checking Xiaoheimi site for recent anime upload matches...")
         xiaoheimi = XiaoheimiScraper()
-        xiaoheimi_posts = xiaoheimi.get_anime_posts()
-        matched_posts = xiaoheimi.match_to_recent_videos(xiaoheimi_posts, anime_list)
+        site_posts = xiaoheimi.get_anime_posts()
+        matched_posts = xiaoheimi.match_to_recent_videos(site_posts, anime_list)
         matched_download_details = xiaoheimi.get_recent_posts_videos_download_link(matched_posts)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
@@ -54,8 +54,8 @@ def main() -> None:
     try:
         logger.info("Checking Anime baby site for recent anime upload matches...")
         anime_baby = AnimeBabyScrapper()
-        anime_baby_posts = anime_baby.get_anime_posts()
-        matched_posts = anime_baby.match_to_recent_videos(anime_baby_posts, anime_list)
+        site_posts = anime_baby.get_anime_posts()
+        matched_posts = anime_baby.match_to_recent_videos(site_posts, anime_list)
         matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts)
         sd.batch_downloader(matched_download_details)
     except Exception as error:

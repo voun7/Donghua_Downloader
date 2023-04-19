@@ -25,9 +25,16 @@ def main() -> None:
 
     # To obtain the channel id you can view the source code of the channel page
     # and find either data-channel-external-id or "externalId"
-    youtube_channel_ids = ["UC80ztI40QAXzWL94eoRzWow", "UCBIiQ5Hlsadi1HQl8dufZag", "UCXmOpN9pg1hJBRkHODL00EA",
-                           "UCJSAZ5pbDi8StbSbJI1riEg", "UCJS5PJXcAIpXkBOjPNvK7Uw", "UCYkn7e_zaRR_UxOrJR0RVdg",
-                           "UCpsQzjI6BLuxrH6XNUHSWCQ", "UCEY7zXcul32d1hvRCDlxLjQ", "UCNIKva6iDURgVxf44pMZlKA"]
+    # YouTube Channel IDs ordering determines priority when matching videos.
+    ch_id_1 = "UC80ztI40QAXzWL94eoRzWow"  # No. 7 Animation Hall
+    ch_id_2 = "UCYkn7e_zaRR_UxOrJR0RVdg"  # 次元动漫社 Animation Club
+    ch_id_3 = "UCBIiQ5Hlsadi1HQl8dufZag"  # 云朵屋互娱
+    ch_id_4 = "UCJSAZ5pbDi8StbSbJI1riEg"  # Qixiang-Animation
+    ch_id_5 = "UCJS5PJXcAIpXkBOjPNvK7Uw"  # Vita Animation Groups
+    ch_id_6 = "UCpsQzjI6BLuxrH6XNUHSWCQ"  # 小帅动漫 Xiaoshuai Animation
+    ch_id_7 = "UCXmOpN9pg1hJBRkHODL00EA"  # 三福动漫 Sanfu
+    ch_id_8 = "UCEY7zXcul32d1hvRCDlxLjQ"  # 动漫游乐园
+    youtube_channel_ids = [ch_id_1, ch_id_2, ch_id_3, ch_id_4, ch_id_5, ch_id_6, ch_id_7, ch_id_8]
 
     # Arguments
     try:

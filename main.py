@@ -22,10 +22,8 @@ def main() -> None:
         download_archives_dir.mkdir()
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
     anime_list = [keyword for folder in destination_dir.iterdir() for keyword in re.findall(r'\((.*?)\)', folder.name)]
-
-    # To obtain the channel id you can view the source code of the channel page
-    # and find either data-channel-external-id or "externalId"
     # YouTube Channel IDs ordering determines priority when matching videos.
+    # To obtain the channel id check the source code of the channel page search for "externalId".
     ch_id_1 = "UC80ztI40QAXzWL94eoRzWow"  # No. 7 Animation Hall
     ch_id_2 = "UCYkn7e_zaRR_UxOrJR0RVdg"  # 次元动漫社 Animation Club
     ch_id_3 = "UCBIiQ5Hlsadi1HQl8dufZag"  # 云朵屋互娱

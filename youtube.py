@@ -305,12 +305,9 @@ class YouTube:
                 logger.info('Done downloading file, now post-processing ...')
 
         ydl_opts = {
-            'logger': logger.setLevel(logging.INFO),
+            'logger': logger.getChild('yt_dlp'),
             'progress_hooks': [my_hook],
-            # 'noprogress': True,
-            'ignoreerrors': True,
-            'socket_timeout': 120,
-            'wait_for_video': (1, 600),
+            'noprogress': True,
             'download_archive': youtube_download_archive,
             'format': 'bestvideo[height>720][ext=mp4]+bestaudio[ext=m4a]',
             'ffmpeg_location': ffmpeg_path,

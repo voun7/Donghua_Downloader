@@ -31,7 +31,7 @@ def main() -> None:
     ch_id_5 = "UCJS5PJXcAIpXkBOjPNvK7Uw"  # Vita Animation Groups
     ch_id_6 = "UCpsQzjI6BLuxrH6XNUHSWCQ"  # 小帅动漫 Xiaoshuai Animation
     ch_id_7 = "UCXmOpN9pg1hJBRkHODL00EA"  # 三福动漫 Sanfu
-    ch_id_8 = "UCEY7zXcul32d1hvRCDlxLjQ"  # 动漫游乐园
+    ch_id_8 = "UCNIKva6iDURgVxf44pMZlKA"  # Animal Family
     youtube_channel_ids = [ch_id_1, ch_id_2, ch_id_3, ch_id_4, ch_id_5, ch_id_6, ch_id_7, ch_id_8]
 
     # Arguments

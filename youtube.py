@@ -302,7 +302,7 @@ class YouTube:
             if d['status'] == 'error':
                 logger.exception('An error has occurred ...')
             if d['status'] == 'finished':
-                logger.info('Done downloading file, now post-processing ...')
+                logger.info(f'Done downloading file. File location: {d["filename"]}')
 
         ydl_opts = {
             'logger': logger.getChild('yt_dlp'),

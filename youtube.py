@@ -308,6 +308,7 @@ class YouTube:
             'logger': logger.getChild('yt_dlp'),
             'progress_hooks': [my_hook],
             'noprogress': True,
+            'ignoreerrors': 'only_download',
             'download_archive': youtube_download_archive,
             'format': 'bestvideo[height>720][ext=mp4]+bestaudio[ext=m4a]',
             'ffmpeg_location': ffmpeg_path,

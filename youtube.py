@@ -307,8 +307,8 @@ class YouTube:
 
         ydl_opts = {
             'logger': logger.getChild('yt_dlp'),
-            'progress_hooks': [my_hook],
             'noprogress': True,
+            'progress_hooks': [my_hook],
             'ignoreerrors': 'only_download',
             'socket_timeout': 120,
             'wait_for_video': (1, 600),

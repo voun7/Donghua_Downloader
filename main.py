@@ -52,7 +52,7 @@ def main() -> None:
         xiaobaotv = XiaobaotvScraper()
         site_posts = xiaobaotv.get_anime_posts()
         matched_posts = xiaobaotv.match_to_recent_videos(site_posts, anime_list)
-        matched_download_details = xiaobaotv.get_recent_posts_videos_download_link(matched_posts)
+        matched_download_details = xiaobaotv.get_recent_posts_videos_download_link(matched_posts, download_archive)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
         logger.exception(f"An error occurred while running Xiaobaotv script! Error: {error}")
@@ -62,7 +62,7 @@ def main() -> None:
         anime_baby = AnimeBabyScrapper()
         site_posts = anime_baby.get_anime_posts()
         matched_posts = anime_baby.match_to_recent_videos(site_posts, anime_list)
-        matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts)
+        matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts, download_archive)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
         logger.exception(f"An error occurred while running Anime baby script! Error: {error}")

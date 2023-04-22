@@ -137,7 +137,7 @@ class ScrapperDownloader:
         """
         logger.info("..........Using multithreading to download videos..........")
         if not all_download_details:
-            logger.info("No Videos to download!")
+            logger.info("No Videos to download!\n")
             return
         start = time.perf_counter()
         with concurrent.futures.ThreadPoolExecutor() as executor:

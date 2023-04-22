@@ -59,7 +59,7 @@ class ScrapperDownloader:
         width, height = int(resolution[0]), int(resolution[1])
         # Delete the downloaded file.
         temp_file.unlink()
-        if height >= self.min_res_height:
+        if not height >= self.min_res_height:
             logger.warning(f"Resolved name: {resolved_name}, File: {file_name} failed resolution test! "
                            f"Resolution: {width} x {height}. Skipping download!")
             return True

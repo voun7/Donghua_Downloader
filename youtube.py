@@ -301,7 +301,7 @@ class YouTube:
 
         def my_hook(d: dict) -> None:
             if d['status'] == 'error':
-                logger.exception('An error has occurred ...')
+                logger.exception(f'An error has occurred when downloading: {d["filename"]}')
             if d['status'] == 'finished':
                 logger.info(f'Done downloading file. File location: {d["filename"]}')
 

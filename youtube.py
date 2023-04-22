@@ -291,7 +291,8 @@ class YouTube:
         total_time = end - start
         logger.info(f"Total time matching recent uploads and adding to playlist took: {total_time}")
 
-    def playlist_downloader(self, download_location: Path, youtube_download_archive: Path, ffmpeg_path: str) -> None:
+    def playlist_downloader(self, download_location: Path, youtube_download_archive: Path, ffmpeg_path: str,
+                            min_res_height: int) -> None:
         """
         This method uses yt_dlp to download videos from playlist.
         """
@@ -309,8 +310,10 @@ class YouTube:
             'progress_hooks': [my_hook],
             'noprogress': True,
             'ignoreerrors': 'only_download',
+            'socket_timeout': 120,
+            'wait_for_video': (1, 600),
             'download_archive': youtube_download_archive,
-            'format': 'bestvideo[height>720][ext=mp4]+bestaudio[ext=m4a]',
+            'format': f'bestvideo[height>={min_res_height}][ext=mp4]+bestaudio[ext=m4a]',
             'ffmpeg_location': ffmpeg_path,
             'outtmpl': str(download_location) + '/%(title)s.%(ext)s'
         }

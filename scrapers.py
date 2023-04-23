@@ -171,7 +171,7 @@ class AnimeBabyScrapper(ScrapperTools):
             post_update = soup.find(string="更新：").parent.next_sibling.text.split("，")[0]
             last_update_time = parser.parse(post_update).date()
             if last_update_time >= current_date_without_time:
-                latest_video_number = int(soup.find(string="连载：").parent.next_sibling.text.strip("更新至集第"))
+                latest_video_number = int(soup.find(string="连载：").parent.next_sibling.text.strip("全更新至集第"))
                 if latest_video_number < self.video_num_per_post:  # Prevents asking for more videos than are available.
                     num_videos = latest_video_number  # This sets the number to download all videos of the post.
                 else:

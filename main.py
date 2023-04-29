@@ -18,7 +18,7 @@ def main() -> None:
     download_archive = download_archives_dir / "resolved_names_download_archive.txt"
     youtube_download_archive = download_archives_dir / "youtube_downloads_archive.txt"
     ffmpeg_path = "ffmpeg/bin"
-    min_res_height = 1080  # Minimum resolution height.
+    min_res_height = 720  # Minimum resolution height.
     if not download_archives_dir.exists():
         download_archives_dir.mkdir()
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"

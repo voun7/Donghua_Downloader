@@ -98,10 +98,10 @@ class XiaobaotvScraper(ScrapperTools):
                             f"latest video number: {latest_video_number}. "
                             f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")
                 for video_number in range(video_start_num, latest_video_number + 1):
-                    video_post = soup.find('li', {"title": f"{video_number}"})
                     file_name = f"{post_name} 第{video_number}集"
                     resolved_name = self.ch_gen.generate_title(file_name, anime_name)
                     if resolved_name not in archive_content:
+                        video_post = soup.find('li', {"title": f"{video_number}"})
                         video_link = self.base_url + video_post.find('a').get('href')
                         download_link = self.get_video_download_link(video_link)
                         logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
@@ -182,10 +182,10 @@ class AnimeBabyScrapper(ScrapperTools):
                             f"latest video number: {latest_video_number}. "
                             f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")
                 for video_number in range(video_start_num, latest_video_number + 1):
-                    video_post = soup.find('a', {"title": f"播放{post_name}第{video_number:02d}集"})
                     file_name = f"{post_name} 第{video_number}集"
                     resolved_name = self.ch_gen.generate_title(file_name, anime_name)
                     if resolved_name not in archive_content:
+                        video_post = soup.find('a', {"title": f"播放{post_name}第{video_number:02d}集"})
                         try:
                             video_link = self.base_url + video_post.get('href')
                         except Exception as error:
@@ -267,10 +267,10 @@ class Yhdm6Scrapper(ScrapperTools):
                             f"latest video number: {latest_video_number}. "
                             f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")
                 for video_number in range(video_start_num, latest_video_number + 1):
-                    video_post = soup.find(text=f"第{video_number}集").parent
                     file_name = f"{post_name} 第{video_number}集"
                     resolved_name = self.ch_gen.generate_title(file_name, anime_name)
                     if resolved_name not in archive_content:
+                        video_post = soup.find(text=f"第{video_number:02d}集").parent
                         try:
                             video_link = self.base_url + video_post.get('href')
                         except Exception as error:

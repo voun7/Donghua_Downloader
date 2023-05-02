@@ -61,7 +61,7 @@ def main() -> None:
         matched_download_details = xiaobaotv.get_recent_posts_videos_download_link(matched_posts, archive_content)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
-        logger.exception(f"An error occurred while running {site_name} site scrapper! Error: {error}")
+        logger.exception(f"An error occurred while running {site_name} site scrapper! \nError: {error}")
 
     site_name = "Anime baby"
     try:
@@ -72,7 +72,7 @@ def main() -> None:
         matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts, archive_content)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
-        logger.exception(f"An error occurred while running {site_name} site scrapper! Error: {error}")
+        logger.exception(f"An error occurred while running {site_name} site scrapper! \nError: {error}")
 
     site_name = "Yhdm6"
     try:
@@ -83,7 +83,7 @@ def main() -> None:
         matched_download_details = yhdm6.get_recent_posts_videos_download_link(matched_posts, archive_content)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
-        logger.exception(f"An error occurred while running {site_name} site scrapper! Error: {error}")
+        logger.exception(f"An error occurred while running {site_name} site scrapper! \nError: {error}")
 
 
 if __name__ == '__main__':

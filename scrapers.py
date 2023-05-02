@@ -23,7 +23,6 @@ class ScrapperTools:
     }
     ch_gen = ChineseTitleGenerator()
     # Common texts used by scrappers are shared from here.
-    access_fail_message = "Program failed to access website!\n"
     check_downlink_message = "..........Checking for latest videos download links.........."
     time_message = "Time taken to retrieve recent posts download links: "
 
@@ -59,20 +58,16 @@ class XiaobaotvScraper(ScrapperTools):
         logger.info(f"..........Site Page {page} Anime Posts..........")
         video_name_and_link = {}
         payload = f"/index.php/vod/show/id/51/page/{page}.html"
-        try:
-            page_response = requests.get(self.base_url + payload, headers=self.header)
-            logger.info(f"Page Response = {page_response}")
-            soup = BeautifulSoup(page_response.text, self.parser)
-            posts = soup.find_all('li', class_='col-lg-8 col-md-6 col-sm-4 col-xs-3')
-            for post in posts:
-                post_name = post.find('h4', class_='title text-overflow').text
-                post_url = self.base_url + post.find('a').get('href')
-                logger.info(f"Post Title: {post_name}, Post URL: {post_url}")
-                video_name_and_link[post_name] = post_url
-            return video_name_and_link
-        except Exception as error:
-            logger.exception(error)
-            logger.critical(self.access_fail_message)
+        page_response = requests.get(self.base_url + payload, headers=self.header)
+        logger.info(f"Page Response = {page_response}")
+        soup = BeautifulSoup(page_response.text, self.parser)
+        posts = soup.find_all('li', class_='col-lg-8 col-md-6 col-sm-4 col-xs-3')
+        for post in posts:
+            post_name = post.find('h4', class_='title text-overflow').text
+            post_url = self.base_url + post.find('a').get('href')
+            logger.info(f"Post Title: {post_name}, Post URL: {post_url}")
+            video_name_and_link[post_name] = post_url
+        return video_name_and_link
 
     def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: list) -> dict:
         """
@@ -142,20 +137,16 @@ class AnimeBabyScrapper(ScrapperTools):
         logger.info(f"..........Site Page {page} Anime Posts..........")
         video_name_and_link = {}
         payload = f"/index.php/vod/show/id/20/page/{page}.html"
-        try:
-            page_response = requests.get(self.base_url + payload, headers=self.header)
-            logger.info(f"Page Response = {page_response}")
-            soup = BeautifulSoup(page_response.text, self.parser)
-            posts = soup.find_all('a', class_="module-item-title")
-            for post in posts:
-                post_name = post.contents[0]
-                post_url = self.base_url + post.get('href')
-                logger.info(f"Post Title: {post_name}, Post URL: {post_url}")
-                video_name_and_link[post_name] = post_url
-            return video_name_and_link
-        except Exception as error:
-            logger.exception(error)
-            logger.critical(self.access_fail_message)
+        page_response = requests.get(self.base_url + payload, headers=self.header)
+        logger.info(f"Page Response = {page_response}")
+        soup = BeautifulSoup(page_response.text, self.parser)
+        posts = soup.find_all('a', class_="module-item-title")
+        for post in posts:
+            post_name = post.contents[0]
+            post_url = self.base_url + post.get('href')
+            logger.info(f"Post Title: {post_name}, Post URL: {post_url}")
+            video_name_and_link[post_name] = post_url
+        return video_name_and_link
 
     def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: list) -> dict:
         """
@@ -226,20 +217,16 @@ class Yhdm6Scrapper(ScrapperTools):
         logger.info(f"..........Site Page {page} Anime Posts..........")
         video_name_and_link = {}
         payload = f"/index.php/vod/show/id/4/page/{page}.html"
-        try:
-            page_response = requests.get(self.base_url + payload, headers=self.header)
-            logger.info(f"Page Response = {page_response}")
-            soup = BeautifulSoup(page_response.text, self.parser)
-            posts = soup.find_all('p', class_="vodlist_title")
-            for post in posts:
-                post_name = post.contents[0].get('title')
-                post_url = self.base_url + post.contents[0].get('href')
-                logger.info(f"Post Title: {post_name}, Post URL: {post_url}")
-                video_name_and_link[post_name] = post_url
-            return video_name_and_link
-        except Exception as error:
-            logger.exception(error)
-            logger.critical(self.access_fail_message)
+        page_response = requests.get(self.base_url + payload, headers=self.header)
+        logger.info(f"Page Response = {page_response}")
+        soup = BeautifulSoup(page_response.text, self.parser)
+        posts = soup.find_all('p', class_="vodlist_title")
+        for post in posts:
+            post_name = post.contents[0].get('title')
+            post_url = self.base_url + post.contents[0].get('href')
+            logger.info(f"Post Title: {post_name}, Post URL: {post_url}")
+            video_name_and_link[post_name] = post_url
+        return video_name_and_link
 
     def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: list) -> dict:
         """

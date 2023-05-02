@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 class ScrapperTools:
     parser = "html.parser"
     video_num_per_post = 3  # The number of recent videos that will downloaded per post.
+    download_pattern = re.compile(r'"url":"(.*?)"')
     header = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                       'AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -121,7 +122,7 @@ class XiaobaotvScraper(ScrapperTools):
         page_response = requests.get(video_url, headers=self.header)
         soup = BeautifulSoup(page_response.text, self.parser)
         download_script = soup.find(class_='embed-responsive clearfix')
-        download_match = re.finditer(r'"url":"(.*?)"', str(download_script))
+        download_match = self.download_pattern.finditer(str(download_script))
         for match in download_match:
             download_link = match[1].replace("\\", '')
         return download_link
@@ -212,9 +213,9 @@ class AnimeBabyScrapper(ScrapperTools):
             return download_link
 
 
-class TempScrapper(ScrapperTools):
+class Yhdm6Scrapper(ScrapperTools):
     def __init__(self) -> None:
-        self.base_url = ""
+        self.base_url = "https://yhdm6.top"
 
     def get_anime_posts(self, page: int = 1) -> dict:
         """
@@ -223,15 +224,15 @@ class TempScrapper(ScrapperTools):
         """
         logger.info(f"..........Site Page {page} Anime Posts..........")
         video_name_and_link = {}
-        payload = f"{page}"
+        payload = f"/index.php/vod/show/id/4/page/{page}.html"
         try:
             page_response = requests.get(self.base_url + payload, headers=self.header)
             logger.info(f"Page Response = {page_response}")
             soup = BeautifulSoup(page_response.text, self.parser)
-            posts = soup.find_all()
+            posts = soup.find_all('p', class_="vodlist_title")
             for post in posts:
-                post_name = ''
-                post_url = ''
+                post_name = post.contents[0].get('title')
+                post_url = self.base_url + post.contents[0].get('href')
                 logger.info(f"Post Title: {post_name}, Post URL: {post_url}")
                 video_name_and_link[post_name] = post_url
             return video_name_and_link
@@ -239,7 +240,7 @@ class TempScrapper(ScrapperTools):
             logger.exception(error)
             logger.critical("Program failed to access website!\n")
 
-    def get_recent_posts_videos_download_link(self, matched_posts: dict) -> dict:
+    def get_recent_posts_videos_download_link(self, matched_posts: dict, download_archive: Path) -> dict:
         """
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
         How many of the other recent post videos are determined by video_num_per_post value.
@@ -248,16 +249,17 @@ class TempScrapper(ScrapperTools):
         all_download_details = {}
         current_date_without_time = datetime.now().date()
         start = time.perf_counter()
+        archive_content = download_archive.read_text(encoding="utf-8").splitlines()
         for post_name, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]
             page_response = requests.get(url, headers=self.header)
             soup = BeautifulSoup(page_response.text, self.parser)
-            post_update = soup.find()
+            post_update = soup.find(class_="data_style").findNextSibling('em').text
             last_update_time = parser.parse(post_update).date()
             if last_update_time >= current_date_without_time:
-                latest_video_number = int(soup.find())
-                if latest_video_number < self.video_num_per_post:  # Prevents asking for more videos than are available.
-                    num_videos = latest_video_number  # This sets the number to download all videos of the post.
+                latest_video_number = int(soup.find(class_="data_style").text.strip("全更新至集第"))
+                if latest_video_number < self.video_num_per_post:
+                    num_videos = latest_video_number
                 else:
                     num_videos = self.video_num_per_post
                 video_start_num = latest_video_number - num_videos + 1
@@ -265,28 +267,36 @@ class TempScrapper(ScrapperTools):
                             f"latest video number: {latest_video_number}. "
                             f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")
                 for video_number in range(video_start_num, latest_video_number + 1):
-                    video_post = soup.find()
-                    file_name = f""
-                    try:
-                        video_link = ''
-                    except Exception as error:
-                        video_link = None
-                        logger.error(f"Video link not found! Error: {error}")
-                    download_link = self.get_video_download_link(video_link)
-                    logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
-                    all_download_details[download_link] = file_name, anime_name
+                    video_post = soup.find(text=f"第{video_number}集").parent
+                    file_name = f"{post_name} 第{video_number}集"
+                    resolved_name = self.ch_gen.generate_title(file_name, anime_name)
+                    if resolved_name not in archive_content:
+                        try:
+                            video_link = self.base_url + video_post.get('href')
+                        except Exception as error:
+                            video_link = None
+                            logger.error(f"Video link not found! Error: {error}")
+                        download_link = self.get_video_download_link(video_link)
+                        logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
+                        all_download_details[download_link] = file_name, anime_name
+                    else:
+                        logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
             else:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_update_time}")
         end = time.perf_counter()
         logger.info(f"Total time: {end - start}\n")
         return all_download_details
 
-    def get_video_download_link(self, video_url: str) -> str:
+    def get_video_download_link(self, video_url: str) -> str | None:
         """
         This method uses the video url to find the video download link.
         """
         if video_url:
+            download_link = None
             page_response = requests.get(video_url, headers=self.header)
             soup = BeautifulSoup(page_response.text, self.parser)
-            download_link = soup.find()
+            download_script = soup.find("div", class_='player_video')
+            download_match = self.download_pattern.finditer(str(download_script))
+            for match in download_match:
+                download_link = match[1].replace("\\", '')
             return download_link

@@ -2,7 +2,7 @@ import logging
 import re
 from pathlib import Path
 
-from scrapers import XiaobaotvScraper, AnimeBabyScrapper
+from scrapers import XiaobaotvScraper, AnimeBabyScrapper, Yhdm6Scrapper
 from utilities.downloader import ScrapperDownloader
 from utilities.logger_setup import get_log
 from youtube import YouTube
@@ -63,6 +63,16 @@ def main() -> None:
         site_posts = anime_baby.get_anime_posts()
         matched_posts = anime_baby.match_to_recent_videos(site_posts, anime_list)
         matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts, download_archive)
+        sd.batch_downloader(matched_download_details)
+    except Exception as error:
+        logger.exception(f"An error occurred while running Anime baby script! Error: {error}")
+
+    try:
+        logger.info("Checking Yhdm6 site for recent anime upload matches...")
+        yhdm6 = Yhdm6Scrapper()
+        site_posts = yhdm6.get_anime_posts()
+        matched_posts = yhdm6.match_to_recent_videos(site_posts, anime_list)
+        matched_download_details = yhdm6.get_recent_posts_videos_download_link(matched_posts, download_archive)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
         logger.exception(f"An error occurred while running Anime baby script! Error: {error}")

@@ -1,5 +1,6 @@
 import logging
 import re
+import time
 from pathlib import Path
 
 from scrapers import XiaobaotvScraper, AnimeBabyScrapper, Yhdm6Scrapper
@@ -88,5 +89,8 @@ def main() -> None:
 if __name__ == '__main__':
     get_log()
     logger.debug("Logging Started")
+    start = time.perf_counter()
     main()
+    end = time.perf_counter()
+    logger.info(f"Total Runtime: {end - start}")
     logger.debug("Logging Ended\n")

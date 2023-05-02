@@ -289,7 +289,7 @@ class YouTube:
         self.check_matches(matched_videos)
         end = time.perf_counter()
         total_time = end - start
-        logger.info(f"Total time matching recent uploads and adding to playlist took: {total_time}")
+        logger.info(f"Time matching recent uploads and adding to playlist took: {total_time}")
 
     def playlist_downloader(self, download_location: Path, youtube_download_archive: Path, ffmpeg_path: str,
                             min_res_height: int) -> None:
@@ -321,4 +321,4 @@ class YouTube:
             ydl.download(self.playlist_id)
         end = time.perf_counter()
         total_time = end - start
-        logger.info(f"Total time downloading playlist took: {total_time}\n")
+        logger.info(f"Time downloading playlist took: {total_time}\n")

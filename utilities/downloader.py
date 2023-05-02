@@ -146,4 +146,4 @@ class ScrapperDownloader:
         self.update_download_archive()
         logger.info("Downloads finished!")
         end = time.perf_counter()
-        logger.info(f"Total download time: {end - start}\n")
+        logger.info(f"Download time: {end - start}\n")

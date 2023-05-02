@@ -109,7 +109,7 @@ class XiaobaotvScraper(ScrapperTools):
             else:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date_without_time}")
         end = time.perf_counter()
-        logger.info(f"Total time: {end - start}\n")
+        logger.info(f"Time taken to retrieve recent post download links: {end - start}\n")
         return all_download_details
 
     def get_video_download_link(self, video_url: str) -> str:
@@ -196,7 +196,7 @@ class AnimeBabyScrapper(ScrapperTools):
             else:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_update_time}")
         end = time.perf_counter()
-        logger.info(f"Total time: {end - start}\n")
+        logger.info(f"Time taken to retrieve recent post download links: {end - start}\n")
         return all_download_details
 
     def get_video_download_link(self, video_url: str) -> str:
@@ -280,7 +280,7 @@ class Yhdm6Scrapper(ScrapperTools):
             else:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_update_time}")
         end = time.perf_counter()
-        logger.info(f"Total time: {end - start}\n")
+        logger.info(f"Time taken to retrieve recent post download links: {end - start}\n")
         return all_download_details
 
     def get_video_download_link(self, video_url: str) -> str | None:

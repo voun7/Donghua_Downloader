@@ -21,6 +21,10 @@ def main() -> None:
     min_res_height = 720  # Minimum resolution height.
     if not download_archives_dir.exists():
         download_archives_dir.mkdir()
+    if download_archive.exists():
+        archive_content = download_archive.read_text(encoding="utf-8").splitlines()
+    else:
+        archive_content = []
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
     anime_list = [keyword for folder in destination_dir.iterdir() for keyword in re.findall(r'\((.*?)\)', folder.name)]
     # YouTube Channel IDs ordering determines priority when matching videos.
@@ -53,7 +57,7 @@ def main() -> None:
         xiaobaotv = XiaobaotvScraper()
         site_posts = xiaobaotv.get_anime_posts()
         matched_posts = xiaobaotv.match_to_recent_videos(site_posts, anime_list)
-        matched_download_details = xiaobaotv.get_recent_posts_videos_download_link(matched_posts, download_archive)
+        matched_download_details = xiaobaotv.get_recent_posts_videos_download_link(matched_posts, archive_content)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
         logger.exception(f"An error occurred while running {site_name} site scrapper! Error: {error}")
@@ -64,7 +68,7 @@ def main() -> None:
         anime_baby = AnimeBabyScrapper()
         site_posts = anime_baby.get_anime_posts()
         matched_posts = anime_baby.match_to_recent_videos(site_posts, anime_list)
-        matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts, download_archive)
+        matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts, archive_content)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
         logger.exception(f"An error occurred while running {site_name} site scrapper! Error: {error}")
@@ -75,7 +79,7 @@ def main() -> None:
         yhdm6 = Yhdm6Scrapper()
         site_posts = yhdm6.get_anime_posts()
         matched_posts = yhdm6.match_to_recent_videos(site_posts, anime_list)
-        matched_download_details = yhdm6.get_recent_posts_videos_download_link(matched_posts, download_archive)
+        matched_download_details = yhdm6.get_recent_posts_videos_download_link(matched_posts, archive_content)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
         logger.exception(f"An error occurred while running {site_name} site scrapper! Error: {error}")

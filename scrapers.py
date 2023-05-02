@@ -2,7 +2,6 @@ import logging
 import re
 import time
 from datetime import datetime
-from pathlib import Path
 
 import requests
 from bs4 import BeautifulSoup
@@ -71,7 +70,7 @@ class XiaobaotvScraper(ScrapperTools):
             logger.exception(error)
             logger.critical("Program failed to access website!\n")
 
-    def get_recent_posts_videos_download_link(self, matched_posts: dict, download_archive: Path) -> dict:
+    def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: list) -> dict:
         """
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
         How many of the other recent post videos are determined by video_num_per_post value.
@@ -80,7 +79,6 @@ class XiaobaotvScraper(ScrapperTools):
         all_download_details = {}
         current_date_without_time = datetime.now().date()
         start = time.perf_counter()
-        archive_content = download_archive.read_text(encoding="utf-8").splitlines()
         for post_name, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]
             page_response = requests.get(url, headers=self.header)
@@ -155,7 +153,7 @@ class AnimeBabyScrapper(ScrapperTools):
             logger.exception(error)
             logger.critical("Program failed to access website!\n")
 
-    def get_recent_posts_videos_download_link(self, matched_posts: dict, download_archive: Path) -> dict:
+    def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: list) -> dict:
         """
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
         How many of the other recent post videos are determined by video_num_per_post value.
@@ -164,7 +162,6 @@ class AnimeBabyScrapper(ScrapperTools):
         all_download_details = {}
         current_date_without_time = datetime.now().date()
         start = time.perf_counter()
-        archive_content = download_archive.read_text(encoding="utf-8").splitlines()
         for post_name, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]
             page_response = requests.get(url, headers=self.header)
@@ -240,7 +237,7 @@ class Yhdm6Scrapper(ScrapperTools):
             logger.exception(error)
             logger.critical("Program failed to access website!\n")
 
-    def get_recent_posts_videos_download_link(self, matched_posts: dict, download_archive: Path) -> dict:
+    def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: list) -> dict:
         """
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
         How many of the other recent post videos are determined by video_num_per_post value.
@@ -249,7 +246,6 @@ class Yhdm6Scrapper(ScrapperTools):
         all_download_details = {}
         current_date_without_time = datetime.now().date()
         start = time.perf_counter()
-        archive_content = download_archive.read_text(encoding="utf-8").splitlines()
         for post_name, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]
             page_response = requests.get(url, headers=self.header)

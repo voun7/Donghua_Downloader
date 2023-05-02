@@ -22,10 +22,7 @@ def main() -> None:
     min_res_height = 720  # Minimum resolution height.
     if not download_archives_dir.exists():
         download_archives_dir.mkdir()
-    if download_archive.exists():
-        archive_content = download_archive.read_text(encoding="utf-8").splitlines()
-    else:
-        archive_content = []
+    archive_content = download_archive.read_text(encoding="utf-8").splitlines() if download_archive.exists() else []
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
     anime_list = [keyword for folder in destination_dir.iterdir() for keyword in re.findall(r'\((.*?)\)', folder.name)]
     # YouTube Channel IDs ordering determines priority when matching videos.

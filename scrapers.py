@@ -22,6 +22,10 @@ class ScrapperTools:
                       'Chrome/106.0.0.0 Safari/537.36'
     }
     ch_gen = ChineseTitleGenerator()
+    # Common texts used by scrappers are shared from here.
+    access_fail_message = "Program failed to access website!\n"
+    check_downlink_message = "..........Checking for latest videos download links.........."
+    time_message = "Time taken to retrieve recent posts download links: "
 
     @staticmethod
     def match_to_recent_videos(posts: dict, anime_list: list) -> dict:
@@ -68,14 +72,14 @@ class XiaobaotvScraper(ScrapperTools):
             return video_name_and_link
         except Exception as error:
             logger.exception(error)
-            logger.critical("Program failed to access website!\n")
+            logger.critical(self.access_fail_message)
 
     def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: list) -> dict:
         """
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
         How many of the other recent post videos are determined by video_num_per_post value.
         """
-        logger.info("..........Checking for latest videos download links..........")
+        logger.info(self.check_downlink_message)
         all_download_details = {}
         current_date_without_time = datetime.now().date()
         start = time.perf_counter()
@@ -109,7 +113,7 @@ class XiaobaotvScraper(ScrapperTools):
             else:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date_without_time}")
         end = time.perf_counter()
-        logger.info(f"Time taken to retrieve recent post download links: {end - start}\n")
+        logger.info(f"{self.time_message}{end - start}\n")
         return all_download_details
 
     def get_video_download_link(self, video_url: str) -> str:
@@ -151,14 +155,14 @@ class AnimeBabyScrapper(ScrapperTools):
             return video_name_and_link
         except Exception as error:
             logger.exception(error)
-            logger.critical("Program failed to access website!\n")
+            logger.critical(self.access_fail_message)
 
     def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: list) -> dict:
         """
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
         How many of the other recent post videos are determined by video_num_per_post value.
         """
-        logger.info("..........Checking for latest videos download links..........")
+        logger.info(self.check_downlink_message)
         all_download_details = {}
         current_date_without_time = datetime.now().date()
         start = time.perf_counter()
@@ -196,7 +200,7 @@ class AnimeBabyScrapper(ScrapperTools):
             else:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_update_time}")
         end = time.perf_counter()
-        logger.info(f"Time taken to retrieve recent post download links: {end - start}\n")
+        logger.info(f"{self.time_message}{end - start}\n")
         return all_download_details
 
     def get_video_download_link(self, video_url: str) -> str:
@@ -235,14 +239,14 @@ class Yhdm6Scrapper(ScrapperTools):
             return video_name_and_link
         except Exception as error:
             logger.exception(error)
-            logger.critical("Program failed to access website!\n")
+            logger.critical(self.access_fail_message)
 
     def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: list) -> dict:
         """
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
         How many of the other recent post videos are determined by video_num_per_post value.
         """
-        logger.info("..........Checking for latest videos download links..........")
+        logger.info(self.check_downlink_message)
         all_download_details = {}
         current_date_without_time = datetime.now().date()
         start = time.perf_counter()
@@ -280,7 +284,7 @@ class Yhdm6Scrapper(ScrapperTools):
             else:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_update_time}")
         end = time.perf_counter()
-        logger.info(f"Time taken to retrieve recent post download links: {end - start}\n")
+        logger.info(f"{self.time_message}{end - start}\n")
         return all_download_details
 
     def get_video_download_link(self, video_url: str) -> str | None:

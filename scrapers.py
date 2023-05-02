@@ -47,8 +47,8 @@ class ScrapperTools:
 
 
 class XiaobaotvScraper(ScrapperTools):
-    def __init__(self) -> None:
-        self.base_url = "https://xiaobaotv.net"
+    def __init__(self, site) -> None:
+        self.base_url = f"https://{site}"
 
     def get_anime_posts(self, page: int = 1) -> dict:
         """
@@ -126,8 +126,8 @@ class XiaobaotvScraper(ScrapperTools):
 
 
 class AnimeBabyScrapper(ScrapperTools):
-    def __init__(self) -> None:
-        self.base_url = "https://www.animebaby.top"
+    def __init__(self, site) -> None:
+        self.base_url = f"https://{site}"
 
     def get_anime_posts(self, page: int = 1) -> dict:
         """
@@ -206,8 +206,8 @@ class AnimeBabyScrapper(ScrapperTools):
 
 
 class Yhdm6Scrapper(ScrapperTools):
-    def __init__(self) -> None:
-        self.base_url = "https://yhdm6.top"
+    def __init__(self, site) -> None:
+        self.base_url = f"https://{site}"
 
     def get_anime_posts(self, page: int = 1) -> dict:
         """

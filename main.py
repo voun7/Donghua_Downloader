@@ -49,38 +49,38 @@ def main() -> None:
 
     sd = ScrapperDownloader(playlist_download_dir, download_archive, ffmpeg_path, min_res_height)
 
-    site_name = "Xiaobaotv"
+    site_address = "xiaobaotv.net"
     try:
-        logger.info(f"Checking {site_name} site for recent anime upload matches...")
-        xiaobaotv = XiaobaotvScraper()
+        logger.info(f"Checking {site_address} site for recent anime upload matches...")
+        xiaobaotv = XiaobaotvScraper(site_address)
         site_posts = xiaobaotv.get_anime_posts()
         matched_posts = xiaobaotv.match_to_recent_videos(site_posts, anime_list)
         matched_download_details = xiaobaotv.get_recent_posts_videos_download_link(matched_posts, archive_content)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
-        logger.exception(f"An error occurred while running {site_name} site scrapper! \nError: {error}")
+        logger.exception(f"An error occurred while running {site_address} site scrapper! \nError: {error}")
 
-    site_name = "Anime baby"
+    site_address = "animebaby.top"
     try:
-        logger.info(f"Checking {site_name} site for recent anime upload matches...")
-        anime_baby = AnimeBabyScrapper()
+        logger.info(f"Checking {site_address} site for recent anime upload matches...")
+        anime_baby = AnimeBabyScrapper(site_address)
         site_posts = anime_baby.get_anime_posts()
         matched_posts = anime_baby.match_to_recent_videos(site_posts, anime_list)
         matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts, archive_content)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
-        logger.exception(f"An error occurred while running {site_name} site scrapper! \nError: {error}")
+        logger.exception(f"An error occurred while running {site_address} site scrapper! \nError: {error}")
 
-    site_name = "Yhdm6"
+    site_address = "yhdm6.top"
     try:
-        logger.info(f"Checking {site_name} site for recent anime upload matches...")
-        yhdm6 = Yhdm6Scrapper()
+        logger.info(f"Checking {site_address} site for recent anime upload matches...")
+        yhdm6 = Yhdm6Scrapper(site_address)
         site_posts = yhdm6.get_anime_posts()
         matched_posts = yhdm6.match_to_recent_videos(site_posts, anime_list)
         matched_download_details = yhdm6.get_recent_posts_videos_download_link(matched_posts, archive_content)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
-        logger.exception(f"An error occurred while running {site_name} site scrapper! \nError: {error}")
+        logger.exception(f"An error occurred while running {site_address} site scrapper! \nError: {error}")
 
 
 if __name__ == '__main__':

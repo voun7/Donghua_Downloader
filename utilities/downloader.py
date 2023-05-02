@@ -18,25 +18,25 @@ class ScrapperDownloader:
         self.download_archive = download_archive
         self.ffmpeg_path = ffmpeg_path
         self.min_res_height = min_res_height  # Minimum allowed height of video resolution.
-        self.archive_content = self.new_archive_names = []
+        self.downloaded_resolved_names_archive = self.new_downloaded_resolved_names = []
         if self.download_archive.exists():
-            self.archive_content = self.download_archive.read_text(encoding="utf-8").splitlines()
+            self.downloaded_resolved_names_archive = self.download_archive.read_text(encoding="utf-8").splitlines()
 
     def update_download_archive(self) -> None:
         """
         Updated the names download archive with the new names.
         """
-        if self.new_archive_names:
-            logger.info(f"Archive updated with new names. Names: {self.new_archive_names}")
+        if self.new_downloaded_resolved_names:
+            logger.info(f"Archive updated with new names. Names: {self.new_downloaded_resolved_names}")
             with open(self.download_archive, 'a', encoding="utf-8") as text_file:
-                text_file.writelines(self.new_archive_names)
-            self.new_archive_names = []  # Empty list after every update to prevent duplicates.
+                text_file.writelines(self.new_downloaded_resolved_names)
+            self.new_downloaded_resolved_names = []  # Empty list after every update to prevent duplicates.
 
     def check_download_archive(self, resolved_name, file_name) -> bool:
         """
         Check if the resolved name is in archive.
         """
-        if resolved_name in self.archive_content:
+        if resolved_name in self.downloaded_resolved_names_archive:
             logger.warning(f"Resolved name: {resolved_name}, File: {file_name} exists in the archive. "
                            f"Skipping download!")
             return True
@@ -125,8 +125,8 @@ class ScrapperDownloader:
 
         if file_path.exists():
             logger.info(f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded successfully!")
-            self.archive_content.append(resolved_name)
-            self.new_archive_names.append(resolved_name + "\n")
+            self.downloaded_resolved_names_archive.append(resolved_name)  # Prevent download of exising resolved names.
+            self.new_downloaded_resolved_names.append(resolved_name + "\n")
         else:
             logger.warning(f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded failed!")
 

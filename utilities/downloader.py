@@ -7,8 +7,6 @@ from pathlib import Path
 
 import requests
 
-from utilities.ch_title_gen import ChineseTitleGenerator
-
 logger = logging.getLogger(__name__)
 
 
@@ -96,14 +94,12 @@ class ScrapperDownloader:
         # Run the command using subprocess.run().
         subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL)
 
-    def video_downloader(self, download_link: str, download_details: tuple) -> None:
+    def video_downloader(self, resolved_name: str, download_details: tuple) -> None:
         """
         Use m3u8 link to download video and create mp4 file. Embedded advertisements links will be removed.
         """
-        file_name, video_match_name = download_details[0], download_details[1]
+        file_name, video_match_name, download_link = download_details[0], download_details[1], download_details[2]
         file_path = Path(f"{self.download_location}/{file_name}.mp4")
-        gen = ChineseTitleGenerator()
-        resolved_name = gen.generate_title(file_name, video_match_name)
         if file_path.exists():
             logger.warning(f"Resolved name: {resolved_name}, File: {file_name} exists in directory. Skipping download!")
             return
@@ -141,8 +137,8 @@ class ScrapperDownloader:
             return
         start = time.perf_counter()
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            _ = [executor.submit(self.video_downloader, download_link, download_details)
-                 for download_link, download_details in all_download_details.items()]
+            _ = [executor.submit(self.video_downloader, resolved_name, download_details)
+                 for resolved_name, download_details in all_download_details.items()]
         self.update_download_archive()
         logger.info("Downloads finished!")
         end = time.perf_counter()

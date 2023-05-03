@@ -102,7 +102,7 @@ class XiaobaotvScraper(ScrapperTools):
                         video_link = self.base_url + video_post.find('a').get('href')
                         download_link = self.get_video_download_link(video_link)
                         logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
-                        all_download_details[download_link] = file_name, anime_name
+                        all_download_details[resolved_name] = file_name, anime_name, download_link
                     else:
                         logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
             else:
@@ -185,7 +185,7 @@ class AnimeBabyScrapper(ScrapperTools):
                             logger.error(f"Video link not found! Error: {error}")
                         download_link = self.get_video_download_link(video_link)
                         logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
-                        all_download_details[download_link] = file_name, anime_name
+                        all_download_details[resolved_name] = file_name, anime_name, download_link
                     else:
                         logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
             else:
@@ -265,7 +265,7 @@ class Yhdm6Scrapper(ScrapperTools):
                             logger.error(f"Video link not found! Error: {error}")
                         download_link = self.get_video_download_link(video_link)
                         logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
-                        all_download_details[download_link] = file_name, anime_name
+                        all_download_details[resolved_name] = file_name, anime_name, download_link
                     else:
                         logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
             else:

@@ -32,7 +32,7 @@ class ScrapperDownloader:
                 text_file.writelines(self.new_downloaded_resolved_names)
             self.new_downloaded_resolved_names = []  # Empty list after every update to prevent duplicates.
 
-    def check_download_archive(self, resolved_name, file_name) -> bool:
+    def check_download_archive(self, resolved_name: str, file_name: str) -> bool:
         """
         Check if the resolved name is in archive.
         """
@@ -96,7 +96,7 @@ class ScrapperDownloader:
         # Run the command using subprocess.run().
         subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL)
 
-    def video_downloader(self, download_link: str, download_details) -> None:
+    def video_downloader(self, download_link: str, download_details: tuple) -> None:
         """
         Use m3u8 link to download video and create mp4 file. Embedded advertisements links will be removed.
         """

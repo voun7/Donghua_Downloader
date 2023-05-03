@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 def main() -> None:
     # Variables
+    start = time.perf_counter()
     playlist_download_dir = Path(r"\\192.168.0.111\General File Sharing\From YouTube\Chinese Anime For Subbing")
     destination_dir = playlist_download_dir / "##Currently Airing"
     download_archives_dir = playlist_download_dir / "Download Archives"
@@ -83,12 +84,12 @@ def main() -> None:
     except Exception as error:
         logger.exception(f"An error occurred while running {site_address} site scrapper! \nError: {error}")
 
+    end = time.perf_counter()
+    logger.info(f"Total Runtime: {end - start}")
+
 
 if __name__ == '__main__':
     get_log()
     logger.debug("Logging Started")
-    start = time.perf_counter()
     main()
-    end = time.perf_counter()
-    logger.info(f"Total Runtime: {end - start}")
     logger.debug("Logging Ended\n")

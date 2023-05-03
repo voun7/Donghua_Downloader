@@ -106,7 +106,8 @@ class ScrapperDownloader:
         if self.check_download_archive(resolved_name, file_name):
             return
         if download_link is None:
-            logger.warning(f"Resolved name: {resolved_name}, File: {file_name} has invalid link. Skipping download!")
+            logger.warning(f"Resolved name: {resolved_name}, "
+                           f"File: {file_name} has no download link. Skipping download!")
             return
         if self.check_video_resolution(resolved_name, file_name, download_link):
             return

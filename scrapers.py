@@ -164,7 +164,7 @@ class AnimeBabyScrapper(ScrapperTools):
             post_update = soup.find(string="更新：").parent.next_sibling.text.split("，")[0]
             last_update_time = parser.parse(post_update).date()
             if last_update_time >= current_date_without_time:
-                latest_video_post = soup.find(string="连载：").parent.next_sibling.text.strip("全更新至集第")
+                latest_video_post = soup.find(string="连载：").parent.next_sibling.text.strip("全更新至集第话")
                 if "已完结" in latest_video_post:
                     logger.info(f"Post named: {post_name} has finished airing! URL: {url}")
                     continue

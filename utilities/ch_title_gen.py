@@ -25,7 +25,7 @@ class ChineseTitleGenerator:
         # Regex for chinese characters.
         self.ch_key_and_num_pattern = re.compile(r'[集季][-\d]')  # Consider removing, not need for most cases.
         self.ch_keyword_pattern = re.compile(r'第(\d+)[集季话]')
-        self.ch_num_pattern = re.compile(r'第([\u4e00-\u9fff]+)[集季话]')
+        self.ch_num_pattern = re.compile(r'第([零一二三四五六七八九十百千万]+)[集季话]')
         self.ch_key_range_pattern = re.compile(r'(?:第(\d+)[集季话].*)?第(\d+)\s*[-~]\s*(\d+)[集季话]')
 
     def set_suffixes(self) -> None:

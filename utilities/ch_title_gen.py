@@ -57,7 +57,9 @@ class ChineseTitleGenerator:
             matches = self.ch_num_pattern.finditer(self.filtered_name)
             for match in matches:
                 ch_num_match = match.group(0)
-                ch_num_in_english = str(cn2num(match.group(1)))
+                ch_num = match.group(1)
+                logger.debug(f"ch_num_match found: {ch_num_match}, ch_num found: {ch_num}")
+                ch_num_in_english = str(cn2num(ch_num))
                 self.filtered_name = self.filtered_name.replace(ch_num_match, f"第{ch_num_in_english}集")
 
     def en_key_ch_key_filter(self) -> None:

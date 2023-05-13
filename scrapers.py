@@ -59,7 +59,7 @@ class XiaobaotvScraper(ScrapperTools):
         video_name_and_link = {}
         payload = f"/index.php/vod/show/id/51/page/{page}.html"
         page_response = requests.get(self.base_url + payload, headers=self.header)
-        logger.info(f"Page Response = {page_response}")
+        page_response.raise_for_status()
         soup = BeautifulSoup(page_response.text, self.parser)
         posts = soup.find_all('li', class_='col-lg-8 col-md-6 col-sm-4 col-xs-3')
         for post in posts:
@@ -138,7 +138,7 @@ class AnimeBabyScrapper(ScrapperTools):
         video_name_and_link = {}
         payload = f"/index.php/vod/show/id/20/page/{page}.html"
         page_response = requests.get(self.base_url + payload, headers=self.header)
-        logger.info(f"Page Response = {page_response}")
+        page_response.raise_for_status()
         soup = BeautifulSoup(page_response.text, self.parser)
         posts = soup.find_all('a', class_="module-item-title")
         for post in posts:
@@ -222,7 +222,7 @@ class Yhdm6Scrapper(ScrapperTools):
         video_name_and_link = {}
         payload = f"/index.php/vod/show/id/4/page/{page}.html"
         page_response = requests.get(self.base_url + payload, headers=self.header)
-        logger.info(f"Page Response = {page_response}")
+        page_response.raise_for_status()
         soup = BeautifulSoup(page_response.text, self.parser)
         posts = soup.find_all('p', class_="vodlist_title")
         for post in posts:

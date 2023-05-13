@@ -19,7 +19,7 @@ class ScrapperTools:
     header = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                       'AppleWebKit/537.36 (KHTML, like Gecko) '
-                      'Chrome/106.0.0.0 Safari/537.36'
+                      'Chrome/113.0.0.0 Safari/537.36'
     }
     ch_gen = ChineseTitleGenerator()
     # Common texts used by scrappers are shared from here.

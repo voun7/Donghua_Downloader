@@ -6,6 +6,7 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 from dateutil import parser
+from undetected_chromedriver import Chrome
 
 from utilities.ch_title_gen import ChineseTitleGenerator
 
@@ -126,8 +127,31 @@ class XiaobaotvScraper(ScrapperTools):
 
 
 class AnimeBabyScrapper(ScrapperTools):
+    chrome_driver = Chrome(headless=True, version_main=113)
+
     def __init__(self, site) -> None:
         self.base_url = f"https://{site}"
+        self.initiate_driver()
+
+    def initiate_driver(self, delay: float = 8) -> None:
+        """
+        Initiate Chrome web driver that helps bypass cloudflare protection.
+        :param delay: Time in seconds to spend waiting.
+        """
+        self.chrome_driver.get(self.base_url)
+        time.sleep(delay)  # Time to allow cloudflare checks to finish
+        page_content = self.chrome_driver.page_source
+        if "cloudflare" in page_content:
+            logger.error("Cloudflare bypass failed!")
+        else:
+            logger.info("Cloudflare bypass succeeded!")
+
+    def close_driver(self, delay: float = 2) -> None:
+        try:
+            self.chrome_driver.close()
+            time.sleep(delay)
+        except Exception as error:
+            logger.error(f"An error occurred while closing the driver! \nError: {error}")
 
     def get_anime_posts(self, page: int = 1) -> dict:
         """
@@ -137,9 +161,8 @@ class AnimeBabyScrapper(ScrapperTools):
         logger.info(f"..........Site Page {page} Anime Posts..........")
         video_name_and_link = {}
         payload = f"/index.php/vod/show/id/20/page/{page}.html"
-        page_response = requests.get(self.base_url + payload, headers=self.header)
-        page_response.raise_for_status()
-        soup = BeautifulSoup(page_response.text, self.parser)
+        self.chrome_driver.get(self.base_url + payload)
+        soup = BeautifulSoup(self.chrome_driver.page_source, self.parser)
         posts = soup.find_all('a', class_="module-item-title")
         for post in posts:
             post_name = post.contents[0]
@@ -159,8 +182,8 @@ class AnimeBabyScrapper(ScrapperTools):
         start = time.perf_counter()
         for post_name, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]
-            page_response = requests.get(url, headers=self.header)
-            soup = BeautifulSoup(page_response.text, self.parser)
+            self.chrome_driver.get(url)
+            soup = BeautifulSoup(self.chrome_driver.page_source, self.parser)
             post_update = soup.find(string="更新：").parent.next_sibling.text.split("，")[0]
             last_update_time = parser.parse(post_update).date()
             if last_update_time >= current_date_without_time:
@@ -196,6 +219,7 @@ class AnimeBabyScrapper(ScrapperTools):
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_update_time}")
         end = time.perf_counter()
         logger.info(f"{self.time_message}{end - start}\n")
+        self.close_driver()
         return all_download_details
 
     def get_video_download_link(self, video_url: str) -> str:
@@ -203,8 +227,8 @@ class AnimeBabyScrapper(ScrapperTools):
         This method uses the video url to find the video download link.
         """
         if video_url:
-            page_response = requests.get(video_url, headers=self.header)
-            soup = BeautifulSoup(page_response.text, self.parser)
+            self.chrome_driver.get(video_url)
+            soup = BeautifulSoup(self.chrome_driver.page_source, self.parser)
             download_link = soup.find(id="bfurl").get('href')
             return download_link
 

@@ -133,7 +133,7 @@ class AnimeBabyScrapper(ScrapperTools):
         self.base_url = f"https://{site}"
         self.initiate_driver()
 
-    def initiate_driver(self, delay: float = 8) -> None:
+    def initiate_driver(self, delay: float = 12) -> None:
         """
         Initiate Chrome web driver that helps bypass cloudflare protection.
         :param delay: Time in seconds to spend waiting.
@@ -146,7 +146,7 @@ class AnimeBabyScrapper(ScrapperTools):
         else:
             logger.info("Cloudflare bypass succeeded!")
 
-    def close_driver(self, delay: float = 2) -> None:
+    def close_driver(self, delay: float = 3) -> None:
         try:
             self.chrome_driver.close()
             time.sleep(delay)

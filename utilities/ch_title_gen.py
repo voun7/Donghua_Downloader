@@ -169,7 +169,7 @@ class ChineseTitleGenerator:
         :param base_name: The name that will be used as the foundation for new title generated.
         :return: A new generated title or same name if no numbers found.
         """
-        logger.debug(f"Initial name: {name}")
+        logger.debug(f"Initial name: {name}, Base name: {base_name}")
         self.name = name
         self.base_name = base_name
         self.set_suffixes()

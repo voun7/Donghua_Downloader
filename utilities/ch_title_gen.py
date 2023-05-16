@@ -35,9 +35,9 @@ class ChineseTitleGenerator:
         file_path = Path(self.name)
         if file_path.exists():
             self.suffixes = "".join(file_path.suffixes)
+            self.name = file_path.stem
         else:
             self.suffixes = ""
-        self.name = file_path.stem
 
     def miscellaneous_strings_filter(self) -> None:
         """

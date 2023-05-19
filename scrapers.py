@@ -187,11 +187,11 @@ class AnimeBabyScrapper(ScrapperTools):
             post_update = soup.find(string="更新：").parent.next_sibling.text.split("，")[0]
             last_update_time = parser.parse(post_update).date()
             if last_update_time >= current_date_without_time:
-                latest_video_post = soup.find(string="连载：").parent.next_sibling.text.strip("全更新至集第话")
+                latest_video_post = soup.find(string="连载：").parent.next_sibling.text
                 if "已完结" in latest_video_post:
                     logger.info(f"Post named: {post_name} has finished airing! URL: {url}")
                     continue
-                latest_video_number = int(latest_video_post)
+                latest_video_number = int(''.join(filter(str.isdigit, latest_video_post)))
                 if latest_video_number < self.video_num_per_post:  # Prevents asking for more videos than are available.
                     num_videos = latest_video_number  # This sets the number to download all videos of the post.
                 else:

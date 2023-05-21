@@ -188,7 +188,7 @@ class AnimeBabyScrapper(ScrapperTools):
             last_update_time = parser.parse(post_update).date()
             if last_update_time >= current_date_without_time:
                 latest_video_post = soup.find(string="连载：").parent.next_sibling.text
-                if "已完结" in latest_video_post:
+                if "已完结" in latest_video_post or "完结" in latest_video_post:
                     logger.info(f"Post named: {post_name} has finished airing! URL: {url}")
                     continue
                 latest_video_number = int(''.join(filter(str.isdigit, latest_video_post)))
@@ -272,7 +272,11 @@ class Yhdm6Scrapper(ScrapperTools):
             post_update = soup.find(class_="data_style").findNextSibling('em').text
             last_update_time = parser.parse(post_update).date()
             if last_update_time >= current_date_without_time:
-                latest_video_number = int(soup.find(class_="data_style").text.strip("全更新至集第"))
+                latest_video_post = soup.find(class_="data_style").text
+                if "完结" in latest_video_post:
+                    logger.info(f"Post named: {post_name} has finished airing! URL: {url}")
+                    continue
+                latest_video_number = int(''.join(filter(str.isdigit, latest_video_post)))
                 if latest_video_number < self.video_num_per_post:
                     num_videos = latest_video_number
                 else:

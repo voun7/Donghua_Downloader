@@ -3,7 +3,7 @@ import re
 import time
 from pathlib import Path
 
-from scrapers import XiaobaotvScraper, AnimeBabyScrapper, Yhdm6Scrapper
+from scrapers import XiaobaotvScraper, AnimeBabyScrapper
 from utilities.downloader import ScrapperDownloader
 from utilities.logger_setup import get_log
 from youtube import YouTube
@@ -74,16 +74,17 @@ def main() -> None:
     except Exception as error:
         logger.exception(f"An error occurred while running {site_address} site scrapper! \nError: {error}")
 
-    site_address = "yhdm6.top"
-    try:
-        logger.info(f"Checking {site_address} site for recent anime upload matches...")
-        yhdm6 = Yhdm6Scrapper(site_address)
-        site_posts = yhdm6.get_anime_posts()
-        matched_posts = yhdm6.match_to_recent_videos(site_posts, anime_list)
-        matched_download_details = yhdm6.get_recent_posts_videos_download_link(matched_posts, archive_content)
-        sd.batch_downloader(matched_download_details)
-    except Exception as error:
-        logger.exception(f"An error occurred while running {site_address} site scrapper! \nError: {error}")
+    # Site is down so scrapper will be disabled for now.
+    # site_address = "yhdm6.top"
+    # try:
+    #     logger.info(f"Checking {site_address} site for recent anime upload matches...")
+    #     yhdm6 = Yhdm6Scrapper(site_address)
+    #     site_posts = yhdm6.get_anime_posts()
+    #     matched_posts = yhdm6.match_to_recent_videos(site_posts, anime_list)
+    #     matched_download_details = yhdm6.get_recent_posts_videos_download_link(matched_posts, archive_content)
+    #     sd.batch_downloader(matched_download_details)
+    # except Exception as error:
+    #     logger.exception(f"An error occurred while running {site_address} site scrapper! \nError: {error}")
 
     end = time.perf_counter()
     logger.info(f"Total Runtime: {end - start}")

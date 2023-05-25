@@ -67,6 +67,7 @@ def main() -> None:
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         anime_baby = AnimeBabyScrapper(site_address)
         site_posts = anime_baby.get_anime_posts()
+        site_posts.update(anime_baby.get_anime_posts(page=2))
         matched_posts = anime_baby.match_to_recent_videos(site_posts, anime_list)
         matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts, archive_content)
         sd.batch_downloader(matched_download_details)

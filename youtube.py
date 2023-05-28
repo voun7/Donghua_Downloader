@@ -219,14 +219,14 @@ class YouTube:
             elif self.ch_name_gen.range_pattern.search(video_title):
                 resolved_name_range = resolved_name.split("EP")
                 resolved_name_episodes = resolved_name_range[1].split("-")
-                resolved_name_1 = f"{resolved_name_range[0]}EP{resolved_name_episodes[0]}"
+                # resolved_name_1 = f"{resolved_name_range[0]}EP{resolved_name_episodes[0]}"
                 resolved_name_2 = f"{resolved_name_range[0]}EP{resolved_name_episodes[1]}"
-                if resolved_name_1 in archive_content and resolved_name_2 in archive_content:
+                if resolved_name_2 in archive_content:
                     logger.warning(f"Video ID: {video_id}, Resolved name: {resolved_name} is already in the archive.")
                 else:
                     logger.info(f"Video ID: {video_id}, Resolved name: {resolved_name} is being added to the archive.")
                     archive_checked_videos[video_id] = video_title
-                    new_resolved_names.append(resolved_name_1 + "\n")
+                    # new_resolved_names.append(resolved_name_1 + "\n")
                     new_resolved_names.append(resolved_name_2 + "\n")
             else:
                 logger.info(f"Video ID: {video_id}, Resolved name: {resolved_name} is being added to the archive.")

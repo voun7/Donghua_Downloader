@@ -226,7 +226,8 @@ class YouTube:
                 else:
                     logger.info(f"Video ID: {video_id}, Resolved name: {resolved_name} is being added to the archive.")
                     archive_checked_videos[video_id] = video_title
-                    new_resolved_names.append(resolved_name_1 + "\n")
+                    if resolved_name_1 not in archive_content:
+                        new_resolved_names.append(resolved_name_1 + "\n")
                     new_resolved_names.append(resolved_name_2 + "\n")
             else:
                 logger.info(f"Video ID: {video_id}, Resolved name: {resolved_name} is being added to the archive.")

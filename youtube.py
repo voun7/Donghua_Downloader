@@ -102,10 +102,11 @@ class YouTube:
         the video id and title for the videos uploaded less than the default time.
         """
         channel_request = self.youtube.channels().list(part="contentDetails", id=channel_id)
-        channel_response = channel_request.execute()
-        upload_id = channel_response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
-        request = self.youtube.playlistItems().list(part="snippet", maxResults=self.max_results, playlistId=upload_id)
         try:
+            channel_response = channel_request.execute()
+            upload_id = channel_response['items'][0]['contentDetails']['relatedPlaylists']['uploads']
+            request = self.youtube.playlistItems().list(part="snippet", maxResults=self.max_results,
+                                                        playlistId=upload_id)
             response = request.execute()
         except Exception as error:
             logger.error(f"Youtube Channel: {channel_id} request failed")

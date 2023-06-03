@@ -32,10 +32,9 @@ def main() -> None:
     ch_id_3 = "UCBIiQ5Hlsadi1HQl8dufZag"  # 云朵屋互娱
     ch_id_4 = "UCJSAZ5pbDi8StbSbJI1riEg"  # Qixiang-Animation
     ch_id_5 = "UCJS5PJXcAIpXkBOjPNvK7Uw"  # Vita Animation Groups
-    ch_id_6 = "UCpsQzjI6BLuxrH6XNUHSWCQ"  # 小帅动漫 Xiaoshuai Animation
-    ch_id_7 = "UCXmOpN9pg1hJBRkHODL00EA"  # 三福动漫 Sanfu
-    ch_id_8 = "UCNIKva6iDURgVxf44pMZlKA"  # Animal Family
-    youtube_channel_ids = [ch_id_1, ch_id_2, ch_id_3, ch_id_4, ch_id_5, ch_id_6, ch_id_7, ch_id_8]
+    ch_id_6 = "UCXmOpN9pg1hJBRkHODL00EA"  # 三福动漫 Sanfu
+    ch_id_7 = "UCNIKva6iDURgVxf44pMZlKA"  # Animal Family
+    youtube_channel_ids = [ch_id_1, ch_id_2, ch_id_3, ch_id_4, ch_id_5, ch_id_6, ch_id_7]
 
     # Arguments
     try:

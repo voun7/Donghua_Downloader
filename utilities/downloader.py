@@ -18,7 +18,7 @@ class ScrapperDownloader:
         self.min_res_height = min_res_height  # Minimum allowed height of video resolution.
         self.downloaded_resolved_names_archive = self.new_downloaded_resolved_names = []
         if self.download_archive.exists():
-            self.downloaded_resolved_names_archive = self.download_archive.read_text(encoding="utf-8").splitlines()
+            self.downloaded_resolved_names_archive = set(self.download_archive.read_text(encoding="utf-8").splitlines())
 
     def update_download_archive(self) -> None:
         """
@@ -122,7 +122,7 @@ class ScrapperDownloader:
 
         if file_path.exists():
             logger.info(f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded successfully!")
-            self.downloaded_resolved_names_archive.append(resolved_name)  # Prevent download of exising resolved names.
+            self.downloaded_resolved_names_archive.add(resolved_name)  # Prevent download of exising resolved names.
             self.new_downloaded_resolved_names.append(resolved_name + "\n")
         else:
             logger.warning(f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded failed!")

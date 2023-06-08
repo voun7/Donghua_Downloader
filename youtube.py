@@ -212,7 +212,7 @@ class YouTube:
         logger.info("..........Checking archive for resolved name matches..........")
         archive_content, archive_checked_videos, new_resolved_names = [], {}, []
         if self.resolved_names_archive.exists():
-            archive_content = self.resolved_names_archive.read_text(encoding="utf-8").splitlines()
+            archive_content = set(self.resolved_names_archive.read_text(encoding="utf-8").splitlines())
         for video_id, video_details in quality_checked_videos.items():
             resolved_name, video_title = video_details[0], video_details[1]
             if resolved_name in archive_content:

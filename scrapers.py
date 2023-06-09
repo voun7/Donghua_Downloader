@@ -48,6 +48,12 @@ class ScrapperTools:
             logger.info("No post matches found!")
         return matched_posts
 
+    def get_num_of_videos(self, latest_video_number: int) -> int:
+        if latest_video_number < self.video_num_per_post:  # Prevents asking for more videos than are available.
+            return latest_video_number  # This sets the number to download all videos of the post.
+        else:
+            return self.video_num_per_post
+
 
 class XiaobaotvScraper(ScrapperTools):
     def __init__(self, site) -> None:
@@ -89,10 +95,7 @@ class XiaobaotvScraper(ScrapperTools):
             last_updated_date_without_time = parser.parse(post_update[1]).date()
             if last_updated_date_without_time >= current_date_without_time:
                 latest_video_number = int(post_update[0].strip('更新至集全'))
-                if latest_video_number < self.video_num_per_post:  # Prevents asking for more videos than are available.
-                    num_videos = latest_video_number  # This sets the number to download all videos of the post.
-                else:
-                    num_videos = self.video_num_per_post
+                num_videos = self.get_num_of_videos(latest_video_number)
                 video_start_num = latest_video_number - num_videos + 1
                 logger.info(f"Post named: {post_name} is new, last Updated: {last_updated_date_without_time}, "
                             f"latest video number: {latest_video_number}. "
@@ -215,10 +218,7 @@ class AnimeBabyScrapper(ScrapperTools):
                     logger.info(f"Post named: {post_name} has finished airing! URL: {url}")
                     continue
                 latest_video_number = int(''.join(filter(str.isdigit, latest_video_post)))
-                if latest_video_number < self.video_num_per_post:  # Prevents asking for more videos than are available.
-                    num_videos = latest_video_number  # This sets the number to download all videos of the post.
-                else:
-                    num_videos = self.video_num_per_post
+                num_videos = self.get_num_of_videos(latest_video_number)
                 video_start_num = latest_video_number - num_videos + 1
                 logger.info(f"Post named: {post_name} is new, last Updated: {last_update_time}, "
                             f"latest video number: {latest_video_number}. "

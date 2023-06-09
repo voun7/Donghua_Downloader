@@ -78,7 +78,7 @@ class XiaobaotvScraper(ScrapperTools):
             video_name_and_link[post_name] = post_url
         return video_name_and_link
 
-    def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: list) -> dict:
+    def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: set) -> dict:
         """
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
         How many of the other recent post videos are determined by video_num_per_post value.
@@ -204,7 +204,7 @@ class AnimeBabyScrapper(ScrapperTools):
             logger.error(f"Video link not found! Error: {error}")
             return
 
-    def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: list) -> dict:
+    def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: set) -> dict:
         """
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
         How many of the other recent post videos are determined by video_num_per_post value.
@@ -282,7 +282,7 @@ class TempScrapper(ScrapperTools):
             logger.exception(error)
             logger.critical("Program failed to access website!\n")
 
-    def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: list) -> dict:
+    def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: set) -> dict:
         """
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
         How many of the other recent post videos are determined by video_num_per_post value.

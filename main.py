@@ -51,7 +51,7 @@ def main() -> None:
 
     sd = ScrapperDownloader(playlist_download_dir, download_archive, ffmpeg_path, min_res_height)
 
-    archive_content = download_archive.read_text(encoding="utf-8").splitlines() if download_archive.exists() else []
+    archive_content = set(download_archive.read_text(encoding="utf-8").splitlines())
 
     site_address = "xiaobaotv.net"
     try:

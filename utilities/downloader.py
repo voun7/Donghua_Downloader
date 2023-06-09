@@ -139,6 +139,7 @@ class ScrapperDownloader:
         if not all_download_details:
             logger.info("No Videos to download!\n")
             return
+        logger.debug(f"all_download_details: {all_download_details}")
         start = time.perf_counter()
         with concurrent.futures.ThreadPoolExecutor() as executor:
             _ = [executor.submit(self.video_downloader, resolved_name, download_details)

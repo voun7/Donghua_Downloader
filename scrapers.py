@@ -198,6 +198,14 @@ class AnimeBabyScrapper(ScrapperTools):
             video_name_and_link[post_name] = post_url
         return video_name_and_link
 
+    def get_post_video_link(self, soup: BeautifulSoup, post_name: str, video_number: int) -> str | None:
+        try:
+            video_post = soup.find('a', {"title": f"播放{post_name}第{video_number:02d}集"})
+            return self.base_url + video_post.get('href')
+        except Exception as error:
+            logger.error(f"Video link not found! Error: {error}")
+            return
+
     def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: list) -> dict:
         """
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
@@ -231,16 +239,10 @@ class AnimeBabyScrapper(ScrapperTools):
                 if resolved_name in archive_content:
                     logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
                     continue
-                video_post = soup.find('a', {"title": f"播放{post_name}第{video_number:02d}集"})
-                try:
-                    video_link = self.base_url + video_post.get('href')
-                except Exception as error:
-                    video_link = None
-                    logger.error(f"Video link not found! Error: {error}")
+                video_link = self.get_post_video_link(soup, post_name, video_number)
                 download_link = self.get_video_download_link(video_link)
                 logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
                 all_download_details[resolved_name] = file_name, anime_name, download_link
-
         end = time.perf_counter()
         logger.info(f"{self.time_message}{end - start}\n")
         if self.cloudflare_detected:

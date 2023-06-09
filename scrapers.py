@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from dateutil import parser
 
 from utilities.ch_title_gen import ChineseTitleGenerator
+from utilities.telegram_bot import send_telegram_message
 
 logger = logging.getLogger(__name__)
 # Do not log this messages unless they are at least warnings
@@ -156,6 +157,8 @@ class AnimeBabyScrapper(ScrapperTools):
         page_content = self.chrome_driver.page_source
         if "cloudflare" in page_content:
             logger.error("Cloudflare bypass failed!")
+            message = f"Cloudflare bypass failed on {self.base_url} site!"
+            send_telegram_message(message)
         else:
             logger.info("Cloudflare bypass succeeded!")
 

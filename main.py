@@ -6,6 +6,7 @@ from pathlib import Path
 from scrapers import XiaobaotvScraper, AnimeBabyScrapper
 from utilities.downloader import ScrapperDownloader
 from utilities.logger_setup import get_log
+from utilities.telegram_bot import send_telegram_message
 from youtube import YouTube
 
 logger = logging.getLogger(__name__)
@@ -44,7 +45,9 @@ def main() -> None:
         youtube.match_to_youtube_videos(youtube_channel_ids, anime_list)
         youtube.playlist_downloader(playlist_download_dir, youtube_download_archive, ffmpeg_path, min_res_height)
     except Exception as error:
-        logger.exception(f"An error occurred while running YouTube scrapper! Error: {error}")
+        error_message = f"An error occurred while running YouTube scrapper! Error: {error}"
+        logger.exception(error_message)
+        send_telegram_message(error_message)
 
     sd = ScrapperDownloader(playlist_download_dir, download_archive, ffmpeg_path, min_res_height)
 
@@ -59,7 +62,9 @@ def main() -> None:
         matched_download_details = xiaobaotv.get_recent_posts_videos_download_link(matched_posts, archive_content)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
-        logger.exception(f"An error occurred while running {site_address} site scrapper! \nError: {error}")
+        error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
+        logger.exception(error_message)
+        send_telegram_message(error_message)
 
     site_address = "animebaby.top"
     try:
@@ -71,7 +76,9 @@ def main() -> None:
         matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts, archive_content)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
-        logger.exception(f"An error occurred while running {site_address} site scrapper! \nError: {error}")
+        error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
+        logger.exception(error_message)
+        send_telegram_message(error_message)
 
     end = time.perf_counter()
     logger.info(f"Total Runtime: {end - start}")

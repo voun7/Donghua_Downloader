@@ -12,6 +12,7 @@ from googleapiclient.discovery import build
 from yt_dlp import YoutubeDL
 
 from utilities.ch_title_gen import ChineseTitleGenerator
+from utilities.telegram_bot import send_telegram_message
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +29,9 @@ class YouTube:
         try:
             self.get_authenticated_service()
         except Exception as error:
-            logger.exception(error)
-            logger.critical("Program failed to authenticate!\n")
+            error_message = f"Youtube program failed to authenticate! \nError: {error}"
+            logger.critical(error_message)
+            send_telegram_message(error_message)
 
     def get_authenticated_service(self) -> None:
         """
@@ -302,7 +304,9 @@ class YouTube:
 
         def my_hook(d: dict) -> None:
             if d['status'] == 'error':
-                logger.exception(f'An error has occurred when downloading: {d["filename"]}')
+                error_message = f'An error has occurred when downloading: {d["filename"]}'
+                logger.exception(error_message)
+                send_telegram_message(error_message)
             if d['status'] == 'finished':
                 logger.info(f'Done downloading file. File location: {d["filename"]}')
 

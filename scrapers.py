@@ -282,44 +282,43 @@ class TempScrapper(ScrapperTools):
             logger.exception(error)
             logger.critical("Program failed to access website!\n")
 
-    def get_recent_posts_videos_download_link(self, matched_posts: dict) -> dict:
+    def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: list) -> dict:
         """
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
         How many of the other recent post videos are determined by video_num_per_post value.
         """
         logger.info("..........Checking for latest videos download links..........")
-        all_download_details = {}
-        current_date_without_time = datetime.now().date()
-        start = time.perf_counter()
+        all_download_details, current_date_without_time, start = {}, datetime.now().date(), time.perf_counter()
         for post_name, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]
             page_response = requests.get(url, headers=self.header)
             soup = BeautifulSoup(page_response.text, self.parser)
             post_update = soup.find()
-            last_update_time = parser.parse(post_update).date()
-            if last_update_time >= current_date_without_time:
-                latest_video_number = int(soup.find())
-                if latest_video_number < self.video_num_per_post:  # Prevents asking for more videos than are available.
-                    num_videos = latest_video_number  # This sets the number to download all videos of the post.
-                else:
-                    num_videos = self.video_num_per_post
-                video_start_num = latest_video_number - num_videos + 1
-                logger.info(f"Post named: {post_name} is new, last Updated: {last_update_time}, "
-                            f"latest video number: {latest_video_number}. "
-                            f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")
-                for video_number in range(video_start_num, latest_video_number + 1):
-                    video_post = soup.find()
-                    file_name = f""
-                    try:
-                        video_link = ''
-                    except Exception as error:
-                        video_link = None
-                        logger.error(f"Video link not found! Error: {error}")
-                    download_link = self.get_video_download_link(video_link)
-                    logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
-                    all_download_details[download_link] = file_name, anime_name
-            else:
-                logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_update_time}")
+            last_updated_date = parser.parse(post_update).date()
+            if not last_updated_date >= current_date_without_time:
+                logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date}")
+                continue
+            latest_video_number = int(soup.find())
+            num_videos = self.get_num_of_videos(latest_video_number)
+            video_start_num = latest_video_number - num_videos + 1
+            logger.info(f"Post named: {post_name} is new, last Updated: {last_updated_date}, "
+                        f"latest video number: {latest_video_number}. "
+                        f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")
+            for video_number in range(video_start_num, latest_video_number + 1):
+                video_post = soup.find()
+                file_name = f""
+                resolved_name = self.ch_gen.generate_title(file_name, anime_name)
+                if resolved_name in archive_content:
+                    logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
+                    continue
+                try:
+                    video_link = ''
+                except Exception as error:
+                    video_link = None
+                    logger.error(f"Video link not found! Error: {error}")
+                download_link = self.get_video_download_link(video_link)
+                logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
+                all_download_details[download_link] = file_name, anime_name
         end = time.perf_counter()
         logger.info(f"Total time: {end - start}\n")
         return all_download_details

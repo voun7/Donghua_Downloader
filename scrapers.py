@@ -84,9 +84,7 @@ class XiaobaotvScraper(ScrapperTools):
         How many of the other recent post videos are determined by video_num_per_post value.
         """
         logger.info(self.check_downlink_message)
-        all_download_details = {}
-        current_date_without_time = datetime.now().date()
-        start = time.perf_counter()
+        all_download_details, current_date_without_time, start = {}, datetime.now().date(), time.perf_counter()
         for post_name, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]
             page_response = requests.get(url, headers=self.header)
@@ -212,9 +210,7 @@ class AnimeBabyScrapper(ScrapperTools):
         How many of the other recent post videos are determined by video_num_per_post value.
         """
         logger.info(self.check_downlink_message)
-        all_download_details = {}
-        current_date_without_time = datetime.now().date()
-        start = time.perf_counter()
+        all_download_details, current_date_without_time, start = {}, datetime.now().date(), time.perf_counter()
         for post_name, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]
             soup = self.get_page_response(url)

@@ -11,6 +11,8 @@ from undetected_chromedriver import Chrome
 from utilities.ch_title_gen import ChineseTitleGenerator
 
 logger = logging.getLogger(__name__)
+# Do not log this messages unless they are at least warnings
+logging.getLogger("selenium").setLevel(logging.WARNING)
 
 
 class ScrapperTools:

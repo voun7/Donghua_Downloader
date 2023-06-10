@@ -269,7 +269,7 @@ class EightEightMVScrapper(ScrapperTools):
         payload = f"/vod-type-id-30-pg-{page}.html"
         page_response = requests.get(self.base_url + payload, headers=self.header)
         page_response.raise_for_status()
-        soup = BeautifulSoup(page_response.text, self.parser)
+        soup = BeautifulSoup(page_response.content, self.parser)
         posts = soup.find_all('li', class_='p1 m1')
         for post in posts:
             post_name = post.find('p', class_='name').text

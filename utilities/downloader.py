@@ -146,8 +146,13 @@ class ScrapperDownloader:
         logger.debug(f"all_download_details: {all_download_details}")
         start = time.perf_counter()
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            _ = [executor.submit(self.video_downloader, resolved_name, download_details)
-                 for resolved_name, download_details in all_download_details.items()]
+            futures = [executor.submit(self.video_downloader, resolved_name, download_details)
+                       for resolved_name, download_details in all_download_details.items()]
+            for i, f in enumerate(concurrent.futures.as_completed(futures)):  # as each  process completes
+                error = f.exception()
+                if error:
+                    logger.exception(f.result())
+                    logger.exception(error)
         self.update_download_archive()
         logger.info("Downloads finished!")
         end = time.perf_counter()

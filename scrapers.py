@@ -202,7 +202,7 @@ class AnimeBabyScrapper(ScrapperTools):
             video_post = soup.find('a', {"title": f"播放{post_name}第{video_number:02d}集"})
             return self.base_url + video_post.get('href')
         except Exception as error:
-            logger.error(f"Video link not found! Error: {error}")
+            logger.error(f"Video link not found for Video Number:{post_name}{video_number}! Error: {error}")
             return
 
     def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: set) -> dict:
@@ -284,7 +284,7 @@ class EightEightMVScrapper(ScrapperTools):
             video_post = soup.find('a', {"title": f"第{video_number:02d}集"})
             return self.base_url + video_post.get('href')
         except Exception as error:
-            logger.error(f"Video link not found! Error: {error}")
+            logger.error(f"Video link not found for Video Number:{video_number}! Error: {error}")
             return
 
     def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: set) -> dict:
@@ -367,7 +367,7 @@ class AgeDm1Scrapper(ScrapperTools):
             video_post = soup.find('a', string=f"第{video_number}集")
             return self.base_url + video_post.get('href')
         except Exception as error:
-            logger.error(f"Video link not found! Error: {error}")
+            logger.error(f"Video link not found for Video Number:{video_number}! Error: {error}")
             return
 
     def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: set) -> dict:

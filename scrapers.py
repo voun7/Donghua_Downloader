@@ -266,7 +266,7 @@ class EightEightMVScrapper(ScrapperTools):
         """
         logger.info(f"..........Site Page {page} Anime Posts..........")
         video_name_and_link = {}
-        payload = f"/vod-type-id-30-pg-1.html"
+        payload = f"/vod-type-id-30-pg-{page}.html"
         page_response = requests.get(self.base_url + payload, headers=self.header)
         page_response.raise_for_status()
         soup = BeautifulSoup(page_response.text, self.parser)

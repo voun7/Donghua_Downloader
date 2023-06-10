@@ -29,6 +29,10 @@ class ScrapperTools:
     # Common texts used by scrappers are shared from here.
     check_downlink_message = "..........Checking for latest videos download links.........."
     time_message = "Time taken to retrieve recent posts download links: "
+    # Selenium config
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless=new")
+    driver = webdriver.Chrome(options=options)
 
     @staticmethod
     def match_to_recent_videos(posts: dict, anime_list: list) -> dict:
@@ -338,9 +342,6 @@ class EightEightMVScrapper(ScrapperTools):
 class AgeDm1Scrapper(ScrapperTools):
     def __init__(self, site: str) -> None:
         self.base_url = f"http://{site}"
-        options = webdriver.ChromeOptions()
-        options.add_argument("--headless=new")
-        self.driver = webdriver.Chrome(options=options)
         self.lst_ep_tag = " LST-EP:"
 
     def get_anime_posts(self, page: int = 1) -> dict:
@@ -381,8 +382,8 @@ class AgeDm1Scrapper(ScrapperTools):
             post_split = post_name_and_last_ep.split(self.lst_ep_tag)
             post_name, latest_video_post = post_split[0], post_split[1]
             anime_name, url = match_details[0], match_details[1]
-            page_response = requests.get(url, headers=self.header)
-            soup = BeautifulSoup(page_response.content, self.parser)
+            self.driver.get(url)
+            soup = BeautifulSoup(self.driver.page_source, self.parser)
             latest_video_number = int(''.join(filter(str.isdigit, latest_video_post)))
             num_videos = self.get_num_of_videos(latest_video_number)
             video_start_num = latest_video_number - num_videos + 1
@@ -400,7 +401,6 @@ class AgeDm1Scrapper(ScrapperTools):
                 all_download_details[download_link] = file_name, anime_name
         end = time.perf_counter()
         logger.info(f"{self.time_message}{end - start}\n")
-        self.driver.quit()  # close headless browser
         return all_download_details
 
     def get_video_download_link(self, video_url: str) -> str:

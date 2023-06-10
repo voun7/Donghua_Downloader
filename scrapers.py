@@ -338,11 +338,16 @@ class EightEightMVScrapper(ScrapperTools):
         This method uses the video url to find the video download link.
         """
         if video_url:
-            # TODO: Finish implementation of finding download link.
             self.driver.get(video_url)
             soup = BeautifulSoup(self.driver.page_source, self.parser)
-            download_link = soup.find()
-            return ''
+            download_src = soup.find("iframe", attrs={'allowfullscreen': 'true'}).get("src")
+            self.driver.get(download_src)
+            soup = BeautifulSoup(self.driver.page_source, self.parser)
+            script_tag_matches = soup.find_all('script')
+            if script_tag_matches:
+                download_link = re.search(r"video_url = '(.+)'", str(script_tag_matches[-1]))
+                return download_link.group(1)
+            return download_src
 
 
 class AgeDm1Scrapper(ScrapperTools):

@@ -323,7 +323,7 @@ class EightEightMVScrapper(ScrapperTools):
                 video_link = self.get_post_video_link(soup, video_number)
                 download_link = self.get_video_download_link(video_link)
                 logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
-                all_download_details[download_link] = file_name, anime_name
+                all_download_details[resolved_name] = file_name, anime_name, download_link
         end = time.perf_counter()
         logger.info(f"{self.time_message}{end - start}\n")
         return all_download_details
@@ -398,7 +398,7 @@ class AgeDm1Scrapper(ScrapperTools):
                 video_link = self.get_post_video_link(soup, video_number)
                 download_link = self.get_video_download_link(video_link)
                 logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
-                all_download_details[download_link] = file_name, anime_name
+                all_download_details[resolved_name] = file_name, anime_name, download_link
         end = time.perf_counter()
         logger.info(f"{self.time_message}{end - start}\n")
         return all_download_details

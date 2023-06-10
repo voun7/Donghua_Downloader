@@ -102,7 +102,7 @@ def main() -> None:
         site_posts.update(agedm1.get_anime_posts(page=2))
         matched_posts = agedm1.match_to_recent_videos(site_posts, anime_list)
         matched_download_details = agedm1.get_recent_posts_videos_download_link(matched_posts, archive_content)
-        agedm1.driver.quit()  # close headless browser
+        agedm1.driver.quit()  # Close headless browser
         sd.batch_downloader(matched_download_details)
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"

@@ -255,9 +255,9 @@ class AnimeBabyScrapper(ScrapperTools):
             return download_link
 
 
-class TempScrapper(ScrapperTools):
-    def __init__(self) -> None:
-        self.base_url = ""
+class EightEightMVScrapper(ScrapperTools):
+    def __init__(self, site: str) -> None:
+        self.base_url = f"https://{site}"
 
     def get_anime_posts(self, page: int = 1) -> dict:
         """
@@ -266,21 +266,25 @@ class TempScrapper(ScrapperTools):
         """
         logger.info(f"..........Site Page {page} Anime Posts..........")
         video_name_and_link = {}
-        payload = f"{page}"
+        payload = f"/vod-type-id-30-pg-1.html"
+        page_response = requests.get(self.base_url + payload, headers=self.header)
+        page_response.raise_for_status()
+        soup = BeautifulSoup(page_response.text, self.parser)
+        posts = soup.find_all('li', class_='p1 m1')
+        for post in posts:
+            post_name = post.find('p', class_='name').text
+            post_url = self.base_url + post.find('a', class_='link-hover').get('href')
+            logger.info(f"Post Title: {post_name}, Post URL: {post_url}")
+            video_name_and_link[post_name] = post_url
+        return video_name_and_link
+
+    def get_post_video_link(self, soup: BeautifulSoup, video_number: int) -> str | None:
         try:
-            page_response = requests.get(self.base_url + payload, headers=self.header)
-            logger.info(f"Page Response = {page_response}")
-            soup = BeautifulSoup(page_response.text, self.parser)
-            posts = soup.find_all()
-            for post in posts:
-                post_name = ''
-                post_url = ''
-                logger.info(f"Post Title: {post_name}, Post URL: {post_url}")
-                video_name_and_link[post_name] = post_url
-            return video_name_and_link
+            video_post = soup.find('a', {"title": f"第{video_number:02d}集"})
+            return self.base_url + video_post.get('href')
         except Exception as error:
-            logger.exception(error)
-            logger.critical("Program failed to access website!\n")
+            logger.error(f"Video link not found! Error: {error}")
+            return
 
     def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: set) -> dict:
         """
@@ -292,35 +296,31 @@ class TempScrapper(ScrapperTools):
         for post_name, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]
             page_response = requests.get(url, headers=self.header)
-            soup = BeautifulSoup(page_response.text, self.parser)
-            post_update = soup.find()
+            soup = BeautifulSoup(page_response.content, self.parser)
+            post_update = soup.find(string="更新：").parent.next_sibling.text
             last_updated_date = parser.parse(post_update).date()
             if not last_updated_date >= current_date_without_time:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date}")
                 continue
-            latest_video_number = int(soup.find())
+            latest_video_post = soup.find(string="状态：").parent.next_sibling.text
+            latest_video_number = int(''.join(filter(str.isdigit, latest_video_post)))
             num_videos = self.get_num_of_videos(latest_video_number)
             video_start_num = latest_video_number - num_videos + 1
             logger.info(f"Post named: {post_name} is new, last Updated: {last_updated_date}, "
                         f"latest video number: {latest_video_number}. "
                         f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")
             for video_number in range(video_start_num, latest_video_number + 1):
-                video_post = soup.find()
-                file_name = f""
+                file_name = f"{post_name} 第{video_number}集"
                 resolved_name = self.ch_gen.generate_title(file_name, anime_name)
                 if resolved_name in archive_content:
                     logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
                     continue
-                try:
-                    video_link = ''
-                except Exception as error:
-                    video_link = None
-                    logger.error(f"Video link not found! Error: {error}")
+                video_link = self.get_post_video_link(soup, video_number)
                 download_link = self.get_video_download_link(video_link)
                 logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
                 all_download_details[download_link] = file_name, anime_name
         end = time.perf_counter()
-        logger.info(f"Total time: {end - start}\n")
+        logger.info(f"{self.time_message}{end - start}\n")
         return all_download_details
 
     def get_video_download_link(self, video_url: str) -> str:
@@ -331,4 +331,4 @@ class TempScrapper(ScrapperTools):
             page_response = requests.get(video_url, headers=self.header)
             soup = BeautifulSoup(page_response.text, self.parser)
             download_link = soup.find()
-            return download_link
+            return ''

@@ -333,8 +333,9 @@ class EightEightMVScrapper(ScrapperTools):
         This method uses the video url to find the video download link.
         """
         if video_url:
-            page_response = requests.get(video_url, headers=self.header)
-            soup = BeautifulSoup(page_response.content, self.parser)
+            # TODO: Finish implementation of finding download link.
+            self.driver.get(video_url)
+            soup = BeautifulSoup(self.driver.page_source, self.parser)
             download_link = soup.find()
             return ''
 

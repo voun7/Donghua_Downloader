@@ -286,7 +286,12 @@ class EightEightMVScrapper(ScrapperTools):
     def get_post_video_link(self, soup: BeautifulSoup, video_number: int) -> str | None:
         try:
             video_post = soup.find('a', {"title": f"第{video_number:02d}集"})
-            return self.base_url + video_post.get('href')
+            if video_post:
+                video_post_link = self.base_url + video_post.get('href')
+            else:
+                video_post = soup.find('a', {"title": f"第{video_number}集"})
+                video_post_link = self.base_url + video_post.get('href')
+            return video_post_link
         except Exception as error:
             logger.error(f"Video link not found for Video Number:{video_number}! Error: {error}")
             return

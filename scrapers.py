@@ -56,7 +56,7 @@ class ScrapperTools:
 
 
 class XiaobaotvScraper(ScrapperTools):
-    def __init__(self, site) -> None:
+    def __init__(self, site: str) -> None:
         self.base_url = f"https://{site}"
 
     def get_anime_posts(self, page: int = 1) -> dict:
@@ -130,7 +130,7 @@ class XiaobaotvScraper(ScrapperTools):
 
 
 class AnimeBabyScrapper(ScrapperTools):
-    def __init__(self, site) -> None:
+    def __init__(self, site: str) -> None:
         self.base_url = f"https://{site}"
         self.cloudflare_detected = self.detect_cloudflare()
         self.chrome_driver = None

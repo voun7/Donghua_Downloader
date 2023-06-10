@@ -7,6 +7,8 @@ from pathlib import Path
 
 import requests
 
+from utilities.telegram_bot import send_telegram_message
+
 logger = logging.getLogger(__name__)
 
 
@@ -55,7 +57,7 @@ class ScrapperDownloader:
                        str(temp_file)]
         if not temp_file.exists():
             logger.error(f"Resolution check temp file for {file_name} not found!")
-            return True
+            return False
         resolution = subprocess.check_output(ffprobe_cmd, stderr=subprocess.DEVNULL).decode().strip().split(',')
         width, height = int(resolution[0]), int(resolution[1])
         # Delete the downloaded file.
@@ -128,7 +130,9 @@ class ScrapperDownloader:
             self.downloaded_resolved_names_archive.add(resolved_name)  # Prevent download of exising resolved names.
             self.new_downloaded_resolved_names.append(resolved_name + "\n")
         else:
-            logger.warning(f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded failed!")
+            error_message = f"[downloader] Resolved name: {resolved_name}, File: {file_path.name}, downloaded failed!"
+            logger.warning(error_message)
+            send_telegram_message(error_message)
 
     def batch_downloader(self, all_download_details: dict) -> None:
         """

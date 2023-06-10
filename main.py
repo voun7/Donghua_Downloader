@@ -3,7 +3,7 @@ import re
 import time
 from pathlib import Path
 
-from scrapers import XiaobaotvScraper, AnimeBabyScrapper, EightEightMVScrapper
+from scrapers import XiaobaotvScraper, AnimeBabyScrapper, EightEightMVScrapper, AgeDm1Scrapper
 from utilities.downloader import ScrapperDownloader
 from utilities.logger_setup import get_log
 from utilities.telegram_bot import send_telegram_message
@@ -88,6 +88,20 @@ def main() -> None:
         site_posts.update(eight_eight_mv.get_anime_posts(page=2))
         matched_posts = eight_eight_mv.match_to_recent_videos(site_posts, anime_list)
         matched_download_details = eight_eight_mv.get_recent_posts_videos_download_link(matched_posts, archive_content)
+        sd.batch_downloader(matched_download_details)
+    except Exception as error:
+        error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
+        logger.exception(error_message)
+        send_telegram_message(error_message)
+
+    site_address = "agedm1.com"
+    try:
+        logger.info(f"Checking {site_address} site for recent anime upload matches...")
+        agedm1 = AgeDm1Scrapper(site_address)
+        site_posts = agedm1.get_anime_posts()
+        site_posts.update(agedm1.get_anime_posts(page=2))
+        matched_posts = agedm1.match_to_recent_videos(site_posts, anime_list)
+        matched_download_details = agedm1.get_recent_posts_videos_download_link(matched_posts, archive_content)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"

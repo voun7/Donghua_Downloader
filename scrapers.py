@@ -19,6 +19,7 @@ logging.getLogger("selenium").setLevel(logging.WARNING)
 class ScrapperTools:
     parser = "html.parser"
     video_num_per_post = 3  # The number of recent videos that will downloaded per post.
+    current_date = datetime.now().date()
     header = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                       'AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -88,14 +89,14 @@ class XiaobaotvScraper(ScrapperTools):
         How many of the other recent post videos are determined by video_num_per_post value.
         """
         logger.info(self.check_downlink_message)
-        all_download_details, current_date_without_time, start = {}, datetime.now().date(), time.perf_counter()
+        all_download_details, start = {}, time.perf_counter()
         for post_name, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]
             page_response = requests.get(url, headers=self.header)
             soup = BeautifulSoup(page_response.text, self.parser)
             post_update = soup.find('span', class_='text-red').text.split(' / ')
             last_updated_date = parser.parse(post_update[1]).date()
-            if not last_updated_date >= current_date_without_time:
+            if not last_updated_date >= self.current_date:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date}")
                 continue
             latest_video_number = int(post_update[0].strip('更新至集全'))
@@ -212,13 +213,13 @@ class AnimeBabyScrapper(ScrapperTools):
         How many of the other recent post videos are determined by video_num_per_post value.
         """
         logger.info(self.check_downlink_message)
-        all_download_details, current_date_without_time, start = {}, datetime.now().date(), time.perf_counter()
+        all_download_details, start = {}, time.perf_counter()
         for post_name, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]
             soup = self.get_page_response(url)
             post_update = soup.find(string="更新：").parent.next_sibling.text.split("，")[0]
             last_updated_date = parser.parse(post_update).date()
-            if not last_updated_date >= current_date_without_time:
+            if not last_updated_date >= self.current_date:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date}")
                 continue
             latest_video_post = soup.find(string="连载：").parent.next_sibling.text
@@ -299,14 +300,14 @@ class EightEightMVScrapper(ScrapperTools):
         How many of the other recent post videos are determined by video_num_per_post value.
         """
         logger.info("..........Checking for latest videos download links..........")
-        all_download_details, current_date_without_time, start = {}, datetime.now().date(), time.perf_counter()
+        all_download_details, start = {}, time.perf_counter()
         for post_name, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]
             page_response = requests.get(url, headers=self.header)
             soup = BeautifulSoup(page_response.content, self.parser)
             post_update = soup.find(string="更新：").parent.next_sibling.text
             last_updated_date = parser.parse(post_update).date()
-            if not last_updated_date >= current_date_without_time:
+            if not last_updated_date >= self.current_date:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date}")
                 continue
             latest_video_post = soup.find(string="状态：").parent.next_sibling.text
@@ -473,14 +474,14 @@ class ImyydsScrapper(ScrapperTools):
         How many of the other recent post videos are determined by video_num_per_post value.
         """
         logger.info("..........Checking for latest videos download links..........")
-        all_download_details, current_date_without_time, start = {}, datetime.now().date(), time.perf_counter()
+        all_download_details, start = {}, time.perf_counter()
         for post_name, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]
             page_response = requests.get(url, headers=self.header)
             soup = BeautifulSoup(page_response.content, self.parser)
             post_update = soup.find(string="状态：").parent.next_sibling.next_sibling.next_sibling.text
             last_updated_date = parser.parse(post_update).date()
-            if not last_updated_date >= current_date_without_time:
+            if not last_updated_date >= self.current_date:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date}")
                 continue
             latest_video_post = soup.find(string="状态：").parent.next_sibling.text

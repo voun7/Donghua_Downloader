@@ -19,7 +19,6 @@ logging.getLogger("selenium").setLevel(logging.WARNING)
 class ScrapperTools:
     parser = "html.parser"
     video_num_per_post = 3  # The number of recent videos that will downloaded per post.
-    download_pattern = re.compile(r'"url":"(.*?)"')
     header = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
                       'AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -128,7 +127,7 @@ class XiaobaotvScraper(ScrapperTools):
         page_response = requests.get(video_url, headers=self.header)
         soup = BeautifulSoup(page_response.text, self.parser)
         download_script = soup.find(class_='embed-responsive clearfix')
-        download_match = self.download_pattern.finditer(str(download_script))
+        download_match = re.finditer(r'"url":"(.*?)"', str(download_script))
         for match in download_match:
             download_link = match[1].replace("\\", '')
         return download_link

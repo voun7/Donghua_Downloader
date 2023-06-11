@@ -3,7 +3,7 @@ import re
 import time
 from pathlib import Path
 
-from scrapers import XiaobaotvScraper, AnimeBabyScrapper, EightEightMVScrapper, AgeDm1Scrapper
+from scrapers import XiaobaotvScraper, AnimeBabyScrapper, EightEightMVScrapper, AgeDm1Scrapper, ImyydsScrapper
 from utilities.downloader import ScrapperDownloader
 from utilities.logger_setup import get_log
 from utilities.telegram_bot import send_telegram_message
@@ -103,6 +103,19 @@ def main() -> None:
         matched_posts = agedm1.match_to_recent_videos(site_posts, anime_list)
         matched_download_details = agedm1.get_recent_posts_videos_download_link(matched_posts, archive_content)
         agedm1.driver.quit()  # Close headless browser
+        sd.batch_downloader(matched_download_details)
+    except Exception as error:
+        error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
+        logger.exception(error_message)
+        send_telegram_message(error_message)
+
+    site_address = "imyyds.com"
+    try:
+        logger.info(f"Checking {site_address} site for recent anime upload matches...")
+        imyyds = ImyydsScrapper(site_address)
+        site_posts = imyyds.get_anime_posts()
+        matched_posts = imyyds.match_to_recent_videos(site_posts, anime_list)
+        matched_download_details = imyyds.get_recent_posts_videos_download_link(matched_posts, archive_content)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"

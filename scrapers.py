@@ -426,3 +426,89 @@ class AgeDm1Scrapper(ScrapperTools):
             if download_link:
                 download_link = download_link.group().replace("497", "")
                 return download_link
+
+
+class ImyydsScrapper(ScrapperTools):
+    def __init__(self, site: str) -> None:
+        self.base_url = f"https://{site}"
+
+    def get_anime_posts(self, page: int = 1) -> dict:
+        """
+        This method returns all the anime's posted on the sites given page.
+        :return: Post name as key and url as value.
+        """
+        logger.info(f"..........Site Page {page} Anime Posts..........")
+        video_name_and_link = {}
+        payload = f"/vodshow/4-国产-------{page}---.html"
+        page_response = requests.get(self.base_url + payload, headers=self.header)
+        page_response.raise_for_status()
+        soup = BeautifulSoup(page_response.content, self.parser)
+        posts = soup.find_all(class_='vodlist_title')
+        for post in posts:
+            post_name = post.text.strip()
+            post_url = self.base_url + post.find('a').get('href')
+            logger.info(f"Post Title: {post_name}, Post URL: {post_url}")
+            video_name_and_link[post_name] = post_url
+        return video_name_and_link
+
+    def get_post_video_link(self, soup: BeautifulSoup, video_number: int) -> str | None:
+        try:
+            video_post = soup.find('a', string=f"第{video_number:02d}集")
+            if video_post:
+                video_post_link = self.base_url + video_post.get('href')
+            else:
+                video_post = soup.find('a', string=f"第{video_number}集")
+                video_post_link = self.base_url + video_post.get('href')
+            return video_post_link
+        except Exception as error:
+            logger.error(f"Video link not found for Video Number:{video_number}! Error: {error}")
+            return
+
+    def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: set) -> dict:
+        """
+        Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
+        How many of the other recent post videos are determined by video_num_per_post value.
+        """
+        logger.info("..........Checking for latest videos download links..........")
+        all_download_details, current_date_without_time, start = {}, datetime.now().date(), time.perf_counter()
+        for post_name, match_details in matched_posts.items():
+            anime_name, url = match_details[0], match_details[1]
+            page_response = requests.get(url, headers=self.header)
+            soup = BeautifulSoup(page_response.content, self.parser)
+            post_update = soup.find(string="状态：").parent.next_sibling.next_sibling.next_sibling.text
+            last_updated_date = parser.parse(post_update).date()
+            if not last_updated_date >= current_date_without_time:
+                logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date}")
+                continue
+            latest_video_post = soup.find(string="状态：").parent.next_sibling.text
+            latest_video_number = int(''.join(filter(str.isdigit, latest_video_post)))
+            num_videos = self.get_num_of_videos(latest_video_number)
+            video_start_num = latest_video_number - num_videos + 1
+            logger.info(f"Post named: {post_name} is new, last Updated: {last_updated_date}, "
+                        f"latest video number: {latest_video_number}. "
+                        f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")
+            for video_number in range(video_start_num, latest_video_number + 1):
+                file_name = f"{post_name} 第{video_number}集"
+                resolved_name = self.ch_gen.generate_title(file_name, anime_name)
+                if resolved_name in archive_content:
+                    logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
+                    continue
+                video_link = self.get_post_video_link(soup, video_number)
+                download_link = self.get_video_download_link(video_link)
+                logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
+                all_download_details[resolved_name] = file_name, anime_name, download_link
+        end = time.perf_counter()
+        logger.info(f"{self.time_message}{end - start}\n")
+        return all_download_details
+
+    def get_video_download_link(self, video_url: str) -> str:
+        """
+        This method uses the video url to find the video download link.
+        """
+        if video_url:
+            page_response = requests.get(video_url, headers=self.header)
+            soup = BeautifulSoup(page_response.text, self.parser)
+            download_script = soup.find("script", attrs={'type': 'application/ld+json'})
+            download_match = re.search(r'"contentUrl": "(.*?)"', download_script.text)
+            download_link = download_match.group(1)
+            return download_link

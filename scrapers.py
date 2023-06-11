@@ -116,7 +116,7 @@ class XiaobaotvScraper(ScrapperTools):
                 logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
                 all_download_details[resolved_name] = file_name, anime_name, download_link
         end = time.perf_counter()
-        logger.info(f"{self.time_message}{end - start}\n")
+        logger.info(f"{self.time_message}{end - start}")
         return all_download_details
 
     def get_video_download_link(self, video_url: str) -> str:
@@ -242,7 +242,7 @@ class AnimeBabyScrapper(ScrapperTools):
                 logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
                 all_download_details[resolved_name] = file_name, anime_name, download_link
         end = time.perf_counter()
-        logger.info(f"{self.time_message}{end - start}\n")
+        logger.info(f"{self.time_message}{end - start}")
         if self.cloudflare_detected:
             self.close_driver()
         return all_download_details
@@ -327,7 +327,7 @@ class EightEightMVScrapper(ScrapperTools):
                 logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
                 all_download_details[resolved_name] = file_name, anime_name, download_link
         end = time.perf_counter()
-        logger.info(f"{self.time_message}{end - start}\n")
+        logger.info(f"{self.time_message}{end - start}")
         return all_download_details
 
     def get_video_download_link(self, video_url: str) -> str:
@@ -413,7 +413,7 @@ class AgeDm1Scrapper(ScrapperTools):
                 logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
                 all_download_details[resolved_name] = file_name, anime_name, download_link
         end = time.perf_counter()
-        logger.info(f"{self.time_message}{end - start}\n")
+        logger.info(f"{self.time_message}{end - start}")
         return all_download_details
 
     def get_video_download_link(self, video_url: str) -> str:
@@ -500,7 +500,7 @@ class ImyydsScrapper(ScrapperTools):
                 logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
                 all_download_details[resolved_name] = file_name, anime_name, download_link
         end = time.perf_counter()
-        logger.info(f"{self.time_message}{end - start}\n")
+        logger.info(f"{self.time_message}{end - start}")
         return all_download_details
 
     def get_video_download_link(self, video_url: str) -> str:

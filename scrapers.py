@@ -423,8 +423,8 @@ class AgeDm1Scrapper(ScrapperTools):
         if video_url:
             self.driver.get(video_url)
             soup = BeautifulSoup(self.driver.page_source, self.parser)
-            download_match = soup.find(id="playiframe").get('src')
-            download_link = re.search(r"https://[\w./]+.m3u8", download_match)
+            download_match = soup.find(id="playiframe")
+            download_link = re.search(r"https://[\w./]+.m3u8", download_match.get('src'))
             if download_link:
                 download_link = download_link.group().replace("497", "")
                 return download_link

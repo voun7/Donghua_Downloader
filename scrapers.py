@@ -123,13 +123,11 @@ class XiaobaotvScraper(ScrapperTools):
         """
         This method uses the video url to find the video download link.
         """
-        download_link = None
         page_response = requests.get(video_url, headers=self.header)
         soup = BeautifulSoup(page_response.text, self.parser)
         download_script = soup.find(class_='embed-responsive clearfix')
-        download_match = re.finditer(r'"url":"(.*?)"', str(download_script))
-        for match in download_match:
-            download_link = match[1].replace("\\", '')
+        download_match = re.search(r'"url":"(.*?)"', str(download_script))
+        download_link = download_match.group(1).replace("\\", '')
         return download_link
 
 

@@ -130,7 +130,7 @@ class ScrapperDownloader:
             self.downloaded_resolved_names_archive.add(resolved_name)  # Prevent download of exising resolved names.
             self.new_downloaded_resolved_names.append(resolved_name + "\n")
         else:
-            error_message = f"[downloader] Resolved name: {resolved_name}, File: {file_path.name}, downloaded failed!"
+            error_message = f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded failed!"
             logger.warning(error_message)
             send_telegram_message(error_message)
 

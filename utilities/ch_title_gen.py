@@ -152,7 +152,7 @@ class ChineseTitleGenerator:
             self.name = f"{self.base_name} EP{ep_num}{self.suffixes}"
         elif len(self.number_list) > 1:
             if len(self.number_list) > 2 and self.number_list[0] == self.number_list[1]:
-                self.number_list.pop(0)
+                self.number_list.pop(0)  # For titles that have season written twice in name.
             season_num = self.number_list[0]
             episode_num = self.number_list[1]
             self.name = f"{self.base_name} S{season_num} EP{episode_num}{self.suffixes}"

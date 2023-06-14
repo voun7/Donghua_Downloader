@@ -92,7 +92,7 @@ def main() -> None:
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
         logger.exception(error_message)
-        send_telegram_message(error_message)
+        # send_telegram_message(error_message)
 
     site_address = "agedm1.com"
     try:

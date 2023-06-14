@@ -34,7 +34,8 @@ class ChineseTitleGenerator:
         """
         file_path = Path(self.name)
         if file_path.exists():
-            self.suffixes = "".join(file_path.suffixes)
+            filtered_suffixes = [suffix for suffix in file_path.suffixes if " " not in suffix]
+            self.suffixes = "".join(filtered_suffixes)
             self.name = file_path.stem
         else:
             self.suffixes = ""

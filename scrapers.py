@@ -91,31 +91,36 @@ class XiaobaotvScraper(ScrapperTools):
         logger.info(self.check_downlink_message)
         all_download_details, start = {}, time.perf_counter()
         for post_name, match_details in matched_posts.items():
-            anime_name, url = match_details[0], match_details[1]
-            page_response = requests.get(url, headers=self.header)
-            soup = BeautifulSoup(page_response.text, self.parser)
-            post_update = soup.find('span', class_='text-red').text.split(' / ')
-            last_updated_date = parser.parse(post_update[1]).date()
-            if not last_updated_date >= self.current_date:
-                logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date}")
-                continue
-            latest_video_number = int(post_update[0].strip('更新至集全'))
-            num_videos = self.get_num_of_videos(latest_video_number)
-            video_start_num = latest_video_number - num_videos + 1
-            logger.info(f"Post named: {post_name} is new, last Updated: {last_updated_date}, "
-                        f"latest video number: {latest_video_number}. "
-                        f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")
-            for video_number in range(video_start_num, latest_video_number + 1):
-                file_name = f"{post_name} 第{video_number}集"
-                resolved_name = self.ch_gen.generate_title(file_name, anime_name)
-                if resolved_name in archive_content:
-                    logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
+            try:
+                anime_name, url = match_details[0], match_details[1]
+                page_response = requests.get(url, headers=self.header)
+                soup = BeautifulSoup(page_response.text, self.parser)
+                post_update = soup.find('span', class_='text-red').text.split(' / ')
+                last_updated_date = parser.parse(post_update[1]).date()
+                if not last_updated_date >= self.current_date:
+                    logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date}")
                     continue
-                video_post = soup.find('li', {"title": f"{video_number}"})
-                video_link = self.base_url + video_post.find('a').get('href')
-                download_link = self.get_video_download_link(video_link)
-                logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
-                all_download_details[resolved_name] = file_name, anime_name, download_link
+                latest_video_number = int(post_update[0].strip('更新至集全'))
+                num_videos = self.get_num_of_videos(latest_video_number)
+                video_start_num = latest_video_number - num_videos + 1
+                logger.info(f"Post named: {post_name} is new, last Updated: {last_updated_date}, "
+                            f"latest video number: {latest_video_number}. "
+                            f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")
+                for video_number in range(video_start_num, latest_video_number + 1):
+                    file_name = f"{post_name} 第{video_number}集"
+                    resolved_name = self.ch_gen.generate_title(file_name, anime_name)
+                    if resolved_name in archive_content:
+                        logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
+                        continue
+                    video_post = soup.find('li', {"title": f"{video_number}"})
+                    video_link = self.base_url + video_post.find('a').get('href')
+                    download_link = self.get_video_download_link(video_link)
+                    logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
+                    all_download_details[resolved_name] = file_name, anime_name, download_link
+            except Exception as error:
+                error_message = f"An error occurred while scrapping {post_name}! \nError: {error}"
+                logger.exception(error_message)
+                send_telegram_message(error_message)
         end = time.perf_counter()
         logger.info(f"{self.time_message}{end - start}")
         return all_download_details

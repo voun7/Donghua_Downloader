@@ -19,12 +19,7 @@ class ChineseTitleGenerator:
         # Regex patterns for name.
         self.all_number_pattern = re.compile(r'(\d+)')
         self.range_pattern = re.compile(r'\d+\s*[-~]\s*\d+')
-        # Regex for english characters.
-        self.en_key_ch_key_pattern = re.compile(r'[Ss](\d+)')
-        self.en_key_season_ep_pattern = re.compile(r'(?:[Ss](\d+).*)?(?:E|EP|ep)(\d+)')
-        # Regex for chinese characters.
-        self.ch_key_and_num_pattern = re.compile(r'[集季][-\d]')  # Consider removing, not need for most cases.
-        self.ch_keyword_pattern = re.compile(r'第(\d+)[集季话]')
+        self.keyword_pattern = re.compile(r'[SsEPep第](\d+)[集季话]*(\d+)*')
         self.ch_num_pattern = re.compile(r'第([零一二三四五六七八九十百千万]+)[集季话]')
         self.ch_key_range_pattern = re.compile(r'(?:第(\d+)[集季话].*)?第(\d+)\s*[-~]\s*(\d+)[集季话]')
 
@@ -63,20 +58,6 @@ class ChineseTitleGenerator:
                 ch_num_in_english = str(cn2num(ch_num))
                 self.filtered_name = self.filtered_name.replace(ch_num_match, f"第{ch_num_in_english}集")
 
-    def en_key_ch_key_filter(self) -> None:
-        """
-        Replace the english keyword representing the season in the title with a chinese keyword.
-        Only works on names that have season keyword in english but no episode keyword.
-        """
-        if self.en_key_ch_key_pattern.search(self.filtered_name):
-            logger.debug("en_key_ch_key_pattern match in name")
-            matches = self.en_key_ch_key_pattern.finditer(self.filtered_name)
-            for match in matches:
-                en_char_match = match.group(0)
-                logger.debug(f"en_char_match: {en_char_match}")
-                en_char_match_num = match.group(1)
-                self.filtered_name = self.filtered_name.replace(en_char_match, f"第{en_char_match_num}集")
-
     def filter_name(self) -> None:
         """
         Make the name easier for regex patterns to find relevant numbers.
@@ -85,12 +66,6 @@ class ChineseTitleGenerator:
 
         self.miscellaneous_strings_filter()
         self.chinese_num_filter()
-        self.en_key_ch_key_filter()
-
-        if self.ch_key_and_num_pattern.search(self.filtered_name):
-            logger.debug("ch_key_and_num_pattern match in name")
-            # Removes chinese keyword prefix to allow all numbers to be captured instead.
-            self.filtered_name = self.filtered_name.replace('第', '')
 
     def set_number_list(self) -> None:
         """
@@ -103,12 +78,10 @@ class ChineseTitleGenerator:
         elif self.range_pattern.search(self.filtered_name):
             logger.debug("using range_pattern numbers")
             self.number_list = self.all_number_pattern.findall(self.filtered_name)
-        elif self.ch_keyword_pattern.search(self.filtered_name):
-            logger.debug("using ch_keyword_pattern numbers")
-            self.number_list = self.ch_keyword_pattern.findall(self.filtered_name)
-        elif self.en_key_season_ep_pattern.search(self.name):
-            logger.debug("using en_key_season_ep_pattern numbers")
-            captured_groups = self.en_key_season_ep_pattern.findall(self.name)
+        elif self.keyword_pattern.search(self.filtered_name):
+            logger.debug("using keyword_pattern numbers")
+            captured_groups = self.keyword_pattern.findall(self.filtered_name)
+            logger.debug(f"captured_groups: {captured_groups}")
             self.number_list = list(filter(None, chain.from_iterable(captured_groups)))
         else:
             logger.debug("using all_number_pattern numbers")
@@ -194,4 +167,4 @@ if __name__ == '__main__':
     gen = ChineseTitleGenerator()
     for file in test_folder.iterdir():
         new_name = gen.generate_title(str(file), "base name")
-        print(f"New Name: {new_name}\n")
+        print(f"Old Name: {file.name} \nNew Name: {new_name}\n")

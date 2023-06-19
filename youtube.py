@@ -219,7 +219,7 @@ class YouTube:
             resolved_name, video_title = video_details[0], video_details[1]
             if resolved_name in archive_content:
                 logger.warning(f"Video ID: {video_id}, Resolved name: {resolved_name} is already in the archive.")
-            elif self.ch_name_gen.range_pattern.search(video_title):
+            elif self.ch_name_gen.episode_range_pattern.search(video_title):
                 resolved_name_range = resolved_name.split("EP")
                 resolved_name_episodes = resolved_name_range[1].split("-")
                 resolved_name_1 = f"{resolved_name_range[0]}EP{resolved_name_episodes[0]}"

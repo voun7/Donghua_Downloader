@@ -10,125 +10,149 @@ logger = logging.getLogger(__name__)
 
 class ChineseTitleGenerator:
     def __init__(self) -> None:
-        self.name = None
-        self.base_name = None
-        self.suffixes = None
-        self.filtered_name = None
-        self.number_list = None
+        self.name = self.base_name = self.suffixes = self.filtered_name = None
+        self.season_no = self.episode_range_no = self.episode_no = None
 
         # Regex patterns for name.
-        self.all_number_pattern = re.compile(r'(\d+)')
-        self.range_pattern = re.compile(r'\d+\s*[-~]\s*\d+')
-        self.keyword_pattern = re.compile(r'[SsEPep第](\d+)[集季话]*(\d+)*')
+        self.all_numbers_pattern = re.compile(r'(\d+)')
         self.ch_num_pattern = re.compile(r'第([零一二三四五六七八九十百千万]+)[集季话]')
-        self.ch_key_range_pattern = re.compile(r'(?:第(\d+)[集季话].*)?第(\d+)\s*[-~]\s*(\d+)[集季话]')
+        self.season_pattern = re.compile(r'第?\s*(\d+)季|(?:Season|S)\s*(\d+)')
+        self.episode_range_pattern = re.compile(r'(\d+)\s*[-~～]\s*(\d+)')
+        self.episode_pattern = re.compile(r'[第季]\s*(\d+)[集话]|EP\s*(\d+)')
 
-    def set_suffixes(self) -> None:
+    def get_suffixes(self) -> str:
         """
-        If the string is a file path, remember its suffixes.
+        If the string is a file path, remember its suffixes and set the name to a name without the suffixes in it.
         """
         file_path = Path(self.name)
         if file_path.exists():
             filtered_suffixes = [suffix for suffix in file_path.suffixes if " " not in suffix and len(suffix) < 8]
-            self.suffixes = "".join(filtered_suffixes)
             self.name = file_path.stem
+            suffixes = "".join(filtered_suffixes)
+            logger.debug(f"name: {self.name}. suffixes: {suffixes}")
+            return suffixes
         else:
-            self.suffixes = ""
+            logger.debug(f"name: {self.name}")
+            return ""
 
-    def miscellaneous_strings_filter(self) -> None:
+    @staticmethod
+    def miscellaneous_strings_filter(name: str) -> str:
         """
         Remove common strings from name that may lead to incorrect generated name.
         """
         miscellaneous_strings = ["1080P", "4K"]
         for char in miscellaneous_strings:
-            if char in self.filtered_name:
-                self.filtered_name = self.filtered_name.replace(char, '')
+            if char in name:
+                logger.debug(f"miscellaneous_string: {char}, removed from: {name}")
+                name = name.replace(char, '')
+        return name
 
-    def chinese_num_filter(self) -> None:
+    def chinese_num_filter(self, name: str) -> str:
         """
         Change the chinese number in the name to regular numbers.
         """
-        if self.ch_num_pattern.search(self.filtered_name):
+        if self.ch_num_pattern.search(name):
             logger.debug("ch_num_pattern match in name")
-            matches = self.ch_num_pattern.finditer(self.filtered_name)
+            matches = self.ch_num_pattern.finditer(name)
             for match in matches:
                 ch_num_match = match.group(0)
                 ch_num = match.group(1)
                 logger.debug(f"ch_num_match found: {ch_num_match}, ch_num found: {ch_num}")
                 ch_num_in_english = str(cn2num(ch_num))
-                self.filtered_name = self.filtered_name.replace(ch_num_match, f"第{ch_num_in_english}集")
+                name = name.replace(ch_num, ch_num_in_english)
+            logger.debug(f"ch_num filtered name: {name}")
+        return name
 
-    def filter_name(self) -> None:
+    def get_filtered_name(self, name: str) -> str:
         """
         Make the name easier for regex patterns to find relevant numbers.
         """
-        self.filtered_name = self.name
+        filtered_name = self.miscellaneous_strings_filter(name)
+        filtered_name = self.chinese_num_filter(filtered_name)
+        return filtered_name
 
-        self.miscellaneous_strings_filter()
-        self.chinese_num_filter()
+    def use_all_name_numbers(self) -> None:
+        """
+        Use all the numbers in the name to set the season number and episode number.
+        """
+        logger.debug("using all_numbers_pattern numbers")
+        number_list = self.all_numbers_pattern.findall(self.filtered_name)
+        number_list_length = len(number_list)
+        if number_list_length == 1:
+            self.episode_no = number_list[0]
+        elif number_list_length >= 2:
+            self.season_no, self.episode_no = number_list[0], number_list[1]
 
-    def set_number_list(self) -> None:
+    def get_title_numbers(self) -> None:
         """
-        Decides how the number list will be derived depending on the matching regex.
+        Uses the numbers in the title to set the season, episode and episode range numbers.
         """
-        if self.ch_key_range_pattern.search(self.filtered_name):
-            logger.debug("using ch_key_range_pattern numbers")
-            captured_groups = self.ch_key_range_pattern.findall(self.filtered_name)
-            self.number_list = list(filter(None, chain.from_iterable(captured_groups)))
-        elif self.range_pattern.search(self.filtered_name):
-            logger.debug("using range_pattern numbers")
-            self.number_list = self.all_number_pattern.findall(self.filtered_name)
-        elif self.keyword_pattern.search(self.filtered_name):
-            logger.debug("using keyword_pattern numbers")
-            captured_groups = self.keyword_pattern.findall(self.filtered_name)
-            logger.debug(f"captured_groups: {captured_groups}")
-            self.number_list = list(filter(None, chain.from_iterable(captured_groups)))
+        season_match = self.season_pattern.search(self.filtered_name)
+        logger.debug(f"season_match: {season_match}")
+        if season_match:
+            self.season_no = next(match for match in season_match.groups() if match is not None)
+        episode_range_match = self.episode_range_pattern.search(self.filtered_name)
+        logger.debug(f"episode_range_match: {episode_range_match}")
+        if episode_range_match:
+            self.episode_range_no = episode_range_match.groups()
         else:
-            logger.debug("using all_number_pattern numbers")
-            self.number_list = self.all_number_pattern.findall(self.filtered_name)
+            episode_match = self.episode_pattern.search(self.filtered_name)
+            logger.debug(f"episode_match: {episode_match}")
+            if episode_match:
+                self.episode_no = next(match for match in episode_match.groups() if match is not None)
+            else:
+                # This condition is used when the season number tag is used for the episode number.
+                season_result = self.season_pattern.findall(self.filtered_name)
+                season_matches = list(filter(None, chain.from_iterable(season_result)))
+                if season_matches and season_matches[0] != season_matches[1]:
+                    self.episode_no = season_matches[1]
+
+        if self.season_no is None and self.episode_range_no is None and self.episode_no is None:
+            self.use_all_name_numbers()
+
+        logger.debug(f"season_no: {self.season_no}, "
+                     f"episode_range_no: {self.episode_range_no}, "
+                     f"episode_no: {self.episode_no}")
 
     def remove_leading_zeros(self) -> None:
         """
-        Remove leading zeros from name to increase consistency in generated names.
+        Remove any leading zeros from name to increase consistency in generated names.
         """
-        self.number_list = [ele.lstrip('0') for ele in self.number_list]
+        if self.season_no and self.season_no.startswith('0'):
+            self.season_no = self.season_no.lstrip('0')
+            logger.debug(f"leading zeros removed: S:{self.season_no}")
+        if self.episode_range_no and self.episode_range_no[0].startswith('0'):
+            self.episode_range_no = (self.episode_range_no[0].lstrip('0'), self.episode_range_no[1].lstrip('0'))
+            logger.debug(f"leading zeros removed: EP_range:{self.episode_range_no}")
+        if self.episode_no and self.episode_no.startswith('0'):
+            self.episode_no = self.episode_no.lstrip('0')
+            logger.debug(f"leading zeros removed: EP:{self.episode_no}")
 
     def _set_ep_range_title(self) -> None:
         """
         Use the numbers in the number list and base name to build a new name for names with range in them.
         """
-        if len(self.number_list) == 2:
-            first_ep_num = self.number_list[0]
-            last_ep_num = self.number_list[1]
+        first_ep_num = self.episode_range_no[0]
+        last_ep_num = self.episode_range_no[1]
+        if self.season_no and self.episode_range_no:
+            self.name = f"{self.base_name} S{self.season_no} EP{first_ep_num}-{last_ep_num}{self.suffixes}"
+        elif self.episode_range_no:
             self.name = f"{self.base_name} EP{first_ep_num}-{last_ep_num}{self.suffixes}"
-        elif len(self.number_list) > 2:
-            season_num = self.number_list[0]
-            first_ep_num = self.number_list[1]
-            last_ep_num = self.number_list[2]
-            self.name = f"{self.base_name} S{season_num} EP{first_ep_num}-{last_ep_num}{self.suffixes}"
 
     def set_title(self) -> None:
         """
         Use the numbers in the number list and base name to build a new name.
         """
-        if len(self.number_list) == 0:
-            logger.debug(f"{self.name} has no numbers")
-            self.name = f"{self.name}{self.suffixes}"
-            return
-
-        if self.range_pattern.search(self.filtered_name):
+        if self.episode_range_pattern.search(self.filtered_name):
             self._set_ep_range_title()
             return
 
-        if len(self.number_list) == 1:
-            ep_num = self.number_list[0]
-            self.name = f"{self.base_name} EP{ep_num}{self.suffixes}"
-        elif len(self.number_list) > 1:
-            if len(self.number_list) > 2 and self.number_list[0] == self.number_list[1]:
-                self.number_list.pop(0)  # For titles that have season written twice in name.
-            season_num = self.number_list[0]
-            episode_num = self.number_list[1]
-            self.name = f"{self.base_name} S{season_num} EP{episode_num}{self.suffixes}"
+        if self.season_no and self.episode_no:
+            self.name = f"{self.base_name} S{self.season_no} EP{self.episode_no}{self.suffixes}"
+        elif self.episode_no:
+            self.name = f"{self.base_name} EP{self.episode_no}{self.suffixes}"
+        elif self.season_no:
+            self.name = f"{self.base_name} S{self.season_no}{self.suffixes}"
 
     def title_final_filter(self) -> None:
         """
@@ -145,17 +169,12 @@ class ChineseTitleGenerator:
         :param base_name: The name that will be used as the foundation for new title generated.
         :return: A new generated title or same name if no numbers found.
         """
-        logger.debug(f"Initial name: {name}, Base name: {base_name}")
-        self.name = name
-        self.base_name = base_name
-        self.set_suffixes()
-        logger.debug(f"suffixes: {self.suffixes}")
-        self.filter_name()
-        logger.debug(f"filtered name: {self.filtered_name}")
-        self.set_number_list()
-        logger.debug(f"number list: {self.number_list}")
+        self.name, self.base_name = name, base_name
+        self.season_no = self.episode_range_no = self.episode_no = None  # Clear previous values from memory.
+        self.suffixes = self.get_suffixes()
+        self.filtered_name = self.get_filtered_name(self.name)
+        self.get_title_numbers()
         self.remove_leading_zeros()
-        logger.debug(f"leading zeros removed: {self.number_list}")
         self.set_title()
         self.title_final_filter()
         return self.name
@@ -167,4 +186,4 @@ if __name__ == '__main__':
     gen = ChineseTitleGenerator()
     for file in test_folder.iterdir():
         new_name = gen.generate_title(str(file), "base name")
-        print(f"Old Name: {file.name} \nNew Name: {new_name}\n")
+        logger.debug(f"New Name: {new_name}\n")

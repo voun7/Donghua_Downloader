@@ -104,7 +104,7 @@ class ChineseTitleGenerator:
                 # This condition is used when the season number tag is used for the episode number.
                 season_result = self.season_pattern.findall(self.filtered_name)
                 season_matches = list(filter(None, chain.from_iterable(season_result)))
-                if season_matches and season_matches[0] != season_matches[1]:
+                if len(season_matches) > 1 and season_matches[0] != season_matches[1]:
                     self.episode_no = season_matches[1]
 
         if self.season_no is None and self.episode_range_no is None and self.episode_no is None:

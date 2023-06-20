@@ -69,14 +69,15 @@ class ScrapperDownloader:
         else:
             return False
 
-    def ad_free_playlist_downloader(self, file_name: str, advert_tag: str, response_text: str) -> None:
+    def ad_free_playlist_downloader(self, file_name: str, advert_tag_start: str, advert_tag_end: str,
+                                    response_text: str) -> None:
         """
         Remove embedded advertisements from m3u8 playlist.
         """
         logger.debug(f"Advertisement detected in {file_name} and are being removed!")
         file_path = Path(f"{self.download_location}/{file_name}.mp4")
         # Remove embedded advertisement fragments from the response text if any.
-        advert_pattern = re.compile(re.escape(advert_tag) + "(.*?)" + re.escape(advert_tag), re.DOTALL)
+        advert_pattern = re.compile(re.escape(advert_tag_start) + "(.*?)" + re.escape(advert_tag_end), re.DOTALL)
         ad_free_m3u8_text = advert_pattern.sub("", response_text)
         # Create temp ad filtered m3u8 playlist.
         temp_m3u8_file = Path(f"{self.download_location}/{file_name}_filtered_playlist.m3u8")
@@ -119,9 +120,10 @@ class ScrapperDownloader:
         # Make a request to the m3u8 file link.
         response = requests.get(download_link)
         response_text = response.text
-        advert_tag = "#EXT-X-DISCONTINUITY\n"
-        if advert_tag in response_text:
-            self.ad_free_playlist_downloader(file_name, advert_tag, response_text)
+        advert_tag_start = "#EXT-X-DISCONTINUITY\n#EXTINF:9"
+        advert_tag_end = "#EXT-X-DISCONTINUITY\n"
+        if advert_tag_start in response_text:
+            self.ad_free_playlist_downloader(file_name, advert_tag_start, advert_tag_end, response_text)
         else:
             self.link_downloader(file_name, download_link)
 

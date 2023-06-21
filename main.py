@@ -3,7 +3,8 @@ import re
 import time
 from pathlib import Path
 
-from scrapers import XiaobaotvScraper, AnimeBabyScrapper, EightEightMVScrapper, AgeDm1Scrapper, ImyydsScrapper
+from scrapers import ScrapperTools, XiaobaotvScraper, AnimeBabyScrapper, EightEightMVScrapper, AgeDm1Scrapper, \
+    ImyydsScrapper
 from utilities.downloader import ScrapperDownloader
 from utilities.logger_setup import get_log
 from utilities.telegram_bot import send_telegram_message
@@ -51,15 +52,16 @@ def main() -> None:
 
     sd = ScrapperDownloader(playlist_download_dir, download_archive, ffmpeg_path, min_res_height)
 
-    archive_content = set(download_archive.read_text(encoding="utf-8").splitlines())
+    ScrapperTools.anime_list = anime_list
+    ScrapperTools.archive_content = set(download_archive.read_text(encoding="utf-8").splitlines())
 
     site_address = "xiaobaotv.net"
     try:
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         xiaobaotv = XiaobaotvScraper(site_address)
         site_posts = xiaobaotv.get_anime_posts()
-        matched_posts = xiaobaotv.match_to_recent_videos(site_posts, anime_list)
-        matched_download_details = xiaobaotv.get_recent_posts_videos_download_link(matched_posts, archive_content)
+        matched_posts = xiaobaotv.match_to_recent_videos(site_posts)
+        matched_download_details = xiaobaotv.get_recent_posts_videos_download_link(matched_posts)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
@@ -72,8 +74,8 @@ def main() -> None:
         anime_baby = AnimeBabyScrapper(site_address)
         site_posts = anime_baby.get_anime_posts()
         site_posts.update(anime_baby.get_anime_posts(page=2))
-        matched_posts = anime_baby.match_to_recent_videos(site_posts, anime_list)
-        matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts, archive_content)
+        matched_posts = anime_baby.match_to_recent_videos(site_posts)
+        matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
@@ -86,8 +88,8 @@ def main() -> None:
         eight_eight_mv = EightEightMVScrapper(site_address)
         site_posts = eight_eight_mv.get_anime_posts()
         site_posts.update(eight_eight_mv.get_anime_posts(page=2))
-        matched_posts = eight_eight_mv.match_to_recent_videos(site_posts, anime_list)
-        matched_download_details = eight_eight_mv.get_recent_posts_videos_download_link(matched_posts, archive_content)
+        matched_posts = eight_eight_mv.match_to_recent_videos(site_posts)
+        matched_download_details = eight_eight_mv.get_recent_posts_videos_download_link(matched_posts)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
@@ -100,8 +102,8 @@ def main() -> None:
         agedm1 = AgeDm1Scrapper(site_address)
         site_posts = agedm1.get_anime_posts()
         site_posts.update(agedm1.get_anime_posts(page=2))
-        matched_posts = agedm1.match_to_recent_videos(site_posts, anime_list)
-        matched_download_details = agedm1.get_recent_posts_videos_download_link(matched_posts, archive_content)
+        matched_posts = agedm1.match_to_recent_videos(site_posts)
+        matched_download_details = agedm1.get_recent_posts_videos_download_link(matched_posts)
         agedm1.driver.quit()  # Close headless browser
         sd.batch_downloader(matched_download_details)
     except Exception as error:
@@ -114,8 +116,8 @@ def main() -> None:
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         imyyds = ImyydsScrapper(site_address)
         site_posts = imyyds.get_anime_posts()
-        matched_posts = imyyds.match_to_recent_videos(site_posts, anime_list)
-        matched_download_details = imyyds.get_recent_posts_videos_download_link(matched_posts, archive_content)
+        matched_posts = imyyds.match_to_recent_videos(site_posts)
+        matched_download_details = imyyds.get_recent_posts_videos_download_link(matched_posts)
         sd.batch_downloader(matched_download_details)
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"

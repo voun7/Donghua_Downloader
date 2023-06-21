@@ -17,6 +17,8 @@ logging.getLogger("selenium").setLevel(logging.WARNING)
 
 
 class ScrapperTools:
+    anime_list = None
+    archive_content = None
     parser = "html.parser"
     video_num_per_post = 3  # The number of recent videos that will downloaded per post.
     current_date = datetime.now().date()
@@ -34,17 +36,15 @@ class ScrapperTools:
     options.add_argument("--headless=new")
     driver = webdriver.Chrome(options=options)
 
-    @staticmethod
-    def match_to_recent_videos(posts: dict, anime_list: list) -> dict:
+    def match_to_recent_videos(self, posts: dict) -> dict:
         """
-        This method checks if anime matches a recent post from the site.
+        This method checks if a name from the anime list matches a recent post from the site.
         :param posts: Posts should have name as key and url as value.
-        :param anime_list: List of anime's to be matched with posts.
         :return: Anime names as key and post titles and urls as values.
         """
         matched_posts = {}
         logger.info("..........Matching names to site recent post..........")
-        for anime_name in anime_list:
+        for anime_name in self.anime_list:
             for post_name, post_url in posts.items():
                 if anime_name in post_name:
                     logger.info(f"Anime: {anime_name} matches Post Title: {post_name}, Post URL: {post_url}")
@@ -83,7 +83,7 @@ class XiaobaotvScraper(ScrapperTools):
             video_name_and_link[post_name] = post_url
         return video_name_and_link
 
-    def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: set) -> dict:
+    def get_recent_posts_videos_download_link(self, matched_posts: dict) -> dict:
         """
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
         How many of the other recent post videos are determined by video_num_per_post value.
@@ -109,7 +109,7 @@ class XiaobaotvScraper(ScrapperTools):
                 for video_number in range(video_start_num, latest_video_number + 1):
                     file_name = f"{post_name} 第{video_number}集"
                     resolved_name = self.ch_gen.generate_title(file_name, anime_name)
-                    if resolved_name in archive_content:
+                    if resolved_name in self.archive_content:
                         logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
                         continue
                     video_post = soup.find('li', {"title": f"{video_number}"})
@@ -216,7 +216,7 @@ class AnimeBabyScrapper(ScrapperTools):
             return self.base_url + video_post3.get('href')
         logger.error(f"Video link not found for Video Number:{post_name} {video_number}!")
 
-    def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: set) -> dict:
+    def get_recent_posts_videos_download_link(self, matched_posts: dict) -> dict:
         """
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
         How many of the other recent post videos are determined by video_num_per_post value.
@@ -244,7 +244,7 @@ class AnimeBabyScrapper(ScrapperTools):
             for video_number in range(video_start_num, latest_video_number + 1):
                 file_name = f"{post_name} 第{video_number}集"
                 resolved_name = self.ch_gen.generate_title(file_name, anime_name)
-                if resolved_name in archive_content:
+                if resolved_name in self.archive_content:
                     logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
                     continue
                 video_link = self.get_post_video_link(soup, post_name, video_number)
@@ -302,7 +302,7 @@ class EightEightMVScrapper(ScrapperTools):
             return self.base_url + video_post3.get('href')
         logger.error(f"Video link not found for Video Number: {video_number}!")
 
-    def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: set) -> dict:
+    def get_recent_posts_videos_download_link(self, matched_posts: dict) -> dict:
         """
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
         How many of the other recent post videos are determined by video_num_per_post value.
@@ -328,7 +328,7 @@ class EightEightMVScrapper(ScrapperTools):
             for video_number in range(video_start_num, latest_video_number + 1):
                 file_name = f"{post_name} 第{video_number}集"
                 resolved_name = self.ch_gen.generate_title(file_name, anime_name)
-                if resolved_name in archive_content:
+                if resolved_name in self.archive_content:
                     logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
                     continue
                 video_link = self.get_post_video_link(soup, video_number)
@@ -393,7 +393,7 @@ class AgeDm1Scrapper(ScrapperTools):
             logger.error(f"Video link not found for Video Number:{video_number}! Error: {error}")
             return
 
-    def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: set) -> dict:
+    def get_recent_posts_videos_download_link(self, matched_posts: dict) -> dict:
         """
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
         How many of the other recent post videos are determined by video_num_per_post value.
@@ -414,7 +414,7 @@ class AgeDm1Scrapper(ScrapperTools):
             for video_number in range(video_start_num, latest_video_number + 1):
                 file_name = f"{post_name} 第{video_number}集"
                 resolved_name = self.ch_gen.generate_title(file_name, anime_name)
-                if resolved_name in archive_content:
+                if resolved_name in self.archive_content:
                     logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
                     continue
                 video_link = self.get_post_video_link(soup, video_number)
@@ -476,7 +476,7 @@ class ImyydsScrapper(ScrapperTools):
             logger.error(f"Video link not found for Video Number:{video_number}! Error: {error}")
             return
 
-    def get_recent_posts_videos_download_link(self, matched_posts: dict, archive_content: set) -> dict:
+    def get_recent_posts_videos_download_link(self, matched_posts: dict) -> dict:
         """
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
         How many of the other recent post videos are determined by video_num_per_post value.
@@ -502,7 +502,7 @@ class ImyydsScrapper(ScrapperTools):
             for video_number in range(video_start_num, latest_video_number + 1):
                 file_name = f"{post_name} 第{video_number}集"
                 resolved_name = self.ch_gen.generate_title(file_name, anime_name)
-                if resolved_name in archive_content:
+                if resolved_name in self.archive_content:
                     logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
                     continue
                 video_link = self.get_post_video_link(soup, video_number)

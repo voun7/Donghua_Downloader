@@ -17,16 +17,10 @@ logging.getLogger("selenium").setLevel(logging.WARNING)
 
 
 class ScrapperTools:
-    anime_list = None
-    archive_content = None
+    headers = anime_list = archive_content = None
     parser = "html.parser"
     video_num_per_post = 3  # The number of recent videos that will downloaded per post.
     current_date = datetime.now().date()
-    header = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
-                      'AppleWebKit/537.36 (KHTML, like Gecko) '
-                      'Chrome/113.0.0.0 Safari/537.36'
-    }
     ch_gen = ChineseTitleGenerator()
     # Common texts used by scrappers are shared from here.
     check_downlink_message = "..........Checking for latest videos download links.........."
@@ -72,7 +66,7 @@ class XiaobaotvScraper(ScrapperTools):
         logger.info(f"..........Site Page {page} Anime Posts..........")
         video_name_and_link = {}
         payload = f"/index.php/vod/show/id/51/page/{page}.html"
-        page_response = requests.get(self.base_url + payload, headers=self.header)
+        page_response = requests.get(self.base_url + payload, headers=self.headers)
         page_response.raise_for_status()
         soup = BeautifulSoup(page_response.text, self.parser)
         posts = soup.find_all('li', class_='col-lg-8 col-md-6 col-sm-4 col-xs-3')
@@ -93,7 +87,7 @@ class XiaobaotvScraper(ScrapperTools):
         for post_name, match_details in matched_posts.items():
             try:
                 anime_name, url = match_details[0], match_details[1]
-                page_response = requests.get(url, headers=self.header)
+                page_response = requests.get(url, headers=self.headers)
                 soup = BeautifulSoup(page_response.text, self.parser)
                 post_update = soup.find('span', class_='text-red').text.split(' / ')
                 last_updated_date = parser.parse(post_update[1]).date()
@@ -129,7 +123,7 @@ class XiaobaotvScraper(ScrapperTools):
         """
         This method uses the video url to find the video download link.
         """
-        page_response = requests.get(video_url, headers=self.header)
+        page_response = requests.get(video_url, headers=self.headers)
         soup = BeautifulSoup(page_response.text, self.parser)
         download_script = soup.find(class_='embed-responsive clearfix')
         download_match = re.search(r'"url":"(.*?)"', str(download_script))
@@ -146,7 +140,7 @@ class AnimeBabyScrapper(ScrapperTools):
             self.initiate_driver()
 
     def detect_cloudflare(self) -> bool:
-        page_response = requests.get(self.base_url, headers=self.header)
+        page_response = requests.get(self.base_url, headers=self.headers)
         if "cloudflare" in page_response:
             logger.warning("Cloudflare detected in site!")
             return True
@@ -180,7 +174,7 @@ class AnimeBabyScrapper(ScrapperTools):
 
     def get_page_response(self, url: str) -> BeautifulSoup:
         if not self.cloudflare_detected:
-            page_response = requests.get(url, headers=self.header)
+            page_response = requests.get(url, headers=self.headers)
             page_response.raise_for_status()
             return BeautifulSoup(page_response.text, self.parser)
         else:
@@ -452,7 +446,7 @@ class ImyydsScrapper(ScrapperTools):
         logger.info(f"..........Site Page {page} Anime Posts..........")
         video_name_and_link = {}
         payload = f"/vodshow/4-国产-------{page}---.html"
-        page_response = requests.get(self.base_url + payload, headers=self.header)
+        page_response = requests.get(self.base_url + payload, headers=self.headers)
         page_response.raise_for_status()
         soup = BeautifulSoup(page_response.content, self.parser)
         posts = soup.find_all(class_='vodlist_title')
@@ -485,7 +479,7 @@ class ImyydsScrapper(ScrapperTools):
         all_download_details, start = {}, time.perf_counter()
         for post_name, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]
-            page_response = requests.get(url, headers=self.header)
+            page_response = requests.get(url, headers=self.headers)
             soup = BeautifulSoup(page_response.content, self.parser)
             post_update = soup.find(string="状态：").parent.next_sibling.next_sibling.next_sibling.text
             last_updated_date = parser.parse(post_update).date()
@@ -518,7 +512,7 @@ class ImyydsScrapper(ScrapperTools):
         This method uses the video url to find the video download link.
         """
         if video_url:
-            page_response = requests.get(video_url, headers=self.header)
+            page_response = requests.get(video_url, headers=self.headers)
             soup = BeautifulSoup(page_response.text, self.parser)
             download_script = soup.find("script", attrs={'type': 'application/ld+json'})
             download_match = re.search(r'"contentUrl": "(.*?)"', download_script.text)

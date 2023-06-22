@@ -23,6 +23,8 @@ def main() -> None:
     youtube_download_archive = download_archives_dir / "youtube_downloads_archive.txt"
     ffmpeg_path = "ffmpeg/bin"
     min_res_height = 720  # Minimum resolution height.
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                             'Chrome/113.0.0.0 Safari/537.36'}
     if not download_archives_dir.exists():
         download_archives_dir.mkdir()
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
@@ -52,7 +54,7 @@ def main() -> None:
 
     sd = ScrapperDownloader(playlist_download_dir, download_archive, ffmpeg_path, min_res_height)
 
-    ScrapperTools.anime_list = anime_list
+    ScrapperTools.headers, ScrapperTools.anime_list = headers, anime_list
     ScrapperTools.archive_content = set(download_archive.read_text(encoding="utf-8").splitlines())
 
     site_address = "xiaobaotv.net"

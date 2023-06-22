@@ -48,11 +48,12 @@ class ScrapperDownloader:
     def check_video_resolution(self, resolved_name: str, file_name: str, download_link: str) -> bool:
         """
         Returns True if video's height resolution is lower than the allowed minimum and False otherwise.
+        The first 10 seconds of the video are downloaded for testing.
         """
         temp_file = Path(f"{self.download_location}/{file_name}_res_check_temp.mp4")
         duration = "10"  # Set the duration of the first fragment to download (in seconds).
         ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-t', duration, '-i', download_link, '-c', 'copy', str(temp_file)]
-        subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs / 2.0)
+        subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs / 6.0)
         # Get the resolution of the downloaded video.
         ffprobe_cmd = [f"{self.ffmpeg_path}/ffprobe", '-show_entries', 'stream=width,height', '-of', 'csv=p=0',
                        str(temp_file)]

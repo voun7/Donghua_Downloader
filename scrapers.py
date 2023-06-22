@@ -154,7 +154,7 @@ class AnimeBabyScrapper(ScrapperTools):
         :param delay: Time in seconds to spend waiting.
         """
         from undetected_chromedriver import Chrome
-        self.chrome_driver = Chrome(headless=True, version_main=113)
+        self.chrome_driver = Chrome(headless=True)
         self.chrome_driver.get(self.base_url)
         time.sleep(delay)  # Time to allow cloudflare checks to finish
         page_content = self.chrome_driver.page_source

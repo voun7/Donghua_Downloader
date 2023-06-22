@@ -342,13 +342,13 @@ class EightEightMVScrapper(ScrapperTools):
         """
         if video_url:
             soup = self.get_page_response(video_url, 2)
-            download_src = soup.find("iframe", attrs={'allowfullscreen': 'true'}).get("src")
-            soup = self.get_page_response(download_src, 2)
-            script_tag_matches = soup.find_all('script')
-            if script_tag_matches:
-                download_link = re.search(r"video_url = '(.+)'", str(script_tag_matches[-1]))
-                return download_link.group(1)
-            return download_src
+            download_src = soup.find("iframe", attrs={'allowfullscreen': 'true'})
+            if download_src:
+                soup = self.get_page_response(download_src.get("src"), 2)
+                script_tag_matches = soup.find_all('script')
+                if script_tag_matches:
+                    download_link = re.search(r"video_url = '(.+)'", str(script_tag_matches[-1]))
+                    return download_link.group(1)
 
 
 class AgeDm1Scrapper(ScrapperTools):

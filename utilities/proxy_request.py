@@ -19,7 +19,7 @@ class RotatingProxiesRequest:
     def __init__(self) -> None:
         self.url = self.request_type = self._current_proxy = None
         self._working_proxies = set()
-        self.timeout, self.no_proxies_recheck, self.max_proxies_recheck = 15, 0, 8
+        self.no_proxies_recheck, self.max_proxies_recheck = 0, 8
         self.proxy_response = requests.Response
         self.success_flag = Event()  # Event to signal working proxy found success.
         if self.proxy_file.exists():
@@ -28,10 +28,10 @@ class RotatingProxiesRequest:
             logger.error("Proxy file not found!")
             self.proxies = []
 
-    def request_proxy_check(self, proxy: str) -> None:
+    def request_proxy_check(self, proxy: str, timeout: float) -> None:
         try:
             response = requests.get(self.url, proxies={"http": proxy, "https": proxy}, headers=self.headers,
-                                    timeout=self.timeout)
+                                    timeout=timeout)
             response.raise_for_status()
             page_response = response.content
             if page_response:
@@ -46,11 +46,11 @@ class RotatingProxiesRequest:
         except requests.exceptions.RequestException as error:
             logger.debug(f"Error occurred when using request with proxy: {proxy}. Error: {error}")
 
-    def selenium_proxy_check(self, proxy: str) -> None:
+    def selenium_proxy_check(self, proxy: str, timeout: float) -> None:
         try:
             self.options.add_argument(f'--proxy-server={proxy}')
             driver = webdriver.Chrome(options=self.options)
-            driver.set_page_load_timeout(self.timeout)
+            driver.set_page_load_timeout(timeout)
             driver.get(self.url)
             page_response = driver.page_source
             if page_response:
@@ -65,15 +65,15 @@ class RotatingProxiesRequest:
         except Exception as error:
             logger.debug(f"Error occurred when using selenium with proxy: {proxy}. Error: {error}")
 
-    def check_and_set_proxy(self, proxy: str) -> None:
+    def check_and_set_proxy(self, proxy: str, timeout: float = 15) -> None:
         if self.success_flag.is_set():  # Check if success has been achieved.
             return
         if self._current_proxy:
             self._current_proxy = self.proxy_response = None  # Clear memory.
         if self.request_type == 1:
-            self.request_proxy_check(proxy)
+            self.request_proxy_check(proxy, timeout)
         if self.request_type == 2:
-            self.selenium_proxy_check(proxy)
+            self.selenium_proxy_check(proxy, timeout)
 
     def check_proxies(self) -> None:
         logger.debug("Checking all proxies.")

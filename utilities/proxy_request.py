@@ -69,7 +69,7 @@ class RotatingProxiesRequest:
             else:
                 logger.debug("Page response not long enough.")
         except Exception as error:
-            error_msgs = ["ERR_CONNECTION_RESET", "Timed out receiving message"]
+            error_msgs = ["ERR_CONNECTION_RESET", "ERR_TUNNEL_CONNECTION_FAILED", "Timed out receiving message"]
             if not any(msg in str(error) for msg in error_msgs):
                 logger.debug(f"Error occurred when using selenium with proxy: {proxy}. Error: {error}")
 

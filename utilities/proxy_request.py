@@ -82,7 +82,7 @@ class RotatingProxiesRequest:
             executor.map(self.check_and_set_proxy, self.proxies)
         if not self._current_proxy:
             self.no_proxies_recheck += 1
-            logger.warning(f"No working proxy found! Recking proxies! Count:{self.no_proxies_recheck}")
+            logger.warning(f"No working proxy found! Recking proxies! Count: {self.no_proxies_recheck}")
             if self.no_proxies_recheck > self.max_proxies_recheck:
                 raise Exception("Max number of check for proxies reached! Get new proxy file list!")
             else:

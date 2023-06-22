@@ -104,7 +104,7 @@ class RotatingProxiesRequest:
 
         if self._current_proxy:  # Previously working proxy.
             self.success_flag.clear()
-            self.check_and_set_proxy(self._current_proxy)  # Check if the working proxy still works.
+            self.check_and_set_proxy(self._current_proxy, 30)  # Check if the working proxy still works.
             if self._current_proxy:  # Double check if a proxy was given.
                 logger.debug("Current proxy worked!")
                 return self._current_proxy

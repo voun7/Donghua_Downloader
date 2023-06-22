@@ -8,6 +8,7 @@ from selenium import webdriver
 logger = logging.getLogger(__name__)
 # Do not log this messages unless they are at least warnings
 logging.getLogger("selenium").setLevel(logging.WARNING)
+logging.getLogger("urllib3.connectionpool").setLevel(logging.WARNING)
 
 
 class RotatingProxiesRequest:

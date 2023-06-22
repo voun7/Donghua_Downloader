@@ -55,8 +55,8 @@ class RotatingProxiesRequest:
             page_response = driver.page_source
             if page_response:
                 if self.success_flag.is_set():  # This is for the threads that have already made requests.
-                    logger.debug(f"Working proxy: {proxy} added to set.")
                     self._working_proxies.add(proxy)
+                    logger.debug(f"Working proxy: {proxy} added to set. Working proxies: {self._working_proxies}")
                     return
                 self.success_flag.set()  # Set the flag to signal success.
                 logger.debug(f"Selenium access successful using proxy: {proxy}")

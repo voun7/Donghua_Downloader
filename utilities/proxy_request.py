@@ -19,15 +19,15 @@ class RotatingProxiesRequest:
 
     def __init__(self) -> None:
         self.url = self.request_type = self._current_proxy = None
-        self._working_proxies = set()
+        self._working_proxies, self._forbidden_proxies = set(), set()
         self.no_proxies_recheck, self.max_proxies_recheck = 0, 8
         self.proxy_response = requests.Response
         self.success_flag = Event()  # Event to signal working proxy found success.
         if self.proxy_file.exists():
-            self.proxies = self.proxy_file.read_text().splitlines()
+            self.proxies = set(self.proxy_file.read_text().splitlines())
         else:
             logger.error("Proxy file not found!")
-            self.proxies = []
+            self.proxies = set()
 
     def request_proxy_check(self, proxy: str, timeout: float) -> None:
         try:
@@ -37,15 +37,18 @@ class RotatingProxiesRequest:
             page_response = response.content
             if page_response:
                 if self.success_flag.is_set():  # This is for the threads that have already made requests.
-                    logger.debug(f"Working proxy: {proxy} added to set.")
                     self._working_proxies.add(proxy)
+                    logger.debug(f"Working proxy: {proxy} added to working proxy set.")
                     return
                 self.success_flag.set()  # Set the flag to signal success.
                 logger.debug(f"Request access successful using proxy: {proxy}")
                 self._current_proxy = proxy
                 self.proxy_response = page_response
         except requests.exceptions.RequestException as error:
-            logger.debug(f"Error occurred when using request with proxy: {proxy}. Error: {error}")
+            # logger.debug(f"Error occurred when using request with proxy: {proxy}. Error: {error}")
+            if "403 Client" in str(error):
+                self._forbidden_proxies.add(proxy)
+                logger.debug(f"Forbidden proxy: {proxy} added to forbidden proxy set.")
 
     def selenium_proxy_check(self, proxy: str, timeout: float) -> None:
         try:
@@ -54,7 +57,7 @@ class RotatingProxiesRequest:
             driver.set_page_load_timeout(timeout)
             driver.get(self.url)
             page_response = driver.page_source
-            if page_response:
+            if page_response and len(page_response) > 600:
                 if self.success_flag.is_set():  # This is for the threads that have already made requests.
                     self._working_proxies.add(proxy)
                     logger.debug(f"Working proxy: {proxy} added to set. Working proxies: {self._working_proxies}")
@@ -63,6 +66,8 @@ class RotatingProxiesRequest:
                 logger.debug(f"Selenium access successful using proxy: {proxy}")
                 self._current_proxy = proxy
                 self.proxy_response = page_response
+            else:
+                logger.debug("Page response not long enough.")
         except Exception as error:
             logger.debug(f"Error occurred when using selenium with proxy: {proxy}. Error: {error}")
 
@@ -77,7 +82,10 @@ class RotatingProxiesRequest:
             self.selenium_proxy_check(proxy, timeout)
 
     def check_proxies(self) -> None:
-        logger.debug("Checking all proxies.")
+        if self._forbidden_proxies & self.proxies:
+            self.proxies = self.proxies - self._forbidden_proxies  # Remove forbidden proxies from proxies set.
+            logger.debug(f"Forbidden proxies removed from proxies set. Forbidden proxies: {self._forbidden_proxies}")
+        logger.debug(f"Checking all proxies. Proxies size: {len(self.proxies)}")
         max_workers = 200 if self.request_type == 1 else 20
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             executor.map(self.check_and_set_proxy, self.proxies)
@@ -90,14 +98,13 @@ class RotatingProxiesRequest:
                 self.check_proxies()  # Recursion is used until a working proxy is found.
 
     def check_working_proxies(self) -> None:
-        logger.debug("Checking working proxies.")
+        logger.debug(f"Checking working proxies. Working proxies: {self._working_proxies}")
         self.success_flag.clear()
-        for proxy in self._working_proxies:
-            self.check_and_set_proxy(proxy)
-            if self._current_proxy:
-                logger.debug(f"Working proxy: {proxy} from set worked!")
-                break
-        if not self._current_proxy:
+        with ThreadPoolExecutor() as executor:
+            executor.map(self.check_and_set_proxy, self._working_proxies)
+        if self._current_proxy:
+            logger.debug(f"Working proxy: {self._current_proxy} from set worked!")
+        else:
             self._working_proxies = set()  # Empty set.
             logger.debug("No working proxy in the set worked.")
 

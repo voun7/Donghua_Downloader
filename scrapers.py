@@ -9,6 +9,7 @@ from dateutil import parser
 from selenium import webdriver
 
 from utilities.ch_title_gen import ChineseTitleGenerator
+from utilities.proxy_request import RotatingProxiesRequest
 from utilities.telegram_bot import send_telegram_message
 
 logger = logging.getLogger(__name__)
@@ -264,6 +265,11 @@ class AnimeBabyScrapper(ScrapperTools):
 class EightEightMVScrapper(ScrapperTools):
     def __init__(self, site: str) -> None:
         self.base_url = f"https://{site}"
+        self.r_proxy = RotatingProxiesRequest()
+
+    def get_page_response(self, url: str, request_type: float) -> BeautifulSoup:
+        self.r_proxy.get_proxy(url, request_type)
+        return BeautifulSoup(self.r_proxy.proxy_response, self.parser)
 
     def get_anime_posts(self, page: int = 1) -> dict:
         """
@@ -273,9 +279,7 @@ class EightEightMVScrapper(ScrapperTools):
         logger.info(f"..........Site Page {page} Anime Posts..........")
         video_name_and_link = {}
         payload = f"/vod-type-id-30-pg-{page}.html"
-        page_response = requests.get(self.base_url + payload, headers=self.header)
-        page_response.raise_for_status()
-        soup = BeautifulSoup(page_response.content, self.parser)
+        soup = self.get_page_response(self.base_url + payload, 1)
         posts = soup.find_all('li', class_='p1 m1')
         for post in posts:
             post_name = post.find('p', class_='name').text
@@ -305,8 +309,7 @@ class EightEightMVScrapper(ScrapperTools):
         all_download_details, start = {}, time.perf_counter()
         for post_name, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]
-            page_response = requests.get(url, headers=self.header)
-            soup = BeautifulSoup(page_response.content, self.parser)
+            soup = self.get_page_response(url, 1)
             post_update = soup.find(string="更新：").parent.next_sibling.text
             last_updated_date = parser.parse(post_update).date()
             if not last_updated_date >= self.current_date:
@@ -338,11 +341,9 @@ class EightEightMVScrapper(ScrapperTools):
         This method uses the video url to find the video download link.
         """
         if video_url:
-            self.driver.get(video_url)
-            soup = BeautifulSoup(self.driver.page_source, self.parser)
+            soup = self.get_page_response(video_url, 2)
             download_src = soup.find("iframe", attrs={'allowfullscreen': 'true'}).get("src")
-            self.driver.get(download_src)
-            soup = BeautifulSoup(self.driver.page_source, self.parser)
+            soup = self.get_page_response(download_src, 2)
             script_tag_matches = soup.find_all('script')
             if script_tag_matches:
                 download_link = re.search(r"video_url = '(.+)'", str(script_tag_matches[-1]))

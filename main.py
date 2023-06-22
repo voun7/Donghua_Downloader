@@ -7,6 +7,7 @@ from scrapers import ScrapperTools, XiaobaotvScraper, AnimeBabyScrapper, EightEi
     ImyydsScrapper
 from utilities.downloader import ScrapperDownloader
 from utilities.logger_setup import get_log
+from utilities.proxy_request import RotatingProxiesRequest
 from utilities.telegram_bot import send_telegram_message
 from youtube import YouTube
 
@@ -21,6 +22,7 @@ def main() -> None:
     download_archives_dir = playlist_download_dir / "Download Archives"
     download_archive = download_archives_dir / "resolved_names_download_archive.txt"
     youtube_download_archive = download_archives_dir / "youtube_downloads_archive.txt"
+    proxy_file = download_archives_dir / "proxy list.txt"
     ffmpeg_path = "ffmpeg/bin"
     min_res_height = 720  # Minimum resolution height.
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -56,6 +58,8 @@ def main() -> None:
 
     ScrapperTools.headers, ScrapperTools.anime_list = headers, anime_list
     ScrapperTools.archive_content = set(download_archive.read_text(encoding="utf-8").splitlines())
+
+    RotatingProxiesRequest.headers, RotatingProxiesRequest.proxy_file = headers, proxy_file
 
     site_address = "xiaobaotv.net"
     try:

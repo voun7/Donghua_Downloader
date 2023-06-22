@@ -88,7 +88,7 @@ class RotatingProxiesRequest:
             self.proxies = self.proxies - self._forbidden_proxies  # Remove forbidden proxies from proxies set.
             logger.debug(f"Forbidden proxies removed from proxies set. Forbidden proxies: {self._forbidden_proxies}")
         logger.debug(f"Checking all proxies. Proxies size: {len(self.proxies)}")
-        max_workers = 200 if self.request_type == 1 else 20
+        max_workers = 200 if self.request_type == 1 else 5
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             executor.map(self.check_and_set_proxy, self.proxies)
         if not self._current_proxy:
@@ -102,7 +102,8 @@ class RotatingProxiesRequest:
     def check_working_proxies(self) -> None:
         logger.debug(f"Checking working proxies. Working proxies: {self._working_proxies}")
         self.success_flag.clear()
-        with ThreadPoolExecutor() as executor:
+        max_workers = 50 if self.request_type == 1 else 5
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
             executor.map(self.check_and_set_proxy, self._working_proxies)
         if self._current_proxy:
             logger.debug(f"Working proxy: {self._current_proxy} from set worked!")

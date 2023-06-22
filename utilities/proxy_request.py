@@ -40,7 +40,7 @@ class RotatingProxiesRequest:
                     self._working_proxies.add(proxy)
                     return
                 self.success_flag.set()  # Set the flag to signal success.
-                logger.info(f"Access successful using proxy: {proxy}")
+                logger.debug(f"Request access successful using proxy: {proxy}")
                 self._current_proxy = proxy
                 self.proxy_response = page_response
         except requests.exceptions.RequestException as error:
@@ -59,7 +59,7 @@ class RotatingProxiesRequest:
                     self._working_proxies.add(proxy)
                     return
                 self.success_flag.set()  # Set the flag to signal success.
-                logger.info(f"Access successful using proxy: {proxy}")
+                logger.debug(f"Selenium access successful using proxy: {proxy}")
                 self._current_proxy = proxy
                 self.proxy_response = page_response
         except Exception as error:
@@ -94,6 +94,7 @@ class RotatingProxiesRequest:
         for proxy in self._working_proxies:
             self.check_and_set_proxy(proxy)
             if self._current_proxy:
+                logger.debug(f"Working proxy: {proxy} from set worked!")
                 break
         if not self._current_proxy:
             self._working_proxies = set()  # Empty set.

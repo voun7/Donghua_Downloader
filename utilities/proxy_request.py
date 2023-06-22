@@ -111,7 +111,7 @@ class RotatingProxiesRequest:
             self._working_proxies = set()  # Empty set.
             logger.debug("No working proxy in the set worked.")
 
-    def get_proxy(self, url: str, request_type: float) -> str | None:
+    def get_proxy(self, url: str, request_type: int) -> str | None:
         self.url, self.request_type = url, request_type
 
         if self._current_proxy:  # Previously working proxy.

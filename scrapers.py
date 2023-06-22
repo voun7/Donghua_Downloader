@@ -265,11 +265,34 @@ class AnimeBabyScrapper(ScrapperTools):
 class EightEightMVScrapper(ScrapperTools):
     def __init__(self, site: str) -> None:
         self.base_url = f"https://{site}"
+        self.use_proxy_request = self.detect_site_block()
         self.r_proxy = RotatingProxiesRequest()
 
-    def get_page_response(self, url: str, request_type: float) -> BeautifulSoup:
+    def detect_site_block(self) -> bool:
+        try:
+            page_response = requests.get(self.base_url, headers=self.headers)
+            page_response.raise_for_status()
+            return False
+        except requests.exceptions.RequestException as error:
+            if "403 Client" in str(error):
+                logger.info("Real Ip address has been blocked. Switching to proxy requests.")
+                return True
+
+    def proxy_request(self, url: str, request_type: int) -> BeautifulSoup:
         self.r_proxy.get_proxy(url, request_type)
         return BeautifulSoup(self.r_proxy.proxy_response, self.parser)
+
+    def get_page_response(self, url: str, request_type: int) -> BeautifulSoup:
+        if self.use_proxy_request:
+            return self.proxy_request(url, request_type)
+
+        if request_type == 1:
+            page_response = requests.get(url, headers=self.headers)
+            page_response.raise_for_status()
+            return BeautifulSoup(page_response.text, self.parser)
+        if request_type == 2:
+            self.driver.get(url)
+            return BeautifulSoup(self.driver.page_source, self.parser)
 
     def get_anime_posts(self, page: int = 1) -> dict:
         """

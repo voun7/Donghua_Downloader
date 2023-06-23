@@ -56,6 +56,7 @@ class ScrapperDownloader:
         try:
             subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs / 6.0)
         except TimeoutError:
+            logger.debug(f"Timeout error for {temp_file}, Deleting leftover file!")
             temp_file.unlink()
         # Get the resolution of the downloaded video.
         ffprobe_cmd = [f"{self.ffmpeg_path}/ffprobe", '-show_entries', 'stream=width,height', '-of', 'csv=p=0',
@@ -93,6 +94,7 @@ class ScrapperDownloader:
         try:
             subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs)
         except TimeoutError:
+            logger.debug(f"Timeout error for {file_name}, Deleting leftover file!")
             file_path.unlink()
         # Clean up the temp filtered playlist file.
         temp_m3u8_file.unlink()
@@ -109,6 +111,7 @@ class ScrapperDownloader:
             # Run the command using subprocess.run().
             subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs)
         except TimeoutError:
+            logger.debug(f"Timeout error for {file_name}, Deleting leftover file!")
             file_path.unlink()
 
     def video_downloader(self, resolved_name: str, download_details: tuple) -> None:

@@ -57,8 +57,7 @@ class ScrapperDownloader:
             subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs / 6.0)
         except Exception as error:
             logger.debug(f"An error occurred while downloading {temp_file}, Error: {error}")
-            if temp_file.exists():
-                temp_file.unlink()
+            temp_file.unlink(missing_ok=True)
         # Get the resolution of the downloaded video.
         ffprobe_cmd = [f"{self.ffmpeg_path}/ffprobe", '-show_entries', 'stream=width,height', '-of', 'csv=p=0',
                        str(temp_file)]
@@ -96,8 +95,7 @@ class ScrapperDownloader:
             subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs)
         except Exception as error:
             logger.debug(f"An error occurred while downloading {file_name}, Error: {error}")
-            if file_path.exists():
-                file_path.unlink()
+            file_path.unlink(missing_ok=True)
         # Clean up the temp filtered playlist file.
         temp_m3u8_file.unlink()
 
@@ -114,8 +112,7 @@ class ScrapperDownloader:
             subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs)
         except Exception as error:
             logger.debug(f"An error occurred while downloading {file_name}, Error: {error}")
-            if file_path.exists():
-                file_path.unlink()
+            file_path.unlink(missing_ok=True)
 
     def video_downloader(self, resolved_name: str, download_details: tuple) -> None:
         """

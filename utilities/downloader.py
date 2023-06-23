@@ -53,7 +53,10 @@ class ScrapperDownloader:
         temp_file = Path(f"{self.download_location}/{file_name}_res_check_temp.mp4")
         duration = "10"  # Set the duration of the first fragment to download (in seconds).
         ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-t', duration, '-i', download_link, '-c', 'copy', str(temp_file)]
-        subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs / 6.0)
+        try:
+            subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs / 6.0)
+        except TimeoutError:
+            temp_file.unlink()
         # Get the resolution of the downloaded video.
         ffprobe_cmd = [f"{self.ffmpeg_path}/ffprobe", '-show_entries', 'stream=width,height', '-of', 'csv=p=0',
                        str(temp_file)]
@@ -87,7 +90,10 @@ class ScrapperDownloader:
         # Use ffmpeg to download and convert the modified playlist.
         ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-protocol_whitelist', 'file,http,https,tcp,tls', '-i',
                       str(temp_m3u8_file), '-c', 'copy', str(file_path)]
-        subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs)
+        try:
+            subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs)
+        except TimeoutError:
+            file_path.unlink()
         # Clean up the temp filtered playlist file.
         temp_m3u8_file.unlink()
 
@@ -99,8 +105,11 @@ class ScrapperDownloader:
         file_path = Path(f"{self.download_location}/{file_name}.mp4")
         # Set the ffmpeg command as a list.
         ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-i', download_link, '-c', 'copy', str(file_path)]
-        # Run the command using subprocess.run().
-        subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs)
+        try:
+            # Run the command using subprocess.run().
+            subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs)
+        except TimeoutError:
+            file_path.unlink()
 
     def video_downloader(self, resolved_name: str, download_details: tuple) -> None:
         """

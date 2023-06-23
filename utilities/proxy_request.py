@@ -37,9 +37,10 @@ class RotatingProxiesRequest:
             page_response = response.content
             if page_response:
                 if self.success_flag.is_set():  # This is for the threads that have already made requests.
-                    self._working_proxies.add(proxy)
-                    logger.debug(f"Working request proxy: {proxy} added to working proxy set. "
-                                 f"Working proxies: {self._working_proxies}")
+                    if proxy not in self._working_proxies:
+                        self._working_proxies.add(proxy)
+                        logger.debug(f"Working request proxy: {proxy} added to working proxy set. "
+                                     f"Working proxies: {self._working_proxies}")
                     return
                 self.success_flag.set()  # Set the flag to signal success.
                 logger.debug(f"Request access successful using proxy: {proxy}")
@@ -59,9 +60,10 @@ class RotatingProxiesRequest:
             page_response = driver.page_source
             if page_response and len(page_response) > 600:
                 if self.success_flag.is_set():  # This is for the threads that have already made requests.
-                    self._working_proxies.add(proxy)
-                    logger.debug(f"Working selenium proxy: {proxy} added to set. "
-                                 f"Working proxies: {self._working_proxies}")
+                    if proxy not in self._working_proxies:
+                        self._working_proxies.add(proxy)
+                        logger.debug(f"Working selenium proxy: {proxy} added to set. "
+                                     f"Working proxies: {self._working_proxies}")
                     return
                 self.success_flag.set()  # Set the flag to signal success.
                 logger.debug(f"Selenium access successful using proxy: {proxy}")

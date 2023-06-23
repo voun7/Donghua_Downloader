@@ -43,8 +43,7 @@ class RotatingProxiesRequest:
                     return
                 self.success_flag.set()  # Set the flag to signal success.
                 logger.debug(f"Request access successful using proxy: {proxy}")
-                self._current_proxy = proxy
-                self.proxy_response = page_response
+                self._current_proxy, self.proxy_response = proxy, page_response
         except requests.exceptions.RequestException as error:
             # logger.debug(f"Error occurred when using request with proxy: {proxy}. Error: {error}")
             if "403 Client" in str(error):
@@ -66,8 +65,7 @@ class RotatingProxiesRequest:
                     return
                 self.success_flag.set()  # Set the flag to signal success.
                 logger.debug(f"Selenium access successful using proxy: {proxy}")
-                self._current_proxy = proxy
-                self.proxy_response = page_response
+                self._current_proxy, self.proxy_response = proxy, page_response
             else:
                 logger.debug(f"Selenium page response not long enough. Response: {page_response}")
         except Exception as error:

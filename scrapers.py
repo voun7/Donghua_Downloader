@@ -275,7 +275,7 @@ class EightEightMVScrapper(ScrapperTools):
             return False
         except requests.exceptions.RequestException as error:
             if "403 Client" in str(error):
-                logger.info("Real Ip address has been blocked. Switching to proxy requests.")
+                logger.info("Real Ip address has been blocked. Switching to rotating proxy requests.")
                 return True
 
     def proxy_request(self, url: str, request_type: int) -> BeautifulSoup:

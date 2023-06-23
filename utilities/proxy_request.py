@@ -56,8 +56,10 @@ class RotatingProxiesRequest:
             self.options.add_argument(f'--proxy-server={proxy}')
             driver = webdriver.Chrome(options=self.options)
             driver.set_page_load_timeout(timeout)
+            driver.implicitly_wait(timeout)
             driver.get(self.url)
             page_response = driver.page_source
+            driver.quit()
             if page_response and len(page_response) > 600:
                 if self.success_flag.is_set():  # This is for the threads that have already made requests.
                     if proxy not in self._working_proxies:

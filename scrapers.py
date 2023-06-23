@@ -58,6 +58,7 @@ class ScrapperTools:
 class XiaobaotvScraper(ScrapperTools):
     def __init__(self, site: str) -> None:
         self.base_url = f"https://{site}"
+        self.session = requests.Session()
 
     def get_anime_posts(self, page: int = 1) -> dict:
         """
@@ -67,7 +68,7 @@ class XiaobaotvScraper(ScrapperTools):
         logger.info(f"..........Site Page {page} Anime Posts..........")
         video_name_and_link = {}
         payload = f"/index.php/vod/show/id/51/page/{page}.html"
-        page_response = requests.get(self.base_url + payload, headers=self.headers)
+        page_response = self.session.get(self.base_url + payload, headers=self.headers)
         page_response.raise_for_status()
         soup = BeautifulSoup(page_response.text, self.parser)
         posts = soup.find_all('li', class_='col-lg-8 col-md-6 col-sm-4 col-xs-3')
@@ -88,7 +89,7 @@ class XiaobaotvScraper(ScrapperTools):
         for post_name, match_details in matched_posts.items():
             try:
                 anime_name, url = match_details[0], match_details[1]
-                page_response = requests.get(url, headers=self.headers)
+                page_response = self.session.get(url, headers=self.headers)
                 soup = BeautifulSoup(page_response.text, self.parser)
                 post_update = soup.find('span', class_='text-red').text.split(' / ')
                 last_updated_date = parser.parse(post_update[1]).date()
@@ -124,7 +125,7 @@ class XiaobaotvScraper(ScrapperTools):
         """
         This method uses the video url to find the video download link.
         """
-        page_response = requests.get(video_url, headers=self.headers)
+        page_response = self.session.get(video_url, headers=self.headers)
         soup = BeautifulSoup(page_response.text, self.parser)
         download_script = soup.find(class_='embed-responsive clearfix')
         download_match = re.search(r'"url":"(.*?)"', str(download_script))
@@ -135,13 +136,14 @@ class XiaobaotvScraper(ScrapperTools):
 class AnimeBabyScrapper(ScrapperTools):
     def __init__(self, site: str) -> None:
         self.base_url = f"https://{site}"
+        self.session = requests.Session()
         self.cloudflare_detected = self.detect_cloudflare()
         self.chrome_driver = None
         if self.cloudflare_detected:
             self.initiate_driver()
 
     def detect_cloudflare(self) -> bool:
-        page_response = requests.get(self.base_url, headers=self.headers)
+        page_response = self.session.get(self.base_url, headers=self.headers)
         if "cloudflare" in page_response:
             logger.warning("Cloudflare detected in site!")
             return True
@@ -175,7 +177,7 @@ class AnimeBabyScrapper(ScrapperTools):
 
     def get_page_response(self, url: str) -> BeautifulSoup:
         if not self.cloudflare_detected:
-            page_response = requests.get(url, headers=self.headers)
+            page_response = self.session.get(url, headers=self.headers)
             page_response.raise_for_status()
             return BeautifulSoup(page_response.text, self.parser)
         else:
@@ -265,12 +267,13 @@ class AnimeBabyScrapper(ScrapperTools):
 class EightEightMVScrapper(ScrapperTools):
     def __init__(self, site: str) -> None:
         self.base_url = f"https://{site}"
+        self.session = requests.Session()
         self.use_proxy_request = self.detect_site_block()
         self.r_proxy = RotatingProxiesRequest()
 
     def detect_site_block(self) -> bool:
         try:
-            page_response = requests.get(self.base_url, headers=self.headers)
+            page_response = self.session.get(self.base_url, headers=self.headers)
             page_response.raise_for_status()
             return False
         except requests.exceptions.RequestException as error:
@@ -287,7 +290,7 @@ class EightEightMVScrapper(ScrapperTools):
             return self.proxy_request(url, request_type)
 
         if request_type == 1:
-            page_response = requests.get(url, headers=self.headers)
+            page_response = self.session.get(url, headers=self.headers)
             page_response.raise_for_status()
             return BeautifulSoup(page_response.text, self.parser)
         if request_type == 2:
@@ -379,6 +382,7 @@ class EightEightMVScrapper(ScrapperTools):
 class AgeDm1Scrapper(ScrapperTools):
     def __init__(self, site: str) -> None:
         self.base_url = f"http://{site}"
+        self.session = requests.Session()
         self.lst_ep_tag = " LST-EP:"
 
     def get_anime_posts(self, page: int = 1) -> dict:
@@ -449,7 +453,7 @@ class AgeDm1Scrapper(ScrapperTools):
         for link in download_links:
             link = link.replace("497", "")
             try:
-                page_response = requests.get(link, headers=self.headers)
+                page_response = self.session.get(link, headers=self.headers)
                 page_response.raise_for_status()
                 return link
             except requests.RequestException:
@@ -473,6 +477,7 @@ class AgeDm1Scrapper(ScrapperTools):
 class ImyydsScrapper(ScrapperTools):
     def __init__(self, site: str) -> None:
         self.base_url = f"https://{site}"
+        self.session = requests.Session()
 
     def get_anime_posts(self, page: int = 1) -> dict:
         """
@@ -482,7 +487,7 @@ class ImyydsScrapper(ScrapperTools):
         logger.info(f"..........Site Page {page} Anime Posts..........")
         video_name_and_link = {}
         payload = f"/vodshow/4-国产-------{page}---.html"
-        page_response = requests.get(self.base_url + payload, headers=self.headers)
+        page_response = self.session.get(self.base_url + payload, headers=self.headers)
         page_response.raise_for_status()
         soup = BeautifulSoup(page_response.content, self.parser)
         posts = soup.find_all(class_='vodlist_title')
@@ -515,7 +520,7 @@ class ImyydsScrapper(ScrapperTools):
         all_download_details, start = {}, time.perf_counter()
         for post_name, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]
-            page_response = requests.get(url, headers=self.headers)
+            page_response = self.session.get(url, headers=self.headers)
             soup = BeautifulSoup(page_response.content, self.parser)
             post_update = soup.find(string="状态：").parent.next_sibling.next_sibling.next_sibling.text
             last_updated_date = parser.parse(post_update).date()
@@ -548,7 +553,7 @@ class ImyydsScrapper(ScrapperTools):
         This method uses the video url to find the video download link.
         """
         if video_url:
-            page_response = requests.get(video_url, headers=self.headers)
+            page_response = self.session.get(video_url, headers=self.headers)
             soup = BeautifulSoup(page_response.text, self.parser)
             download_script = soup.find("script", attrs={'type': 'application/ld+json'})
             download_match = re.search(r'"contentUrl": "(.*?)"', download_script.text)

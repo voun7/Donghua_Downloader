@@ -3,8 +3,7 @@ import re
 import time
 from pathlib import Path
 
-from scrapers import ScrapperTools, XiaobaotvScraper, AnimeBabyScrapper, EightEightMVScrapper, AgeDm1Scrapper, \
-    ImyydsScrapper
+from scrapers import ScrapperTools, XiaobaotvScraper, AnimeBabyScrapper, AgeDm1Scrapper, ImyydsScrapper
 from utilities.downloader import ScrapperDownloader
 from utilities.logger_setup import get_log
 from utilities.proxy_request import RotatingProxiesRequest
@@ -87,20 +86,6 @@ def main() -> None:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
         logger.exception(error_message)
         send_telegram_message(error_message)
-
-    # site_address = "88mv.tv"
-    # try:
-    #     logger.info(f"Checking {site_address} site for recent anime upload matches...")
-    #     eight_eight_mv = EightEightMVScrapper(site_address)
-    #     site_posts = eight_eight_mv.get_anime_posts()
-    #     site_posts.update(eight_eight_mv.get_anime_posts(page=2))
-    #     matched_posts = eight_eight_mv.match_to_recent_videos(site_posts)
-    #     matched_download_details = eight_eight_mv.get_recent_posts_videos_download_link(matched_posts)
-    #     sd.batch_downloader(matched_download_details)
-    # except Exception as error:
-    #     error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
-    #     logger.exception(error_message)
-    #     send_telegram_message(error_message)
 
     site_address = "agedm1.com"
     try:

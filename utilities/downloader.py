@@ -55,9 +55,10 @@ class ScrapperDownloader:
         ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-t', duration, '-i', download_link, '-c', 'copy', str(temp_file)]
         try:
             subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs / 6.0)
-        except subprocess.TimeoutExpired:
-            logger.debug(f"Timeout error for {temp_file}, Deleting leftover file!")
-            temp_file.unlink()
+        except Exception as error:
+            logger.debug(f"An error occurred while downloading {temp_file}, Error: {error}")
+            if temp_file.exists():
+                temp_file.unlink()
         # Get the resolution of the downloaded video.
         ffprobe_cmd = [f"{self.ffmpeg_path}/ffprobe", '-show_entries', 'stream=width,height', '-of', 'csv=p=0',
                        str(temp_file)]
@@ -93,9 +94,10 @@ class ScrapperDownloader:
                       str(temp_m3u8_file), '-c', 'copy', str(file_path)]
         try:
             subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs)
-        except subprocess.TimeoutExpired:
-            logger.debug(f"Timeout error for {file_name}, Deleting leftover file!")
-            file_path.unlink()
+        except Exception as error:
+            logger.debug(f"An error occurred while downloading {file_name}, Error: {error}")
+            if file_path.exists():
+                file_path.unlink()
         # Clean up the temp filtered playlist file.
         temp_m3u8_file.unlink()
 
@@ -110,9 +112,10 @@ class ScrapperDownloader:
         try:
             # Run the command using subprocess.run().
             subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs)
-        except subprocess.TimeoutExpired:
-            logger.debug(f"Timeout error for {file_name}, Deleting leftover file!")
-            file_path.unlink()
+        except Exception as error:
+            logger.debug(f"An error occurred while downloading {file_name}, Error: {error}")
+            if file_path.exists():
+                file_path.unlink()
 
     def video_downloader(self, resolved_name: str, download_details: tuple) -> None:
         """

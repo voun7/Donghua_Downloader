@@ -9,7 +9,6 @@ from dateutil import parser
 from selenium import webdriver
 
 from utilities.ch_title_gen import ChineseTitleGenerator
-from utilities.proxy_request import RotatingProxiesRequest
 from utilities.telegram_bot import send_telegram_message
 
 logger = logging.getLogger(__name__)

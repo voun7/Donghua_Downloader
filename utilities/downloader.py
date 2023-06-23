@@ -62,7 +62,9 @@ class ScrapperDownloader:
         ffprobe_cmd = [f"{self.ffmpeg_path}/ffprobe", '-show_entries', 'stream=width,height', '-of', 'csv=p=0',
                        str(temp_file)]
         if not temp_file.exists():
-            logger.error(f"Resolution check temp file for {file_name} not found! Skipping download!")
+            error_message = f"Resolution check temp file for {file_name} not found, download failed!"
+            logger.error(error_message)
+            send_telegram_message(error_message)
             return True
         resolution = subprocess.check_output(ffprobe_cmd, stderr=subprocess.DEVNULL).decode().strip().split(',')
         width, height = int(resolution[0]), int(resolution[1])
@@ -146,7 +148,7 @@ class ScrapperDownloader:
             self.downloaded_resolved_names_archive.add(resolved_name)  # Prevent download of exising resolved names.
             self.new_downloaded_resolved_names.append(resolved_name + "\n")
         else:
-            error_message = f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded failed!"
+            error_message = f"Resolved name: {resolved_name}, File: {file_path.name}, download failed!"
             logger.warning(error_message)
             send_telegram_message(error_message)
 

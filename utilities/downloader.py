@@ -63,8 +63,8 @@ class ScrapperDownloader:
         ffprobe_cmd = [f"{self.ffmpeg_path}/ffprobe", '-show_entries', 'stream=width,height', '-of', 'csv=p=0',
                        str(temp_file)]
         if not temp_file.exists():
-            logger.error(f"Resolution check temp file for {file_name} not found!")
-            return False
+            logger.error(f"Resolution check temp file for {file_name} not found! Skipping download!")
+            return True
         resolution = subprocess.check_output(ffprobe_cmd, stderr=subprocess.DEVNULL).decode().strip().split(',')
         width, height = int(resolution[0]), int(resolution[1])
         # Delete the downloaded file.

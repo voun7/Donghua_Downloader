@@ -67,7 +67,7 @@ class RotatingProxiesRequest:
                 self._current_proxy = proxy
                 self.proxy_response = page_response
             else:
-                logger.debug("Page response not long enough.")
+                logger.debug(f"Selenium page response not long enough. Response: {page_response}")
         except Exception as error:
             error_msgs = ["ERR_CONNECTION_RESET", "ERR_TUNNEL_CONNECTION_FAILED", "Timed out receiving message"]
             if not any(msg in str(error) for msg in error_msgs):
@@ -75,6 +75,7 @@ class RotatingProxiesRequest:
 
     def check_and_set_proxy(self, proxy: str, timeout: float = 15) -> None:
         if self.success_flag.is_set():  # Check if success has been achieved.
+            logger.debug("Flag has been set, stopping thread.")
             return
         if self._current_proxy:
             self._current_proxy = self.proxy_response = None  # Clear memory.

@@ -401,17 +401,16 @@ class AgeDm1Scrapper(ScrapperTools):
         return video_name_and_link
 
     def get_post_video_link(self, soup: BeautifulSoup, video_number: int) -> str | None:
-        try:
-            video_post = soup.find('a', string=f"第{video_number}集")
-            if video_post:
-                video_post_link = self.base_url + video_post.get('href')
-            else:
-                video_post = soup.find('a', string=str(video_number))
-                video_post_link = self.base_url + video_post.get('href')
-            return video_post_link
-        except Exception as error:
-            logger.error(f"Video link not found for Video Number:{video_number}! Error: {error}")
-            return
+        video_post1 = soup.find('a', string=f"第{video_number}集")
+        if video_post1:
+            return self.base_url + video_post1.get('href')
+        video_post2 = soup.find('a', class_="twidth", string=str(video_number))
+        if video_post2:
+            return self.base_url + video_post2.get('href')
+        video_post3 = soup.find('a', string=str(video_number))
+        if video_post3:
+            return self.base_url + video_post3.get('href')
+        logger.error(f"Video link not found for Video Number: {video_number}!")
 
     def get_recent_posts_videos_download_link(self, matched_posts: dict) -> dict:
         """

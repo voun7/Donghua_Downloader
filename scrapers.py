@@ -444,6 +444,17 @@ class AgeDm1Scrapper(ScrapperTools):
         logger.info(f"{self.time_message}{end - start}")
         return all_download_details
 
+    def test_download_links(self, download_links: list) -> str:
+        logger.debug(f"Testing download links: {download_links}")
+        for link in download_links:
+            link = link.replace("497", "")
+            try:
+                page_response = requests.get(link, headers=self.headers)
+                page_response.raise_for_status()
+                return link
+            except requests.RequestException:
+                logger.debug(f"download link: {link} failed test.")
+
     def get_video_download_link(self, video_url: str) -> str:
         """
         This method uses the video url to find the video download link.
@@ -453,9 +464,9 @@ class AgeDm1Scrapper(ScrapperTools):
             soup = BeautifulSoup(self.driver.page_source, self.parser)
             download_match = soup.find(id="playiframe")
             if download_match:
-                download_link = re.search(r"https://[\w./]+.m3u8", download_match.get('src'))
+                download_links = re.findall(r"https://[\w./]+.m3u8", download_match.get('src'))
+                download_link = self.test_download_links(download_links)
                 if download_link:
-                    download_link = download_link.group().replace("497", "")
                     return download_link
 
 

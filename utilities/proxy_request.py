@@ -69,7 +69,8 @@ class RotatingProxiesRequest:
             else:
                 logger.debug(f"Selenium page response not long enough. Response: {page_response}")
         except Exception as error:
-            error_msgs = ["ERR_CONNECTION_RESET", "ERR_TUNNEL_CONNECTION_FAILED", "Timed out receiving message"]
+            error_msgs = ["ERR_CONNECTION_RESET", "ERR_TUNNEL_CONNECTION_FAILED", "ERR_PROXY_CONNECTION_FAILED",
+                          "Timed out receiving message"]
             if not any(msg in str(error) for msg in error_msgs):
                 logger.debug(f"Error occurred when using selenium with proxy: {proxy}. Error: {error}")
 
@@ -109,7 +110,7 @@ class RotatingProxiesRequest:
             logger.debug(f"Working proxy: {self._current_proxy} from set worked!")
         else:
             self._working_proxies = set()  # Empty set.
-            logger.debug("No working proxy in the set worked.")
+            logger.debug("No working proxy in the set worked. Set has been emptied.")
 
     def get_proxy(self, url: str, request_type: int) -> str | None:
         self.url, self.request_type = url, request_type

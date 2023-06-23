@@ -115,6 +115,19 @@ def main() -> None:
         logger.exception(error_message)
         send_telegram_message(error_message)
 
+    # site_address = ".com"
+    # try:
+    #     logger.info(f"Checking {site_address} site for recent anime upload matches...")
+    #     temp_scrapper = TempScrapper(site_address)
+    #     site_posts = temp_scrapper.get_anime_posts()
+    #     matched_posts = temp_scrapper.match_to_recent_videos(site_posts)
+    #     matched_download_details = temp_scrapper.get_recent_posts_videos_download_link(matched_posts)
+    #     sd.batch_downloader(matched_download_details)
+    # except Exception as error:
+    #     error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
+    #     logger.exception(error_message)
+    #     send_telegram_message(error_message)
+
     end = time.perf_counter()
     logger.info(f"Total Runtime: {end - start}")
 

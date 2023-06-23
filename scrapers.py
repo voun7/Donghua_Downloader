@@ -464,7 +464,7 @@ class AgeDm1Scrapper(ScrapperTools):
             soup = BeautifulSoup(self.driver.page_source, self.parser)
             download_match = soup.find(id="playiframe")
             if download_match:
-                download_links = re.findall(r"https://[\w./]+.m3u8", download_match.get('src'))
+                download_links = re.findall(r"https?://[\w\-./]+.m3u8", download_match.get('src'))
                 download_link = self.test_download_links(download_links)
                 if download_link:
                     return download_link

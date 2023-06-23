@@ -74,8 +74,7 @@ class RotatingProxiesRequest:
                 logger.debug(f"Error occurred when using selenium with proxy: {proxy}. Error: {error}")
 
     def check_and_set_proxy(self, proxy: str, timeout: float = 15) -> None:
-        if self.success_flag.is_set():  # Check if success has been achieved.
-            logger.debug("Flag has been set, stopping thread.")
+        if self.success_flag.is_set():  # Check if success has been achieved and stop thread.
             return
         if self._current_proxy:
             self._current_proxy = self.proxy_response = None  # Clear memory.

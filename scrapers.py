@@ -406,8 +406,11 @@ class ImyydsScrapper(ScrapperTools):
             anime_name, url = match_details[0], match_details[1]
             page_response = self.session.get(url, headers=self.headers)
             soup = BeautifulSoup(page_response.content, self.parser)
-            post_update = soup.find(string="状态：").parent.next_sibling.next_sibling.next_sibling.text
-            last_updated_date = parser.parse(post_update).date()
+            try:
+                post_update = soup.find(string="状态：").parent.next_sibling.next_sibling.next_sibling.text
+                last_updated_date = parser.parse(post_update).date()
+            except AttributeError:
+                last_updated_date = self.current_date
             if not last_updated_date >= self.current_date:
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date}")
                 continue

@@ -415,6 +415,9 @@ class ImyydsScrapper(ScrapperTools):
                 logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date}")
                 continue
             latest_video_post = soup.find(string="状态：").parent.next_sibling.text
+            if "已完结" in latest_video_post or "完结" in latest_video_post:
+                logger.info(f"Post named: {post_name} has finished airing! URL: {url}")
+                continue
             latest_video_number = int(''.join(filter(str.isdigit, latest_video_post)))
             num_videos = self.get_num_of_videos(latest_video_number)
             video_start_num = latest_video_number - num_videos + 1

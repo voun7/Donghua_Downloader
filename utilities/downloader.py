@@ -77,29 +77,50 @@ class ScrapperDownloader:
         else:
             return False
 
-    def ad_free_playlist_downloader(self, file_name: str, advert_tag_start: str, advert_tag_end: str,
-                                    response_text: str) -> None:
+    @staticmethod
+    def ad_remover(text: str, advert_tag_start: str, advert_tag_end: str) -> str:
+        """
+        Remove embedded advertisement fragments from the response text if any
+        :param text: Text containing embedded advertisement.
+        :param advert_tag_start: Start of the advertisement.
+        :param advert_tag_end: End of the advertisement.
+        :return: Advertisement free text.
+        """
+        advert_pattern = re.compile(re.escape(advert_tag_start) + "(.*?)" + re.escape(advert_tag_end), re.DOTALL)
+        ad_free_m3u8_text = advert_pattern.sub("", text)
+        return ad_free_m3u8_text
+
+    def m3u8_downloader(self, m3u8_file: Path, file_path: Path) -> None:
+        """
+        Download file with m3u8 playlist.
+        :param m3u8_file: The m3u8 playlist.
+        :param file_path: The file path for the file to be downloaded.
+        """
+        ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-protocol_whitelist', 'file,http,https,tcp,tls', '-i',
+                      str(m3u8_file), '-c', 'copy', str(file_path)]
+        try:
+            subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs)
+        except Exception as error:
+            logger.debug(f"An error occurred while downloading {file_path.name}, Error: {error}")
+            file_path.unlink(missing_ok=True)
+        # Clean up the m3u8 playlist file.
+        m3u8_file.unlink()
+
+    def ad_free_playlist_downloader(self, file_name: str, response_text: str, advert_tag) -> None:
         """
         Remove embedded advertisements from m3u8 playlist.
         """
         logger.debug(f"Advertisement detected in {file_name} and are being removed!")
         file_path = Path(f"{self.download_location}/{file_name}.mp4")
-        # Remove embedded advertisement fragments from the response text if any.
-        advert_pattern = re.compile(re.escape(advert_tag_start) + "(.*?)" + re.escape(advert_tag_end), re.DOTALL)
-        ad_free_m3u8_text = advert_pattern.sub("", response_text)
+        ad_tag_start1, ad_tag_start2 = "#EXT-X-DISCONTINUITY\n#EXTINF:9", "#EXT-X-DISCONTINUITY\n#EXTINF:8.208200"
+        # Remove advertisement from text.
+        ad_free_m3u8_text = self.ad_remover(response_text, ad_tag_start1, advert_tag)
+        ad_free_m3u8_text = self.ad_remover(ad_free_m3u8_text, ad_tag_start2, advert_tag)
         # Create temp ad filtered m3u8 playlist.
         temp_m3u8_file = Path(f"{self.download_location}/{file_name}_filtered_playlist.m3u8")
         temp_m3u8_file.write_text(ad_free_m3u8_text)
         # Use ffmpeg to download and convert the modified playlist.
-        ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-protocol_whitelist', 'file,http,https,tcp,tls', '-i',
-                      str(temp_m3u8_file), '-c', 'copy', str(file_path)]
-        try:
-            subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs)
-        except Exception as error:
-            logger.debug(f"An error occurred while downloading {file_name}, Error: {error}")
-            file_path.unlink(missing_ok=True)
-        # Clean up the temp filtered playlist file.
-        temp_m3u8_file.unlink()
+        self.m3u8_downloader(temp_m3u8_file, file_path)
 
     def link_downloader(self, file_name: str, download_link: str) -> None:
         """
@@ -135,11 +156,9 @@ class ScrapperDownloader:
             return
         # Make a request to the m3u8 file link.
         response = requests.get(download_link)
-        response_text = response.text
-        advert_tag_start = "#EXT-X-DISCONTINUITY\n#EXTINF:9"
-        advert_tag_end = "#EXT-X-DISCONTINUITY\n"
-        if advert_tag_start in response_text:
-            self.ad_free_playlist_downloader(file_name, advert_tag_start, advert_tag_end, response_text)
+        response_text, advert_tag = response.text, "#EXT-X-DISCONTINUITY\n"
+        if advert_tag in response_text:
+            self.ad_free_playlist_downloader(file_name, response_text, advert_tag)
         else:
             self.link_downloader(file_name, download_link)
 

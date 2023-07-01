@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class ScrapperDownloader:
     def __init__(self, download_location: Path, download_archive: Path, ffmpeg_path: str, min_res_height: int) -> None:
-        self.timeout_secs = 600.0
+        self.timeout_secs = 900.0
         self.download_location = download_location
         self.download_archive = download_archive
         self.ffmpeg_path = ffmpeg_path

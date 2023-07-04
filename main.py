@@ -107,6 +107,8 @@ def main() -> None:
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         imyyds = ImyydsScrapper(site_address)
         site_posts = imyyds.get_anime_posts()
+        site_posts.update(imyyds.get_anime_posts(page=2))
+        site_posts.update(imyyds.get_anime_posts(page=3))
         matched_posts = imyyds.match_to_recent_videos(site_posts)
         matched_download_details = imyyds.get_recent_posts_videos_download_link(matched_posts)
         sd.batch_downloader(matched_download_details)

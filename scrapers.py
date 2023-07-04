@@ -406,14 +406,6 @@ class ImyydsScrapper(ScrapperTools):
             anime_name, url = match_details[0], match_details[1]
             page_response = self.session.get(url, headers=self.headers)
             soup = BeautifulSoup(page_response.content, self.parser)
-            try:
-                post_update = soup.find(string="状态：").parent.next_sibling.next_sibling.next_sibling.text
-                last_updated_date = parser.parse(post_update).date()
-            except AttributeError:
-                last_updated_date = self.current_date
-            if not last_updated_date >= self.current_date:
-                logger.warning(f"Post named: {post_name} is not recent, Last Updated: {last_updated_date}")
-                continue
             latest_video_post = soup.find(string="状态：").parent.next_sibling.text
             if "已完结" in latest_video_post or "完结" in latest_video_post:
                 logger.info(f"Post named: {post_name} has finished airing! URL: {url}")
@@ -421,8 +413,7 @@ class ImyydsScrapper(ScrapperTools):
             latest_video_number = int(''.join(filter(str.isdigit, latest_video_post)))
             num_videos = self.get_num_of_videos(latest_video_number)
             video_start_num = latest_video_number - num_videos + 1
-            logger.info(f"Post named: {post_name} is new, last Updated: {last_updated_date}, "
-                        f"latest video number: {latest_video_number}. "
+            logger.info(f"Post named: {post_name}, latest video number: {latest_video_number}. "
                         f"Last {num_videos} video numbers: {video_start_num}-{latest_video_number}")
             for video_number in range(video_start_num, latest_video_number + 1):
                 file_name = f"{post_name} 第{video_number}集"

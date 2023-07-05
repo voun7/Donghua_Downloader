@@ -105,7 +105,7 @@ class XiaobaotvScraper(ScrapperTools):
                     file_name = f"{post_name} 第{video_number}集"
                     resolved_name = self.ch_gen.generate_title(file_name, anime_name)
                     if resolved_name in self.archive_content:
-                        logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
+                        logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive!")
                         continue
                     video_post = soup.find('li', {"title": f"{video_number}"})
                     video_link = self.base_url + video_post.find('a').get('href')
@@ -241,7 +241,7 @@ class AnimeBabyScrapper(ScrapperTools):
                 file_name = f"{post_name} 第{video_number}集"
                 resolved_name = self.ch_gen.generate_title(file_name, anime_name)
                 if resolved_name in self.archive_content:
-                    logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
+                    logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive!")
                     continue
                 video_link = self.get_post_video_link(soup, post_name, video_number)
                 download_link = self.get_video_download_link(video_link)
@@ -322,7 +322,7 @@ class AgeDm1Scrapper(ScrapperTools):
                 file_name = f"{post_name} 第{video_number}集"
                 resolved_name = self.ch_gen.generate_title(file_name, anime_name)
                 if resolved_name in self.archive_content:
-                    logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
+                    logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive!")
                     continue
                 video_link = self.get_post_video_link(soup, video_number)
                 download_link = self.get_video_download_link(video_link)
@@ -419,7 +419,7 @@ class ImyydsScrapper(ScrapperTools):
                 file_name = f"{post_name} 第{video_number}集"
                 resolved_name = self.ch_gen.generate_title(file_name, anime_name)
                 if resolved_name in self.archive_content:
-                    logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
+                    logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive!")
                     continue
                 video_link = self.get_post_video_link(soup, video_number)
                 download_link = self.get_video_download_link(video_link)
@@ -511,7 +511,7 @@ class TempScrapper(ScrapperTools):
                 file_name = f"{post_name} 第{video_number}集"
                 resolved_name = self.ch_gen.generate_title(file_name, anime_name)
                 if resolved_name in self.archive_content:
-                    logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive! ")
+                    logger.warning(f"File name: {file_name}, Resolved name: {resolved_name} already in archive!")
                     continue
                 video_link = self.get_post_video_link(soup, post_name, video_number)
                 download_link = self.get_video_download_link(video_link)

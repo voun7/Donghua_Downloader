@@ -55,11 +55,10 @@ class ChineseTitleGenerator:
             logger.debug("ch_num_pattern match in name")
             matches = self.ch_num_pattern.finditer(name)
             for match in matches:
-                ch_num_match = match.group(0)
-                ch_num = match.group(1)
+                ch_num_match, ch_num, ch_num_index = match.group(0), match.group(1), match.span(1)
                 logger.debug(f"ch_num_match found: {ch_num_match}, ch_num found: {ch_num}")
                 ch_num_in_english = str(cn2num(ch_num))
-                name = name.replace(ch_num, ch_num_in_english, 1)
+                name = name[:ch_num_index[0]] + ch_num_in_english + name[ch_num_index[1]:]
             logger.debug(f"ch_num filtered name: {name}")
         return name
 

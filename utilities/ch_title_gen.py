@@ -59,7 +59,7 @@ class ChineseTitleGenerator:
                 ch_num = match.group(1)
                 logger.debug(f"ch_num_match found: {ch_num_match}, ch_num found: {ch_num}")
                 ch_num_in_english = str(cn2num(ch_num))
-                name = name.replace(ch_num, ch_num_in_english)
+                name = name.replace(ch_num, ch_num_in_english, 1)
             logger.debug(f"ch_num filtered name: {name}")
         return name
 

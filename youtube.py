@@ -320,7 +320,7 @@ class YouTube:
             'download_archive': youtube_download_archive,
             'format': f'bestvideo[height>={min_res_height}][ext=mp4]+bestaudio[ext=m4a]',
             'ffmpeg_location': ffmpeg_path,
-            'outtmpl': str(download_location) + '/%(title)s.%(ext)s'
+            'outtmpl': str(download_location) + '/%(id)s_%(title)s.%(ext)s'
         }
         with YoutubeDL(ydl_opts) as ydl:
             ydl.download(self.playlist_id)

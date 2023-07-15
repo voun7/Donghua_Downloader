@@ -117,7 +117,7 @@ def main() -> None:
         logger.exception(error_message)
         send_telegram_message(error_message)
 
-    # site_address = ".com"
+    # site_address = "dm590.com"
     # try:
     #     logger.info(f"Checking {site_address} site for recent anime upload matches...")
     #     temp_scrapper = TempScrapper(site_address)

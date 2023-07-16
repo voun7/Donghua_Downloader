@@ -104,7 +104,11 @@ class ChineseTitleGenerator:
                 season_result = self.season_pattern.findall(self.filtered_name)
                 season_matches = list(filter(None, chain.from_iterable(season_result)))
                 if len(season_matches) > 1 and season_matches[0] != season_matches[1]:
+                    logger.debug("Using season_matches to find episode_no")
                     self.episode_no = season_matches[1]
+                elif not self.episode_no and len(self.all_numbers_pattern.findall(self.filtered_name)) > 1:
+                    logger.debug("Using all_numbers_pattern to find episode_no")
+                    self.episode_no = self.all_numbers_pattern.findall(self.filtered_name)[1]
 
         if self.season_no is None and self.episode_range_no is None and self.episode_no is None:
             self.use_all_name_numbers()

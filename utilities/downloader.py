@@ -141,7 +141,7 @@ class ScrapperDownloader:
         """
         Use m3u8 link to download video and create mp4 file. Embedded advertisements links will be removed.
         """
-        file_name, video_match_name, download_link = download_details[0], download_details[1], download_details[2]
+        file_name, download_link = download_details[0], download_details[1]
         file_path = Path(f"{self.download_location}/{file_name}.mp4")
         if file_path.exists():
             logger.warning(f"Resolved name: {resolved_name}, File: {file_name} exists in directory. Skipping download!")

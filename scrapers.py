@@ -111,7 +111,7 @@ class XiaobaotvScraper(ScrapperTools):
                     video_link = self.base_url + video_post.find('a').get('href')
                     download_link = self.get_video_download_link(video_link)
                     logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
-                    all_download_details[resolved_name] = file_name, anime_name, download_link
+                    all_download_details[resolved_name] = file_name, download_link
             except Exception as error:
                 error_message = f"An error occurred while scrapping {post_name}! \nError: {error}"
                 logger.exception(error_message)
@@ -246,7 +246,7 @@ class AnimeBabyScrapper(ScrapperTools):
                 video_link = self.get_post_video_link(soup, post_name, video_number)
                 download_link = self.get_video_download_link(video_link)
                 logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
-                all_download_details[resolved_name] = file_name, anime_name, download_link
+                all_download_details[resolved_name] = file_name, download_link
         end = time.perf_counter()
         logger.info(f"{self.time_message}{end - start}")
         if self.cloudflare_detected:
@@ -327,7 +327,7 @@ class AgeDm1Scrapper(ScrapperTools):
                 video_link = self.get_post_video_link(soup, video_number)
                 download_link = self.get_video_download_link(video_link)
                 logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
-                all_download_details[resolved_name] = file_name, anime_name, download_link
+                all_download_details[resolved_name] = file_name, download_link
         end = time.perf_counter()
         logger.info(f"{self.time_message}{end - start}")
         return all_download_details
@@ -424,7 +424,7 @@ class ImyydsScrapper(ScrapperTools):
                 video_link = self.get_post_video_link(soup, video_number)
                 download_link = self.get_video_download_link(video_link)
                 logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
-                all_download_details[resolved_name] = file_name, anime_name, download_link
+                all_download_details[resolved_name] = file_name, download_link
         end = time.perf_counter()
         logger.info(f"{self.time_message}{end - start}")
         return all_download_details
@@ -516,7 +516,7 @@ class TempScrapper(ScrapperTools):
                 video_link = self.get_post_video_link(soup, post_name, video_number)
                 download_link = self.get_video_download_link(video_link)
                 logger.info(f"File name: {file_name}, Video link: {video_link}, Download link: {download_link}")
-                all_download_details[resolved_name] = file_name, anime_name, download_link
+                all_download_details[resolved_name] = file_name, download_link
         end = time.perf_counter()
         logger.info(f"{self.time_message}{end - start}")
         return all_download_details

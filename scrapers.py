@@ -412,7 +412,12 @@ class ImyydsScrapper(ScrapperTools):
             anime_name, url = match_details[0], match_details[1]
             page_response = self.session.get(url, headers=self.headers)
             soup = BeautifulSoup(page_response.content, self.parser)
-            latest_video_post = soup.find(string="状态：").parent.next_sibling.text
+            latest_video_post = soup.find(string="状态：")
+            if not latest_video_post:
+                logger.warning(f"Post Title: {post_title}. Latest Video Post not found! URL: {url}")
+                continue
+            else:
+                latest_video_post = latest_video_post.parent.next_sibling.text
             if "已完结" in latest_video_post or "完结" in latest_video_post:
                 logger.info(f"Post Title: {post_title} has finished airing! URL: {url}")
                 continue

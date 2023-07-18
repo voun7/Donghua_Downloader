@@ -19,7 +19,7 @@ class ScrapperDownloader:
         self.download_archive = download_archive
         self.ffmpeg_path = ffmpeg_path
         self.min_res_height = min_res_height  # Minimum allowed height of video resolution.
-        self.downloaded_resolved_names_archive = self.new_downloaded_resolved_names = []
+        self.downloaded_resolved_names_archive, self.new_downloaded_resolved_names = set(), []
         if self.download_archive.exists():
             self.downloaded_resolved_names_archive = set(self.download_archive.read_text(encoding="utf-8").splitlines())
 

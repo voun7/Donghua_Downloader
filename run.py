@@ -2,7 +2,7 @@ import logging
 import subprocess
 import sys
 
-from utilities.logger_setup import get_log
+from utilities.logger_setup import setup_logging
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ def update_and_run():
 
 
 if __name__ == '__main__':
-    get_log()
+    setup_logging()
     logger.debug("Logging Started")
     update_and_run()
     logger.debug("Logging Ended\n")

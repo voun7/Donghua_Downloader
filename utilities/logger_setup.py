@@ -23,8 +23,8 @@ def get_server_handler(log_format: logging.Formatter) -> logging.handlers:
     return server_handler
 
 
-def get_file_handler(log_path: Path, log_format: logging.Formatter) -> logging.handlers:
-    log_file = log_path / "runtime.log"
+def get_file_handler(log_dir: Path, log_format: logging.Formatter) -> logging.handlers:
+    log_file = log_dir / "runtime.log"
     file_handler = TimedRotatingFileHandler(log_file, when='midnight', interval=1, backupCount=7, encoding='utf-8')
     file_handler.namer = my_namer
     file_handler.setLevel(logging.DEBUG)
@@ -32,7 +32,7 @@ def get_file_handler(log_path: Path, log_format: logging.Formatter) -> logging.h
     return file_handler
 
 
-def get_log() -> None:
+def setup_logging() -> None:
     """
     Use the following to add logger to other modules.
     import logging

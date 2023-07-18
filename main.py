@@ -5,7 +5,7 @@ from pathlib import Path
 
 from scrapers import ScrapperTools, XiaobaotvScraper, AnimeBabyScrapper, AgeDm1Scrapper, ImyydsScrapper
 from utilities.downloader import ScrapperDownloader
-from utilities.logger_setup import get_log
+from utilities.logger_setup import setup_logging
 from utilities.proxy_request import RotatingProxiesRequest
 from utilities.telegram_bot import send_telegram_message
 from youtube import YouTube
@@ -135,7 +135,7 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    get_log()
+    setup_logging()
     logger.debug("Logging Started")
     main()
     logger.debug("Logging Ended\n")

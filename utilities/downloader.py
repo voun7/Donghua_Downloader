@@ -202,9 +202,9 @@ class ScrapperDownloader:
 
 
 if __name__ == '__main__':
-    from logger_setup import get_log
+    from logger_setup import setup_logging
 
-    get_log()
+    setup_logging()
     logger.debug("Logging Started from downloader.py")
     test_link = ""
     test_download_location = Path(r"C:\Users\VOUN-XPS\Downloads")

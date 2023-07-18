@@ -90,7 +90,7 @@ class ScrapperDownloader:
         ad_free_m3u8_text = advert_pattern.sub("", text)
         ad_tag_txt = advert_pattern.search(text)
         if ad_tag_txt:
-            logger.info(f"Ad tag found using pattern: {advert_pattern}, Ad tag: \n{ad_tag_txt.group(0)}")
+            logger.debug(f"Ad tag found using pattern: {advert_pattern}, Ad tag: \n{ad_tag_txt.group(0)}")
         return ad_free_m3u8_text
 
     def m3u8_downloader(self, m3u8_file: Path, file_path: Path) -> None:

@@ -86,8 +86,11 @@ class ScrapperDownloader:
         :param advert_tag_end: End of the advertisement.
         :return: Advertisement free text.
         """
-        advert_pattern = re.compile(re.escape(advert_tag_start) + "(.*?)" + re.escape(advert_tag_end), re.DOTALL)
+        advert_pattern = re.compile(advert_tag_start + "(.*?)" + advert_tag_end, re.DOTALL)
         ad_free_m3u8_text = advert_pattern.sub("", text)
+        ad_tag_txt = advert_pattern.search(text)
+        if ad_tag_txt:
+            logger.info(f"Ad tag found using pattern: {advert_pattern}, Ad tag: \n{ad_tag_txt.group(0)}")
         return ad_free_m3u8_text
 
     def m3u8_downloader(self, m3u8_file: Path, file_path: Path) -> None:

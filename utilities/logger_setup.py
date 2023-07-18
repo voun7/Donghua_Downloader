@@ -33,6 +33,14 @@ def get_file_handler(log_path: Path, log_format: logging.Formatter) -> logging.h
 
 
 def get_log() -> None:
+    """
+    Use the following to add logger to other modules.
+    import logging
+    logger = logging.getLogger(__name__)
+
+    The following suppress log messages. It will not log messages of given module unless they are at least warnings.
+    logging.getLogger("").setLevel(logging.WARNING)
+    """
     # Create folder for file logs.
     log_dir = Path(__file__).parent.parent / "logs"
     log_dir.mkdir(exist_ok=True)
@@ -58,9 +66,3 @@ def my_namer(default_name: str) -> str:
     """
     base_filename, ext, date = default_name.split(".")
     return f"{base_filename}.{date}.{ext}"
-
-# # Use the following to add logger to other modules.
-# import logging
-# logger = logging.getLogger(__name__)
-# Do not log this messages unless they are at least warnings
-# logging.getLogger("").setLevel(logging.WARNING)

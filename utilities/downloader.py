@@ -115,15 +115,12 @@ class ScrapperDownloader:
         """
         logger.debug(f"Advertisement detected in {file_name} and are being removed!")
         file_path = Path(f"{self.download_location}/{file_name}.mp4")
-        ad_tag_start1, ad_tag_start2 = f"{advert_tag}#EXTINF:9", f"{advert_tag}#EXTINF:8.208200"
-        ad_tag_start3, ad_tag_start4 = f"{advert_tag}#EXT-X-DISCONTINUITY", f"{advert_tag}{advert_tag}#EXTINF:8"
-        ad_tag_start5 = f"{advert_tag}#EXTINF:8"
+        ad_tag_start1, ad_tag_start2 = f"{advert_tag}{advert_tag}#EXTINF:8", f"{advert_tag}#EXTINF:8.208200"
+        ad_tag_start3 = f"{advert_tag}#EXT-X-DISCONTINUITY"
         # Remove advertisement from text.
         ad_free_m3u8_text = self.ad_remover(response_text, ad_tag_start1, advert_tag)
         ad_free_m3u8_text = self.ad_remover(ad_free_m3u8_text, ad_tag_start2, advert_tag)
         ad_free_m3u8_text = self.ad_remover(ad_free_m3u8_text, ad_tag_start3, advert_tag)
-        ad_free_m3u8_text = self.ad_remover(ad_free_m3u8_text, ad_tag_start4, advert_tag)
-        ad_free_m3u8_text = self.ad_remover(ad_free_m3u8_text, ad_tag_start5, advert_tag)
         # Create temp ad filtered m3u8 playlist.
         temp_m3u8_file = Path(f"{self.download_location}/{file_name}_filtered_playlist.m3u8")
         temp_m3u8_file.write_text(ad_free_m3u8_text)
@@ -213,5 +210,5 @@ if __name__ == '__main__':
     test_download_location = Path(r"C:\Users\VOUN-XPS\Downloads")
     test_ffmpeg_path = str(Path(__file__).parent.parent / "ffmpeg/bin")
     dl = ScrapperDownloader(test_download_location, Path("archive.txt"), test_ffmpeg_path, 720)
-    dl.video_downloader("test_name", ("test_video", test_link))
+    dl.video_downloader("", ("test_video", test_link))
     logger.debug("Logging Ended\n")

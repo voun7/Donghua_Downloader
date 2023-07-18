@@ -13,7 +13,7 @@ def get_console_handler() -> logging.handlers:
     return console_handler
 
 
-def get_server_handler(log_format) -> logging.handlers:
+def get_server_handler(log_format: logging.Formatter) -> logging.handlers:
     """
     Sends logs to the graylog server.
     """
@@ -23,8 +23,8 @@ def get_server_handler(log_format) -> logging.handlers:
     return server_handler
 
 
-def get_file_handler(log_format) -> logging.handlers:
-    log_file = "./logs/runtime.log"
+def get_file_handler(log_path: Path, log_format: logging.Formatter) -> logging.handlers:
+    log_file = log_path / "runtime.log"
     file_handler = TimedRotatingFileHandler(log_file, when='midnight', interval=1, backupCount=7, encoding='utf-8')
     file_handler.namer = my_namer
     file_handler.setLevel(logging.DEBUG)
@@ -34,9 +34,8 @@ def get_file_handler(log_format) -> logging.handlers:
 
 def get_log() -> None:
     # Create folder for file logs.
-    log_dir = Path(f"./logs")
-    if not log_dir.exists():
-        log_dir.mkdir()
+    log_dir = Path(__file__).parent.parent / "logs"
+    log_dir.mkdir(exist_ok=True)
 
     # Create a custom logger.
     logger = logging.getLogger()
@@ -48,13 +47,15 @@ def get_log() -> None:
     # Add handlers to the logger.
     logger.addHandler(get_console_handler())
     logger.addHandler(get_server_handler(log_format))
-    logger.addHandler(get_file_handler(log_format))
+    logger.addHandler(get_file_handler(log_dir, log_format))
 
 
-def my_namer(default_name):
-    # This will be called when doing the log rotation
-    # default_name is the default filename that would be assigned, e.g. Rotate_Test.txt.YYYY-MM-DD
-    # Do any manipulations to that name here, for example this changes the name to Rotate_Test.YYYY-MM-DD.txt
+def my_namer(default_name: str) -> str:
+    """
+    This will be called when doing the log rotation
+    default_name is the default filename that would be assigned, e.g. Rotate_Test.txt.YYYY-MM-DD
+    Do any manipulations to that name here, for example this function changes the name to Rotate_Test.YYYY-MM-DD.txt
+    """
     base_filename, ext, date = default_name.split(".")
     return f"{base_filename}.{date}.{ext}"
 

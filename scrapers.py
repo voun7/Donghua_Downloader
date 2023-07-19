@@ -309,7 +309,7 @@ class AgeDm1Scrapper(ScrapperTools):
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
         How many of the other recent post videos are determined by video_num_per_post value.
         """
-        logger.info("..........Checking for latest videos download links..........")
+        logger.info(self.check_downlink_message)
         all_download_details, start = {}, time.perf_counter()
         for post_title_and_last_ep, match_details in matched_posts.items():
             post_split = post_title_and_last_ep.split(self.lst_ep_tag)
@@ -406,7 +406,7 @@ class ImyydsScrapper(ScrapperTools):
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
         How many of the other recent post videos are determined by video_num_per_post value.
         """
-        logger.info("..........Checking for latest videos download links..........")
+        logger.info(self.check_downlink_message)
         all_download_details, start = {}, time.perf_counter()
         for post_title, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]

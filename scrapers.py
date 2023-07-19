@@ -9,7 +9,7 @@ from dateutil import parser
 from selenium import webdriver
 
 from utilities.ch_title_gen import ChineseTitleGenerator
-from utilities.telegram_bot import send_telegram_message
+from utilities.telegram_bot import TelegramBot
 
 logger = logging.getLogger(__name__)
 # Do not log this messages unless they are at least warnings
@@ -21,7 +21,7 @@ class ScrapperTools:
     parser = "html.parser"
     video_num_per_post = 3  # The number of recent videos that will downloaded per post.
     current_date = datetime.now().date()
-    ch_gen = ChineseTitleGenerator()
+    tb, ch_gen = TelegramBot(), ChineseTitleGenerator()
     # Common texts used by scrappers are shared from here.
     check_downlink_message = "..........Checking for latest videos download links.........."
     time_message = "Time taken to retrieve recent posts download links: "
@@ -117,7 +117,7 @@ class XiaobaotvScraper(ScrapperTools):
             except Exception as error:
                 error_message = f"An error occurred while scrapping {post_title}! \nError: {error}"
                 logger.exception(error_message)
-                send_telegram_message(error_message)
+                self.tb.send_telegram_message(error_message)
         end = time.perf_counter()
         logger.info(f"{self.time_message}{end - start}")
         return all_download_details
@@ -165,7 +165,7 @@ class AnimeBabyScrapper(ScrapperTools):
         if "cloudflare" in page_content:
             logger.error("Cloudflare bypass failed!")
             message = f"Cloudflare bypass failed on {self.base_url} site!"
-            send_telegram_message(message)
+            self.tb.send_telegram_message(message)
         else:
             logger.info("Cloudflare bypass succeeded!")
 

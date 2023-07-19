@@ -7,10 +7,16 @@ from scrapers import ScrapperTools, XiaobaotvScraper, AnimeBabyScrapper, AgeDm1S
 from utilities.downloader import ScrapperDownloader
 from utilities.logger_setup import setup_logging
 from utilities.proxy_request import RotatingProxiesRequest
-from utilities.telegram_bot import send_telegram_message
+from utilities.telegram_bot import TelegramBot
 from youtube import YouTube
 
 logger = logging.getLogger(__name__)
+
+
+def set_credentials():
+    logger.debug("Credential files being set.")
+    credential_dir = Path()
+    TelegramBot.credential_file = credential_dir / "telegram auth.json"
 
 
 def main() -> None:
@@ -41,6 +47,8 @@ def main() -> None:
     ch_id_7 = "UCNIKva6iDURgVxf44pMZlKA"  # Animal Family
     youtube_channel_ids = [ch_id_1, ch_id_2, ch_id_3, ch_id_4, ch_id_5, ch_id_6, ch_id_7]
 
+    tb = TelegramBot()
+
     # Arguments
     try:
         logger.info("Checking YouTube site for recent anime upload matches...")
@@ -51,7 +59,7 @@ def main() -> None:
     except Exception as error:
         error_message = f"An error occurred while running YouTube scrapper! Error: {error}"
         logger.exception(error_message)
-        send_telegram_message(error_message)
+        tb.send_telegram_message(error_message)
 
     sd = ScrapperDownloader(playlist_download_dir, download_archive, ffmpeg_path, min_res_height)
 
@@ -71,7 +79,7 @@ def main() -> None:
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
         logger.exception(error_message)
-        send_telegram_message(error_message)
+        tb.send_telegram_message(error_message)
 
     site_address = "animebaby.top"
     try:
@@ -85,7 +93,7 @@ def main() -> None:
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
         logger.exception(error_message)
-        send_telegram_message(error_message)
+        tb.send_telegram_message(error_message)
 
     site_address = "agedm1.com"
     try:
@@ -100,7 +108,7 @@ def main() -> None:
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
         logger.exception(error_message)
-        send_telegram_message(error_message)
+        tb.send_telegram_message(error_message)
 
     site_address = "imyyds.com"
     try:
@@ -115,7 +123,7 @@ def main() -> None:
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
         logger.exception(error_message)
-        send_telegram_message(error_message)
+        tb.send_telegram_message(error_message)
 
     # site_address = "dm590.com"
     # try:
@@ -137,5 +145,6 @@ def main() -> None:
 if __name__ == '__main__':
     setup_logging()
     logger.debug("Logging Started")
+    set_credentials()
     main()
     logger.debug("Logging Ended\n")

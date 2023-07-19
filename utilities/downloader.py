@@ -7,7 +7,7 @@ from pathlib import Path
 
 import requests
 
-from utilities.telegram_bot import send_telegram_message
+from utilities.telegram_bot import TelegramBot
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +19,7 @@ class ScrapperDownloader:
         self.download_archive = download_archive
         self.ffmpeg_path = ffmpeg_path
         self.min_res_height = min_res_height  # Minimum allowed height of video resolution.
+        self.tb = TelegramBot()
         self.downloaded_resolved_names_archive, self.new_downloaded_resolved_names = set(), []
         if self.download_archive.exists():
             self.downloaded_resolved_names_archive = set(self.download_archive.read_text(encoding="utf-8").splitlines())
@@ -64,7 +65,7 @@ class ScrapperDownloader:
         if not temp_file.exists():
             error_message = f"Resolution check temp file for {file_name} not found, download failed!"
             logger.error(error_message)
-            send_telegram_message(error_message)
+            self.tb.send_telegram_message(error_message)
             return True
         resolution = subprocess.check_output(ffprobe_cmd, stderr=subprocess.DEVNULL).decode().strip().split(',')
         width, height = int(resolution[0]), int(resolution[1])
@@ -174,7 +175,7 @@ class ScrapperDownloader:
         else:
             error_message = f"Resolved name: {resolved_name}, File: {file_path.name}, download failed!"
             logger.warning(error_message)
-            send_telegram_message(error_message)
+            self.tb.send_telegram_message(error_message)
 
     def batch_downloader(self, all_download_details: dict) -> None:
         """

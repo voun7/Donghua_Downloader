@@ -10,9 +10,10 @@ class TelegramBot:
     credential_file = None  # Path file.
 
     def __init__(self) -> None:
-        auth_json = json.loads(self.credential_file.read_text())
-        self.bot_token = auth_json["token"]
-        self.chat_id = auth_json["chat_id"]
+        if self.credential_file:
+            auth_json = json.loads(self.credential_file.read_text())
+            self.bot_token = auth_json["token"]
+            self.chat_id = auth_json["chat_id"]
 
     def send_telegram_message(self, message: str) -> None:
         api_url = f'https://api.telegram.org/bot{self.bot_token}/sendMessage'

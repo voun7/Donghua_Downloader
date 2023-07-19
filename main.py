@@ -13,10 +13,15 @@ from youtube import YouTube
 logger = logging.getLogger(__name__)
 
 
-def set_credentials():
-    logger.debug("Credential files being set.")
-    credential_dir = Path()
-    TelegramBot.credential_file = credential_dir / "telegram auth.json"
+def set_credentials() -> None:
+    """
+    Set locations for credentials files.
+    """
+    logger.debug("Credential file locations being set.")
+    cred_dir = Path("credentials")
+    TelegramBot.credential_file = cred_dir / "telegram auth.json"
+    YouTube.credential_file = cred_dir / "OAuth 2.0 Client ID.json"
+    YouTube.token_file = cred_dir / "token.json"
 
 
 def main() -> None:

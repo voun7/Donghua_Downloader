@@ -19,14 +19,15 @@ logger = logging.getLogger(__name__)
 
 # This class makes calls to the YouTube API.
 class YouTube:
+    credential_file = token_file = Path()
+
     def __init__(self, playlist_id: str, resolved_names_archive: Path) -> None:
         self.playlist_id = playlist_id
         self.resolved_names_archive = resolved_names_archive
         self.youtube = None
         self.max_results = 50
         self.default_duration = timedelta(hours=12)
-        self.ch_name_gen = ChineseTitleGenerator()
-        self.tb = TelegramBot()
+        self.tb, self.ch_name_gen = TelegramBot(), ChineseTitleGenerator()
         try:
             self.get_authenticated_service()
         except Exception as error:
@@ -40,14 +41,11 @@ class YouTube:
         """
         scopes = ["https://www.googleapis.com/auth/youtube.force-ssl"]
         api_service_name, api_version, creds = "youtube", "v3", None
-        client_secrets_file = "credentials/OAuth 2.0 Client ID.json"
-        token_file = Path("credentials/token.json")
-        # The file token.json stores the user's access and refresh tokens, and is
-        # created automatically when the authorization flow completes for the first
-        # time.
-        if token_file.exists():
+        # The file token_file stores the user's access and refresh tokens, and is created
+        # automatically when the authorization flow completes for the first time.
+        if self.token_file.exists():
             logger.debug("Token file exists and is being used.")
-            creds = Credentials.from_authorized_user_file(str(token_file), scopes)
+            creds = Credentials.from_authorized_user_file(str(self.token_file), scopes)
         # If there are no (valid) credentials available, let the user log in.
         if not creds or not creds.valid:
             logger.debug("Issue with token detected. Credentials validity are being rechecked!")
@@ -56,10 +54,10 @@ class YouTube:
                 creds.refresh(Request())
             else:
                 logger.critical("Credentials did not work! Local login in is required!")
-                flow = InstalledAppFlow.from_client_secrets_file(client_secrets_file, scopes)
+                flow = InstalledAppFlow.from_client_secrets_file(str(self.credential_file), scopes)
                 creds = flow.run_local_server()
             # Save the credentials for the next run.
-            with open(token_file, 'w') as token:
+            with open(self.token_file, 'w') as token:
                 token.write(creds.to_json())
         self.youtube = build(api_service_name, api_version, credentials=creds)
 

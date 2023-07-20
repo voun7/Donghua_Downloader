@@ -18,7 +18,7 @@ def set_credentials() -> None:
     Set locations for credentials files.
     """
     cred_dir = Path("credentials")
-    logger.debug(f"Credential files location being set. Path: {cred_dir.absolute()}")
+    logger.info(f"Credential files location being set. Path: {cred_dir.absolute()}")
     TelegramBot.credential_file = cred_dir / "telegram auth.json"
     YouTube.credential_file = cred_dir / "OAuth 2.0 Client ID.json"
     YouTube.token_file = cred_dir / "token.json"

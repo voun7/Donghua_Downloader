@@ -25,6 +25,8 @@ def set_credentials() -> None:
 
 
 def main() -> None:
+    # Set credentials first.
+    set_credentials()
     # Variables
     start = time.perf_counter()
     playlist_download_dir = Path(r"\\192.168.0.111\General File Sharing\From YouTube\Chinese Anime For Subbing")
@@ -150,6 +152,5 @@ def main() -> None:
 if __name__ == '__main__':
     setup_logging()
     logger.debug("Logging Started")
-    set_credentials()
     main()
     logger.debug("Logging Ended\n")

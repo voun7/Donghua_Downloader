@@ -116,7 +116,7 @@ class ScrapperDownloader:
         """
         Remove embedded advertisements from m3u8 playlist.
         """
-        logger.debug(f"Advertisement detected in {file_name} and are being removed!")
+        logger.debug(f"Advertisement detected in {file_name} and are being removed! \nPlaylist Text: {response_text}")
         file_path = Path(f"{self.download_location}/{file_name}.mp4")
         ad_tag_start1, ad_tag_start2 = f"{advert_tag}{advert_tag}#EXTINF:8", f"{advert_tag}#EXTINF:8.208200"
         ad_tag_start3, ad_tag_start4 = f"{advert_tag}#EXT-X-DISCONTINUITY", f"{advert_tag}#EXTINF:9.000"

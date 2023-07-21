@@ -79,16 +79,18 @@ class ScrapperDownloader:
             return False
 
     @staticmethod
-    def ad_remover(text: str, advert_tag_start: str, advert_tag_end: str) -> str:
+    def ad_remover(text: str, advert_tag_start: str, advert_tag_end: str, count: int = 0) -> str:
         """
-        Remove embedded advertisement fragments from the response text if any
+        Remove embedded advertisement fragments from the response text if any.
         :param text: Text containing embedded advertisement.
         :param advert_tag_start: Start of the advertisement.
         :param advert_tag_end: End of the advertisement.
+        :param count: The maximum number of pattern occurrences to be replaced.
+        Count must be a non-negative integer. If zero, all occurrences will be replaced.
         :return: Advertisement free text.
         """
         advert_pattern = re.compile(advert_tag_start + "(.*?)" + advert_tag_end, re.DOTALL)
-        ad_free_m3u8_text = advert_pattern.sub("", text)
+        ad_free_m3u8_text = advert_pattern.sub("", text, count)
         ad_tag_txt = advert_pattern.search(text)
         if ad_tag_txt:
             logger.debug(f"Ad tag found using pattern: {advert_pattern}, Ad tag: \n{ad_tag_txt.group(0)}")
@@ -122,7 +124,7 @@ class ScrapperDownloader:
         ad_free_m3u8_text = self.ad_remover(response_text, ad_tag_start1, advert_tag)
         ad_free_m3u8_text = self.ad_remover(ad_free_m3u8_text, ad_tag_start2, advert_tag)
         ad_free_m3u8_text = self.ad_remover(ad_free_m3u8_text, ad_tag_start3, advert_tag)
-        ad_free_m3u8_text = self.ad_remover(ad_free_m3u8_text, ad_tag_start4, advert_tag)
+        ad_free_m3u8_text = self.ad_remover(ad_free_m3u8_text, ad_tag_start4, advert_tag, 1)
         # Create temp ad filtered m3u8 playlist.
         temp_m3u8_file = Path(f"{self.download_location}/{file_name}_filtered_playlist.m3u8")
         temp_m3u8_file.write_text(ad_free_m3u8_text)

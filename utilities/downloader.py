@@ -112,7 +112,7 @@ class ScrapperDownloader:
         # Clean up the m3u8 playlist file.
         m3u8_file.unlink()
 
-    def ad_free_playlist_downloader(self, file_name: str, response_text: str, advert_tag) -> None:
+    def ad_free_playlist_downloader(self, file_name: str, response_text: str, advert_tag: str) -> None:
         """
         Remove embedded advertisements from m3u8 playlist.
         """

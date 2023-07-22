@@ -9,7 +9,6 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
-from yt_dlp import YoutubeDL
 
 from utilities.ch_title_gen import ChineseTitleGenerator
 from utilities.telegram_bot import TelegramBot
@@ -292,37 +291,3 @@ class YouTube:
         end = time.perf_counter()
         total_time = end - start
         logger.info(f"Time matching recent uploads and adding to playlist took: {total_time}")
-
-    def playlist_downloader(self, download_location: Path, youtube_download_archive: Path, ffmpeg_path: str,
-                            min_res_height: int) -> None:
-        """
-        This method uses yt_dlp to download videos from playlist.
-        """
-        logger.info("..........Downloading videos from playlist..........")
-        start = time.perf_counter()
-
-        def my_hook(d: dict) -> None:
-            if d['status'] == 'error':
-                error_message = f'An error has occurred when downloading: {d["filename"]}'
-                logger.exception(error_message)
-                self.tb.send_telegram_message(error_message)
-            if d['status'] == 'finished':
-                logger.info(f'Done downloading file. File location: {d["filename"]}')
-
-        ydl_opts = {
-            'logger': logger.getChild('yt_dlp'),
-            'noprogress': True,
-            'progress_hooks': [my_hook],
-            'ignoreerrors': 'only_download',
-            'socket_timeout': 120,
-            'wait_for_video': (1, 600),
-            'download_archive': youtube_download_archive,
-            'format': f'bestvideo[height>={min_res_height}][ext=mp4]+bestaudio[ext=m4a]',
-            'ffmpeg_location': ffmpeg_path,
-            'outtmpl': str(download_location) + '/%(title)s.%(ext)s'
-        }
-        with YoutubeDL(ydl_opts) as ydl:
-            ydl.download(self.playlist_id)
-        end = time.perf_counter()
-        total_time = end - start
-        logger.info(f"Time downloading playlist took: {total_time}\n")

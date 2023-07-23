@@ -203,16 +203,3 @@ class ScrapperDownloader:
         logger.info("Downloads finished!")
         end = time.perf_counter()
         logger.info(f"Download time: {end - start}\n")
-
-
-if __name__ == '__main__':
-    from logger_setup import setup_logging
-
-    setup_logging()
-    logger.debug("Logging Started from downloader.py")
-    test_link = ""
-    test_download_location = Path(r"C:\Users\nwaez\Downloads")
-    test_ffmpeg_path = str(Path(__file__).parent.parent / "ffmpeg/bin")
-    dl = ScrapperDownloader(test_download_location, Path("archive.txt"), test_ffmpeg_path, 720)
-    dl.video_downloader("", ("test_video", test_link))
-    logger.debug("Logging Ended\n")

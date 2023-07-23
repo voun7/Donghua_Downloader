@@ -167,7 +167,7 @@ def main() -> None:
     ScrapperTools.resolved_names_archive = set(resolved_names_file.read_text(encoding="utf-8").splitlines())
     # Set options for proxy.
     RotatingProxiesRequest.headers, RotatingProxiesRequest.proxy_file = headers, proxy_file
-    # Run codes to download new donghua.
+    # Run code to download new anime.
     run_youtube_api(yt_dl_archive_file, resolved_names_file, anime_list, tb)
     run_scrappers(resolved_names_file, tb)
 

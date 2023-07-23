@@ -1,6 +1,7 @@
 import concurrent.futures
 import logging
 import re
+import socket
 import subprocess
 import time
 from pathlib import Path
@@ -13,11 +14,40 @@ logger = logging.getLogger(__name__)
 
 class DownloadOptions:
     tb = download_location = ffmpeg_path = min_res_height = None
+    host_name = socket.gethostname()
 
 
 class YouTubeDownloader(DownloadOptions):
     def __init__(self, yt_dl_archive_file: Path) -> None:
         self.yt_dl_archive_file = yt_dl_archive_file
+
+    def my_hook(self, d: dict) -> None:
+        if d['status'] == 'error':
+            error_message = f'An error has occurred when downloading: {d["filename"]}'
+            logger.exception(error_message)
+            self.tb.send_telegram_message(error_message)
+        if d['status'] == 'finished':
+            logger.info(f'Done downloading file. File location: {d["filename"]}')
+
+    def get_yt_dlp_options(self) -> dict:
+        ydl_opts = {
+            'ignoreerrors': 'only_download',
+            'socket_timeout': 120,
+            'wait_for_video': (1, 600),
+            'download_archive': self.yt_dl_archive_file,
+            'format': f'bestvideo[height>={self.min_res_height}][ext=mp4]+bestaudio[ext=m4a]',
+            'ffmpeg_location': self.ffmpeg_path,
+            'outtmpl': str(self.download_location) + '/%(title)s.%(ext)s'
+        }
+
+        if "VOUN-SERVER" in self.host_name:
+            extra_opts = {
+                'logger': logger.getChild('yt_dlp'),
+                'noprogress': True,
+                'progress_hooks': [self.my_hook],
+            }
+            ydl_opts.update(extra_opts)
+        return ydl_opts
 
     def playlist_downloader(self, playlist_id: str) -> None:
         """
@@ -28,27 +58,7 @@ class YouTubeDownloader(DownloadOptions):
 
         playlist_link = f"https://www.youtube.com/playlist?list={playlist_id}"
 
-        def my_hook(d: dict) -> None:
-            if d['status'] == 'error':
-                error_message = f'An error has occurred when downloading: {d["filename"]}'
-                logger.exception(error_message)
-                self.tb.send_telegram_message(error_message)
-            if d['status'] == 'finished':
-                logger.info(f'Done downloading file. File location: {d["filename"]}')
-
-        ydl_opts = {
-            'logger': logger.getChild('yt_dlp'),
-            'noprogress': True,
-            'progress_hooks': [my_hook],
-            'ignoreerrors': 'only_download',
-            'socket_timeout': 120,
-            'wait_for_video': (1, 600),
-            'download_archive': self.yt_dl_archive_file,
-            'format': f'bestvideo[height>={self.min_res_height}][ext=mp4]+bestaudio[ext=m4a]',
-            'ffmpeg_location': self.ffmpeg_path,
-            'outtmpl': str(self.download_location) + '/%(title)s.%(ext)s'
-        }
-        with YoutubeDL(ydl_opts) as ydl:
+        with YoutubeDL(self.get_yt_dlp_options()) as ydl:
             ydl.download(playlist_link)
         end = time.perf_counter()
         logger.info(f"Time downloading playlist took: {end - start}\n")
@@ -61,6 +71,7 @@ class ScrapperDownloader(DownloadOptions):
         self.dl_resolved_names_archive, self.new_dl_resolved_names = set(), []
         if self.resolved_names_file.exists():
             self.dl_resolved_names_archive = set(self.resolved_names_file.read_text(encoding="utf-8").splitlines())
+        self.cmd_output = subprocess.DEVNULL if "VOUN-SERVER" in self.host_name else None
 
     def update_download_archive(self) -> None:
         """
@@ -93,7 +104,7 @@ class ScrapperDownloader(DownloadOptions):
         duration = "10"  # Set the duration of the first fragment to download (in seconds).
         ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-t', duration, '-i', download_link, '-c', 'copy', str(temp_file)]
         try:
-            subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs / 6.0)
+            subprocess.run(ffmpeg_cmd, stderr=self.cmd_output, timeout=self.timeout_secs / 6.0)
         except Exception as error:
             logger.debug(f"An error occurred while downloading {temp_file}, Error: {error}")
             temp_file.unlink(missing_ok=True)
@@ -105,7 +116,7 @@ class ScrapperDownloader(DownloadOptions):
             logger.error(error_message)
             self.tb.send_telegram_message(error_message)
             return True
-        resolution = subprocess.check_output(ffprobe_cmd, stderr=subprocess.DEVNULL).decode().strip().split(',')
+        resolution = subprocess.check_output(ffprobe_cmd, stderr=self.cmd_output).decode().strip().split(',')
         width, height = int(resolution[0]), int(resolution[1])
         # Delete the downloaded file.
         temp_file.unlink()
@@ -143,7 +154,7 @@ class ScrapperDownloader(DownloadOptions):
         ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-protocol_whitelist', 'file,http,https,tcp,tls', '-i',
                       str(m3u8_file), '-c', 'copy', str(file_path)]
         try:
-            subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs)
+            subprocess.run(ffmpeg_cmd, stderr=self.cmd_output, timeout=self.timeout_secs)
         except Exception as error:
             logger.debug(f"An error occurred while downloading {file_path.name}, Error: {error}")
             file_path.unlink(missing_ok=True)
@@ -179,7 +190,7 @@ class ScrapperDownloader(DownloadOptions):
         ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-i', download_link, '-c', 'copy', str(file_path)]
         try:
             # Run the command using subprocess.run().
-            subprocess.run(ffmpeg_cmd, stderr=subprocess.DEVNULL, timeout=self.timeout_secs)
+            subprocess.run(ffmpeg_cmd, stderr=self.cmd_output, timeout=self.timeout_secs)
         except Exception as error:
             logger.debug(f"An error occurred while downloading {file_name}, Error: {error}")
             file_path.unlink(missing_ok=True)

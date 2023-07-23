@@ -4,7 +4,7 @@ import time
 from pathlib import Path
 
 from scrapers import ScrapperTools, XiaobaotvScraper, AnimeBabyScrapper, AgeDm1Scrapper, ImyydsScrapper
-from utilities.downloader import ScrapperDownloader
+from utilities.downloader import DownloadOptions, YouTubeDownloader, ScrapperDownloader
 from utilities.logger_setup import setup_logging
 from utilities.proxy_request import RotatingProxiesRequest
 from utilities.telegram_bot import TelegramBot
@@ -24,25 +24,9 @@ def set_credentials() -> None:
     YouTube.token_file = cred_dir / "token.json"
 
 
-def main() -> None:
-    # Set credentials first.
-    set_credentials()
+def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_list: list, tb: TelegramBot) -> None:
     # Variables
-    start = time.perf_counter()
-    playlist_download_dir = Path(r"\\192.168.0.111\General File Sharing\From YouTube\Chinese Anime For Subbing")
-    destination_dir = playlist_download_dir / "##Currently Airing"
-    download_archives_dir = playlist_download_dir / "Download Archives"
-    download_archive = download_archives_dir / "resolved_names_download_archive.txt"
-    youtube_download_archive = download_archives_dir / "youtube_downloads_archive.txt"
-    proxy_file = download_archives_dir / "proxy list.txt"
-    ffmpeg_path = "ffmpeg/bin"
-    min_res_height = 720  # Minimum resolution height.
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                             'Chrome/113.0.0.0 Safari/537.36'}
-    if not download_archives_dir.exists():
-        download_archives_dir.mkdir()
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
-    anime_list = [keyword for folder in destination_dir.iterdir() for keyword in re.findall(r'\((.*?)\)', folder.name)]
     # YouTube Channel IDs ordering determines priority when matching videos.
     # To obtain the channel id check the source code of the channel page search for "externalId".
     ch_id_1 = "UC80ztI40QAXzWL94eoRzWow"  # No. 7 Animation Hall
@@ -53,27 +37,22 @@ def main() -> None:
     ch_id_6 = "UCXmOpN9pg1hJBRkHODL00EA"  # 三福动漫 Sanfu
     ch_id_7 = "UCNIKva6iDURgVxf44pMZlKA"  # Animal Family
     youtube_channel_ids = [ch_id_1, ch_id_2, ch_id_3, ch_id_4, ch_id_5, ch_id_6, ch_id_7]
+    yd = YouTubeDownloader(yt_dl_archive_file)
 
-    tb = TelegramBot()
-
-    # Arguments
     try:
         logger.info("Checking YouTube site for recent anime upload matches...")
-        youtube = YouTube(playlist_id, download_archive)
+        youtube = YouTube(playlist_id, resolved_names_file)
         youtube.clear_playlist()
         youtube.match_to_youtube_videos(youtube_channel_ids, anime_list)
-        youtube.playlist_downloader(playlist_download_dir, youtube_download_archive, ffmpeg_path, min_res_height)
+        yd.playlist_downloader(playlist_id)
     except Exception as error:
         error_message = f"An error occurred while running YouTube scrapper! Error: {error}"
         logger.exception(error_message)
         tb.send_telegram_message(error_message)
 
-    sd = ScrapperDownloader(playlist_download_dir, download_archive, ffmpeg_path, min_res_height)
 
-    ScrapperTools.headers, ScrapperTools.anime_list = headers, anime_list
-    ScrapperTools.archive_content = set(download_archive.read_text(encoding="utf-8").splitlines())
-
-    RotatingProxiesRequest.headers, RotatingProxiesRequest.proxy_file = headers, proxy_file
+def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
+    sd = ScrapperDownloader(resolved_names_file)
 
     site_address = "xiaobaotv.net"
     try:
@@ -132,18 +111,40 @@ def main() -> None:
         logger.exception(error_message)
         tb.send_telegram_message(error_message)
 
-    # site_address = "dm590.com"
-    # try:
-    #     logger.info(f"Checking {site_address} site for recent anime upload matches...")
-    #     temp_scrapper = TempScrapper(site_address)
-    #     site_posts = temp_scrapper.get_anime_posts()
-    #     matched_posts = temp_scrapper.match_to_recent_videos(site_posts)
-    #     matched_download_details = temp_scrapper.get_recent_posts_videos_download_link(matched_posts)
-    #     sd.batch_downloader(matched_download_details)
-    # except Exception as error:
-    #     error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
-    #     logger.exception(error_message)
-    #     send_telegram_message(error_message)
+
+def main() -> None:
+    # Set credentials first.
+    set_credentials()
+    # Variables
+    start = time.perf_counter()
+    # Set directory files.
+    playlist_download_dir = Path(r"\\192.168.0.111\General File Sharing\From YouTube\Chinese Anime For Subbing")
+    destination_dir = playlist_download_dir / "##Currently Airing"
+    dfsd_files_dir = playlist_download_dir / "DFSD Files"
+    dfsd_files_dir.mkdir(exist_ok=True)
+    download_archives_dir = dfsd_files_dir / "Download Archives"
+    download_archives_dir.mkdir(exist_ok=True)
+    ffmpeg_path, proxy_file = dfsd_files_dir / "ffmpeg/bin", dfsd_files_dir / "proxy list.txt"
+    resolved_names_file = download_archives_dir / "resolved_names_download_archive.txt"
+    yt_dl_archive_file = download_archives_dir / "youtube_downloads_archive.txt"
+
+    min_res_height = 720  # Minimum resolution height.
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
+                             'Chrome/113.0.0.0 Safari/537.36'}
+    anime_list = [keyword for folder in destination_dir.iterdir() for keyword in re.findall(r'\((.*?)\)', folder.name)]
+
+    tb = TelegramBot()
+    # Set download options.
+    DownloadOptions.tb, DownloadOptions.download_location = tb, playlist_download_dir
+    DownloadOptions.ffmpeg_path, DownloadOptions.min_res_height = ffmpeg_path, min_res_height
+    # Set scrapper options.
+    ScrapperTools.headers, ScrapperTools.anime_list = headers, anime_list
+    ScrapperTools.resolved_names_archive = set(resolved_names_file.read_text(encoding="utf-8").splitlines())
+    # Set options for proxy.
+    RotatingProxiesRequest.headers, RotatingProxiesRequest.proxy_file = headers, proxy_file
+    # Run codes to download new donghua.
+    run_youtube_api(yt_dl_archive_file, resolved_names_file, anime_list, tb)
+    run_scrappers(resolved_names_file, tb)
 
     end = time.perf_counter()
     logger.info(f"Total Runtime: {end - start}")

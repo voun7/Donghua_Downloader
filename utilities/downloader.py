@@ -16,8 +16,8 @@ class DownloadOptions:
 
 
 class YouTubeDownloader(DownloadOptions):
-    def __init__(self, youtube_download_archive: Path) -> None:
-        self.youtube_download_archive = youtube_download_archive
+    def __init__(self, yt_dl_archive_file: Path) -> None:
+        self.yt_dl_archive_file = yt_dl_archive_file
 
     def playlist_downloader(self, playlist_id: str) -> None:
         """
@@ -43,7 +43,7 @@ class YouTubeDownloader(DownloadOptions):
             'ignoreerrors': 'only_download',
             'socket_timeout': 120,
             'wait_for_video': (1, 600),
-            'download_archive': self.youtube_download_archive,
+            'download_archive': self.yt_dl_archive_file,
             'format': f'bestvideo[height>={self.min_res_height}][ext=mp4]+bestaudio[ext=m4a]',
             'ffmpeg_location': self.ffmpeg_path,
             'outtmpl': str(self.download_location) + '/%(title)s.%(ext)s'
@@ -57,26 +57,26 @@ class YouTubeDownloader(DownloadOptions):
 class ScrapperDownloader(DownloadOptions):
     def __init__(self, resolved_names_file: Path) -> None:
         self.timeout_secs = 900.0
-        self.download_archive = resolved_names_file
-        self.downloaded_resolved_names_archive, self.new_downloaded_resolved_names = set(), []
-        if self.download_archive.exists():
-            self.downloaded_resolved_names_archive = set(self.download_archive.read_text(encoding="utf-8").splitlines())
+        self.resolved_names_file = resolved_names_file
+        self.dl_resolved_names_archive, self.new_dl_resolved_names = set(), []
+        if self.resolved_names_file.exists():
+            self.dl_resolved_names_archive = set(self.resolved_names_file.read_text(encoding="utf-8").splitlines())
 
     def update_download_archive(self) -> None:
         """
         Updated the names download archive with the new names.
         """
-        if self.new_downloaded_resolved_names:
-            logger.info(f"Archive updated with new names. Names: {self.new_downloaded_resolved_names}")
-            with open(self.download_archive, 'a', encoding="utf-8") as text_file:
-                text_file.writelines(self.new_downloaded_resolved_names)
-            self.new_downloaded_resolved_names = []  # Empty list after every update to prevent duplicates.
+        if self.new_dl_resolved_names:
+            logger.info(f"Archive updated with new names. Names: {self.new_dl_resolved_names}")
+            with open(self.resolved_names_file, 'a', encoding="utf-8") as text_file:
+                text_file.writelines(self.new_dl_resolved_names)
+            self.new_dl_resolved_names = []  # Empty list after every update to prevent duplicates.
 
     def check_download_archive(self, resolved_name: str, file_name: str) -> bool:
         """
         Check if the resolved name is in archive.
         """
-        if resolved_name in self.downloaded_resolved_names_archive:
+        if resolved_name in self.dl_resolved_names_archive:
             logger.warning(f"Resolved name: {resolved_name}, File: {file_name} exists in the archive. "
                            f"Skipping download!")
             return True
@@ -211,8 +211,8 @@ class ScrapperDownloader(DownloadOptions):
 
         if file_path.exists():
             logger.info(f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded successfully!")
-            self.downloaded_resolved_names_archive.add(resolved_name)  # Prevent download of exising resolved names.
-            self.new_downloaded_resolved_names.append(resolved_name + "\n")
+            self.dl_resolved_names_archive.add(resolved_name)  # Prevent download of existing resolved names.
+            self.new_dl_resolved_names.append(resolved_name + "\n")
         else:
             error_message = f"Resolved name: {resolved_name}, File: {file_path.name}, download failed!"
             logger.warning(error_message)

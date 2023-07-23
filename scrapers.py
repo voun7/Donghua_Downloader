@@ -17,7 +17,7 @@ logging.getLogger("selenium").setLevel(logging.WARNING)
 
 
 class ScrapperTools:
-    headers = anime_list = archive_content = None
+    headers = anime_list = resolved_names_archive = None
     parser = "html.parser"
     video_num_per_post = 3  # The number of recent videos that will downloaded per post.
     current_date = datetime.now().date()
@@ -104,7 +104,7 @@ class XiaobaotvScraper(ScrapperTools):
                 for video_number in range(video_start_num, latest_video_number + 1):
                     post_video_name = f"{post_title} 第{video_number}集"
                     resolved_name = self.ch_gen.generate_title(post_video_name, anime_name)
-                    if resolved_name in self.archive_content:
+                    if resolved_name in self.resolved_names_archive:
                         logger.warning(f"Post Video Name: {post_video_name}, "
                                        f"Resolved Name: {resolved_name} already in archive!")
                         continue
@@ -242,7 +242,7 @@ class AnimeBabyScrapper(ScrapperTools):
             for video_number in range(video_start_num, latest_video_number + 1):
                 post_video_name = f"{post_title} 第{video_number}集"
                 resolved_name = self.ch_gen.generate_title(post_video_name, anime_name)
-                if resolved_name in self.archive_content:
+                if resolved_name in self.resolved_names_archive:
                     logger.warning(f"Post Video Name: {post_video_name}, "
                                    f"Resolved Name: {resolved_name} already in archive!")
                     continue
@@ -325,7 +325,7 @@ class AgeDm1Scrapper(ScrapperTools):
             for video_number in range(video_start_num, latest_video_number + 1):
                 post_video_name = f"{post_title} 第{video_number}集"
                 resolved_name = self.ch_gen.generate_title(post_video_name, anime_name)
-                if resolved_name in self.archive_content:
+                if resolved_name in self.resolved_names_archive:
                     logger.warning(f"Post Video Name: {post_video_name}, "
                                    f"Resolved Name: {resolved_name} already in archive!")
                     continue
@@ -429,7 +429,7 @@ class ImyydsScrapper(ScrapperTools):
             for video_number in range(video_start_num, latest_video_number + 1):
                 post_video_name = f"{post_title} 第{video_number}集"
                 resolved_name = self.ch_gen.generate_title(post_video_name, anime_name)
-                if resolved_name in self.archive_content:
+                if resolved_name in self.resolved_names_archive:
                     logger.warning(f"Post Video Name: {post_video_name}, "
                                    f"Resolved Name: {resolved_name} already in archive!")
                     continue
@@ -523,7 +523,7 @@ class TempScrapper(ScrapperTools):
             for video_number in range(video_start_num, latest_video_number + 1):
                 post_video_name = f"{post_title} 第{video_number}集"
                 resolved_name = self.ch_gen.generate_title(post_video_name, anime_name)
-                if resolved_name in self.archive_content:
+                if resolved_name in self.resolved_names_archive:
                     logger.warning(f"Post Video Name: {post_video_name}, "
                                    f"Resolved Name: {resolved_name} already in archive!")
                     continue

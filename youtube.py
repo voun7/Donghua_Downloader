@@ -210,24 +210,24 @@ class YouTube:
         :return: Dictionary containing the video id as key and video title as value.
         """
         logger.info("..........Checking archive for resolved name matches..........")
-        archive_content, archive_checked_videos, new_resolved_names = [], {}, []
+        resolved_names_archive, archive_checked_videos, new_resolved_names = [], {}, []
         if self.resolved_names_archive.exists():
-            archive_content = set(self.resolved_names_archive.read_text(encoding="utf-8").splitlines())
+            resolved_names_archive = set(self.resolved_names_archive.read_text(encoding="utf-8").splitlines())
         for video_id, video_details in quality_checked_videos.items():
             resolved_name, video_title = video_details[0], video_details[1]
-            if resolved_name in archive_content:
+            if resolved_name in resolved_names_archive:
                 logger.warning(f"Video ID: {video_id}, Resolved name: {resolved_name} is already in the archive.")
             elif self.ch_name_gen.episode_range_pattern.search(video_title):
                 resolved_name_range = resolved_name.split("EP")
                 resolved_name_episodes = resolved_name_range[1].split("-")
                 resolved_name_1 = f"{resolved_name_range[0]}EP{resolved_name_episodes[0]}"
                 resolved_name_2 = f"{resolved_name_range[0]}EP{resolved_name_episodes[1]}"
-                if resolved_name_1 in archive_content or resolved_name_2 in archive_content:
+                if resolved_name_1 in resolved_names_archive or resolved_name_2 in resolved_names_archive:
                     logger.warning(f"Video ID: {video_id}, Part of resolved name: {resolved_name} already in archive.")
                 else:
                     logger.info(f"Video ID: {video_id}, Resolved name: {resolved_name} is being added to the archive.")
                     archive_checked_videos[video_id] = video_title
-                    if resolved_name_1 not in archive_content:
+                    if resolved_name_1 not in resolved_names_archive:
                         new_resolved_names.append(resolved_name_1 + "\n")
                     new_resolved_names.append(resolved_name_2 + "\n")
             else:
@@ -262,7 +262,7 @@ class YouTube:
         else:
             logger.warning("No video matches!")
 
-    def match_to_youtube_videos(self, youtube_channel_ids: list, file_names: list) -> None:
+    def match_to_youtube_videos(self, youtube_channel_ids: list, anime_names: list) -> None:
         """
         This function matches the names in the list to recently uploaded YouTube videos
         from the channels and adds them to the playlist.
@@ -274,12 +274,11 @@ class YouTube:
             return
         logger.info("..........Checking for video matches..........")
         matched_videos = {}
-        for name in file_names:
+        for anime_name in anime_names:
             for video_id, video_title in all_recent_uploads.items():
-                if name in video_title:  # Match found.
-                    resolved_name = self.ch_name_gen.generate_title(video_title, name)
-                    logger.info(f"Folder name: {name} matches "
-                                f"Video ID: {video_id}, Video Title: {video_title}")
+                if anime_name in video_title:  # Match found.
+                    resolved_name = self.ch_name_gen.generate_title(video_title, anime_name)
+                    logger.info(f"Anime name: {anime_name} matches Video ID: {video_id}, Video Title: {video_title}")
                     # Prevent matching video with same name from different channels.
                     if resolved_name not in list(matched_videos.values()):
                         logger.info(f"Video ID: {video_id}, Resolved name: {resolved_name} added to matches.")

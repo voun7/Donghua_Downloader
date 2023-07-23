@@ -1,7 +1,11 @@
 import logging
 import re
 import time
+from io import BytesIO
 from pathlib import Path
+from zipfile import ZipFile
+
+import requests
 
 from scrapers import ScrapperTools, XiaobaotvScraper, AnimeBabyScrapper, AgeDm1Scrapper, ImyydsScrapper
 from utilities.downloader import DownloadOptions, YouTubeDownloader, ScrapperDownloader
@@ -22,6 +26,25 @@ def set_credentials() -> None:
     TelegramBot.credential_file = cred_dir / "telegram auth.json"
     YouTube.credential_file = cred_dir / "OAuth 2.0 Client ID.json"
     YouTube.token_file = cred_dir / "token.json"
+
+
+def set_ffmpeg_bin(ffmpeg_dir: Path) -> Path:
+    """
+    Return path to ffmpeg bin. Ffmpeg will be downloaded and setup if it does not exist.
+    """
+    if ffmpeg_dir.exists():
+        ffmpeg_name = list(ffmpeg_dir.iterdir())[0]
+        ffmpeg_bin_dir = ffmpeg_dir / ffmpeg_name / "bin"
+        return ffmpeg_bin_dir
+    else:
+        ffmpeg_link = "https://github.com/yt-dlp/FFmpeg-Builds/releases/" \
+                      "download/latest/ffmpeg-master-latest-win64-gpl.zip"
+        zip_data = requests.get(ffmpeg_link)
+        with ZipFile(BytesIO(zip_data.content)) as zip_file:
+            zip_file.extractall(ffmpeg_dir)
+            namelist = zip_file.namelist()  # Get the names of all the files and directories in the zip.
+            ffmpeg_bin_dir = ffmpeg_dir / namelist[0] / "bin"
+            return ffmpeg_bin_dir
 
 
 def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_list: list, tb: TelegramBot) -> None:
@@ -120,11 +143,13 @@ def main() -> None:
     # Set directory files.
     playlist_download_dir = Path(r"\\192.168.0.111\General File Sharing\From YouTube\Chinese Anime For Subbing")
     destination_dir = playlist_download_dir / "##Currently Airing"
-    dfsd_files_dir = playlist_download_dir / "DFSD Files"
+    dfsd_files_dir = playlist_download_dir / "DFSD Project Files"
     dfsd_files_dir.mkdir(exist_ok=True)
     download_archives_dir = dfsd_files_dir / "Download Archives"
     download_archives_dir.mkdir(exist_ok=True)
-    ffmpeg_path, proxy_file = dfsd_files_dir / "ffmpeg/bin", dfsd_files_dir / "proxy list.txt"
+    ffmpeg_dir, proxy_file = dfsd_files_dir / "ffmpeg", dfsd_files_dir / "proxy list.txt"
+    ffmpeg_bin_dir = set_ffmpeg_bin(ffmpeg_dir)
+    logger.debug(f"Ffmpeg bin directory: {ffmpeg_bin_dir}")
     resolved_names_file = download_archives_dir / "resolved_names_download_archive.txt"
     yt_dl_archive_file = download_archives_dir / "youtube_downloads_archive.txt"
 
@@ -136,7 +161,7 @@ def main() -> None:
     tb = TelegramBot()
     # Set download options.
     DownloadOptions.tb, DownloadOptions.download_location = tb, playlist_download_dir
-    DownloadOptions.ffmpeg_path, DownloadOptions.min_res_height = ffmpeg_path, min_res_height
+    DownloadOptions.ffmpeg_path, DownloadOptions.min_res_height = ffmpeg_bin_dir, min_res_height
     # Set scrapper options.
     ScrapperTools.headers, ScrapperTools.anime_list = headers, anime_list
     ScrapperTools.resolved_names_archive = set(resolved_names_file.read_text(encoding="utf-8").splitlines())

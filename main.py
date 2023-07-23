@@ -30,12 +30,10 @@ def set_credentials() -> None:
 
 def set_ffmpeg_bin(ffmpeg_dir: Path) -> Path:
     """
-    Return path to ffmpeg bin. Ffmpeg will be downloaded and setup if it does not exist.
+    Return path to ffmpeg bin folder. Ffmpeg will be downloaded and setup if it does not exist.
     """
     if ffmpeg_dir.exists():
-        ffmpeg_name = list(ffmpeg_dir.iterdir())[0]
-        ffmpeg_bin_dir = ffmpeg_dir / ffmpeg_name / "bin"
-        return ffmpeg_bin_dir
+        ffmpeg_folder_name = list(ffmpeg_dir.iterdir())[0]
     else:
         ffmpeg_link = "https://github.com/yt-dlp/FFmpeg-Builds/releases/" \
                       "download/latest/ffmpeg-master-latest-win64-gpl.zip"
@@ -43,8 +41,8 @@ def set_ffmpeg_bin(ffmpeg_dir: Path) -> Path:
         with ZipFile(BytesIO(zip_data.content)) as zip_file:
             zip_file.extractall(ffmpeg_dir)
             namelist = zip_file.namelist()  # Get the names of all the files and directories in the zip.
-            ffmpeg_bin_dir = ffmpeg_dir / namelist[0] / "bin"
-            return ffmpeg_bin_dir
+            ffmpeg_folder_name = namelist[0]
+    return ffmpeg_dir / ffmpeg_folder_name / "bin"
 
 
 def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_list: list, tb: TelegramBot) -> None:

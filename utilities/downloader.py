@@ -6,20 +6,58 @@ import time
 from pathlib import Path
 
 import requests
-
-from utilities.telegram_bot import TelegramBot
+from yt_dlp import YoutubeDL
 
 logger = logging.getLogger(__name__)
 
 
-class ScrapperDownloader:
-    def __init__(self, download_location: Path, download_archive: Path, ffmpeg_path: str, min_res_height: int) -> None:
+class DownloadOptions:
+    tb = download_location = ffmpeg_path = min_res_height = None
+
+
+class YouTubeDownloader(DownloadOptions):
+    def __init__(self, youtube_download_archive: Path) -> None:
+        self.youtube_download_archive = youtube_download_archive
+
+    def playlist_downloader(self, playlist_id: str) -> None:
+        """
+        This method uses yt_dlp to download videos from playlist.
+        """
+        logger.info("..........Downloading videos from playlist..........")
+        start = time.perf_counter()
+
+        playlist_link = f"https://www.youtube.com/playlist?list={playlist_id}"
+
+        def my_hook(d: dict) -> None:
+            if d['status'] == 'error':
+                error_message = f'An error has occurred when downloading: {d["filename"]}'
+                logger.exception(error_message)
+                self.tb.send_telegram_message(error_message)
+            if d['status'] == 'finished':
+                logger.info(f'Done downloading file. File location: {d["filename"]}')
+
+        ydl_opts = {
+            'logger': logger.getChild('yt_dlp'),
+            'noprogress': True,
+            'progress_hooks': [my_hook],
+            'ignoreerrors': 'only_download',
+            'socket_timeout': 120,
+            'wait_for_video': (1, 600),
+            'download_archive': self.youtube_download_archive,
+            'format': f'bestvideo[height>={self.min_res_height}][ext=mp4]+bestaudio[ext=m4a]',
+            'ffmpeg_location': self.ffmpeg_path,
+            'outtmpl': str(self.download_location) + '/%(title)s.%(ext)s'
+        }
+        with YoutubeDL(ydl_opts) as ydl:
+            ydl.download(playlist_link)
+        end = time.perf_counter()
+        logger.info(f"Time downloading playlist took: {end - start}\n")
+
+
+class ScrapperDownloader(DownloadOptions):
+    def __init__(self, resolved_names_file: Path) -> None:
         self.timeout_secs = 900.0
-        self.download_location = download_location
-        self.download_archive = download_archive
-        self.ffmpeg_path = ffmpeg_path
-        self.min_res_height = min_res_height  # Minimum allowed height of video resolution.
-        self.tb = TelegramBot()
+        self.download_archive = resolved_names_file
         self.downloaded_resolved_names_archive, self.new_downloaded_resolved_names = set(), []
         if self.download_archive.exists():
             self.downloaded_resolved_names_archive = set(self.download_archive.read_text(encoding="utf-8").splitlines())

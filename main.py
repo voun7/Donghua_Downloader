@@ -57,7 +57,9 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
     ch_id_5 = "UCJS5PJXcAIpXkBOjPNvK7Uw"  # Vita Animation Groups
     ch_id_6 = "UCXmOpN9pg1hJBRkHODL00EA"  # 三福动漫 Sanfu
     ch_id_7 = "UCNIKva6iDURgVxf44pMZlKA"  # Animal Family
-    youtube_channel_ids = [ch_id_1, ch_id_2, ch_id_3, ch_id_4, ch_id_5, ch_id_6, ch_id_7]
+    ch_id_8 = "UCgVZKHiJrIHomPGMD8KYTzw"  # D-ANIME
+    ch_id_9 = "UCVSQzmMRQedQRCZZU8QxYow"  # 知名动漫
+    youtube_channel_ids = [ch_id_1, ch_id_2, ch_id_3, ch_id_4, ch_id_5, ch_id_6, ch_id_7, ch_id_8, ch_id_9]
     yd = YouTubeDownloader(yt_dl_archive_file)
 
     try:

@@ -18,7 +18,7 @@ class ChineseTitleGenerator:
         self.ch_num_pattern = re.compile(r'第([零一二三四五六七八九十百千万]+)[集季话]')
         self.season_pattern = re.compile(r'第?\s*(\d+)季|(?:Season|S)\s*(\d+)')
         self.episode_range_pattern = re.compile(r'(\d+)\s*[-~～]\s*(\d+)')
-        self.episode_pattern = re.compile(r'[第季]\s*(\d+)[集话]|EP\s*(\d+)')
+        self.episode_pattern = re.compile(r'[第季]\s*(\d+)[集话]|EP\s*(\d+)|E(\d+)')
 
     def get_suffixes(self) -> str:
         """

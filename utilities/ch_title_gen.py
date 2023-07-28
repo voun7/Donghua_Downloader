@@ -106,9 +106,6 @@ class ChineseTitleGenerator:
                 if len(season_matches) > 1 and season_matches[0] != season_matches[1]:
                     logger.debug("Using season_matches to find episode_no")
                     self.episode_no = season_matches[1]
-                elif not self.episode_no and len(self.all_numbers_pattern.findall(self.filtered_name)) > 1:
-                    logger.debug("Using all_numbers_pattern to find episode_no")
-                    self.episode_no = self.all_numbers_pattern.findall(self.filtered_name)[1]
 
         if self.season_no is None and self.episode_range_no is None and self.episode_no is None:
             self.use_all_name_numbers()

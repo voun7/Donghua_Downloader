@@ -140,7 +140,7 @@ class YouTube:
         """
         logger.info("..........Checking matched videos for duration and quality..........")
         min_duration = timedelta(minutes=3)
-        max_duration = timedelta(minutes=20)
+        max_duration = timedelta(minutes=40)
         passed_check_videos = {}
         for video_id, resolved_name in matched_videos.items():
             request = self.youtube.videos().list(part="snippet,contentDetails", id=video_id)

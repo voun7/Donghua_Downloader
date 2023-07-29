@@ -59,7 +59,8 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
     ch_id_7 = "UCNIKva6iDURgVxf44pMZlKA"  # Animal Family
     ch_id_8 = "UCgVZKHiJrIHomPGMD8KYTzw"  # D-ANIME
     ch_id_9 = "UCVSQzmMRQedQRCZZU8QxYow"  # 知名动漫
-    youtube_channel_ids = [ch_id_1, ch_id_2, ch_id_3, ch_id_4, ch_id_5, ch_id_6, ch_id_7, ch_id_8, ch_id_9]
+    ch_id_10 = "UCQKq8mAjHXFRd6CsdDrCB1w"  # Ziyue Animation
+    youtube_channel_ids = [ch_id_1, ch_id_2, ch_id_3, ch_id_4, ch_id_5, ch_id_6, ch_id_7, ch_id_8, ch_id_9, ch_id_10]
     yd = YouTubeDownloader(yt_dl_archive_file)
 
     try:

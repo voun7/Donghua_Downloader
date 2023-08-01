@@ -146,13 +146,11 @@ def main() -> None:
     destination_dir = playlist_download_dir / "##Currently Airing"
     dfsd_files_dir = playlist_download_dir / "DFSD Project Files"
     dfsd_files_dir.mkdir(exist_ok=True)
-    download_archives_dir = dfsd_files_dir / "Download Archives"
-    download_archives_dir.mkdir(exist_ok=True)
     ffmpeg_dir, proxy_file = dfsd_files_dir / "ffmpeg", dfsd_files_dir / "proxy list.txt"
     ffmpeg_bin_dir = set_ffmpeg_bin(ffmpeg_dir)
     logger.debug(f"Ffmpeg bin directory: {ffmpeg_bin_dir}")
-    resolved_names_file = download_archives_dir / "resolved_names_download_archive.txt"
-    yt_dl_archive_file = download_archives_dir / "youtube_downloads_archive.txt"
+    resolved_names_file = dfsd_files_dir / "resolved_names_download_archive.txt"
+    yt_dl_archive_file = dfsd_files_dir / "youtube_downloads_archive.txt"
 
     min_res_height = 720  # Minimum resolution height.
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '

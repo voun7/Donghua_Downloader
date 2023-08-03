@@ -1,3 +1,4 @@
+import datetime
 import logging
 import re
 import time
@@ -73,6 +74,16 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
         error_message = f"An error occurred while running YouTube scrapper! Error: {error}"
         logger.exception(error_message)
         tb.send_telegram_message(error_message)
+
+
+def is_morning() -> bool:
+    """
+    Check if the current time is in the morning (before 12:00 PM).
+    """
+    now = datetime.datetime.now()
+    morning_start = now.replace(hour=1, minute=0, second=0, microsecond=0)
+    morning_end = now.replace(hour=12, minute=0, second=0, microsecond=0)
+    return morning_start <= now < morning_end
 
 
 def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
@@ -168,7 +179,10 @@ def main() -> None:
     RotatingProxiesRequest.headers, RotatingProxiesRequest.proxy_file = headers, proxy_file
     # Run code to download new anime.
     run_youtube_api(yt_dl_archive_file, resolved_names_file, anime_list, tb)
-    run_scrappers(resolved_names_file, tb)
+    if is_morning():
+        run_scrappers(resolved_names_file, tb)
+    else:
+        logger.warning("Skipping Scrapper! Scrapper will only run in the morning.")
 
     end = time.perf_counter()
     logger.info(f"Total Runtime: {end - start}")

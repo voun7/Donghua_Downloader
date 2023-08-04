@@ -78,11 +78,11 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
 
 def is_morning() -> bool:
     """
-    Check if the current time is in the morning (before 12:00 PM).
+    Check if the current time is in the morning (before 1:00 PM).
     """
     now = datetime.datetime.now()
     morning_start = now.replace(hour=1, minute=0, second=0, microsecond=0)
-    morning_end = now.replace(hour=12, minute=0, second=0, microsecond=0)
+    morning_end = now.replace(hour=13, minute=0, second=0, microsecond=0)
     return morning_start <= now < morning_end
 
 

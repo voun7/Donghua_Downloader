@@ -1,5 +1,6 @@
 import logging
 import re
+from collections import Counter
 
 logger = logging.getLogger(__name__)
 
@@ -8,8 +9,8 @@ class M3u8AdFilter:
     def __init__(self, response_text: str) -> None:
         self.response_text = response_text
         self.ads_removed = 0
+        self.duration_tag = "#EXTINF:"
         self.discon_tag = "#EXT-X-DISCONTINUITY\n"
-        self.discontinuities = self.get_discontinuities()
 
     def get_target_duration(self, tag: str = "#EXT-X-TARGETDURATION:") -> float | int:
         """
@@ -26,14 +27,13 @@ class M3u8AdFilter:
         Get the discontinuity block from the response text.
         """
         discontinuities = self.response_text.split(self.discon_tag)
-        return discontinuities[1:-1]
+        return discontinuities[1:-1]  # Remove the header and footer of the playlist in the response text.
 
-    @staticmethod
-    def get_durations(text: str, tag: str = "#EXTINF:") -> list[float | int]:
+    def get_durations(self, text: str) -> list[float | int]:
         """
         Get the durations of the given text.
         """
-        dur_match = re.findall(rf"{tag}(\d+\.?\d*)", text)
+        dur_match = re.findall(rf"{self.duration_tag}(\d+\.?\d*)", text)
         durations = [float(duration) if "." in duration else int(duration) for duration in dur_match]
         return durations
 
@@ -80,11 +80,24 @@ class M3u8AdFilter:
                 self.response_text = self.response_text.replace(discon, "")
                 self.ads_removed += 1
 
+    def check_duration_uniformity(self) -> None:
+        """
+        If only one duration is different in the response text, it will be deleted.
+        """
+        durations = self.get_durations(self.response_text)[:-1]  # The last duration will be removed.
+        dur_counter = Counter(durations).most_common()
+        if len(dur_counter) == 2 and dur_counter[-1][1] == 1:
+            off_duration = f"{self.duration_tag}{dur_counter[-1][0]},"
+            discon_match = [discon for discon in self.get_discontinuities() if off_duration in discon][0]
+            logger.debug(f"Removing non uniform duration ad match: \n{discon_match}")
+            self.response_text = self.response_text.replace(discon_match, "")
+            self.ads_removed += 1
+
     def run_filters(self) -> str:
         """
         Run the methods in the class to remove ads from the response text.
         """
-        discon_len = len(self.discontinuities)
+        discon_len = len(self.get_discontinuities())
         if discon_len == 1:
             logger.debug(f"{discon_len} pair of discontinuity tags found.")
             self.remove_single_discontinuity()
@@ -92,11 +105,14 @@ class M3u8AdFilter:
             logger.debug(f"{discon_len} pairs of discontinuity tags found.")
             self.remove_double_discontinuity_ads()
             self.remove_suspicious_durations()
+            self.check_duration_uniformity()
         else:
             logger.debug("No pair of discontinuity tags to remove ads found!")
 
         if self.ads_removed == 0:
             logger.debug(f"No advertisement found in the response text. Response text:\n{self.response_text}")
+        elif self.ads_removed > 4:
+            logger.warning(f"Too many parts removed from playlist! Some removed parts may not be ads!")
         # Remove excess discontinuity tags remove response text.
         self.response_text = self.response_text.replace(f"{self.discon_tag}{self.discon_tag}", "")
         logger.debug(f"Number of ads removed: {self.ads_removed}")

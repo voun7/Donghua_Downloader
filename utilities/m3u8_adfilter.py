@@ -93,7 +93,7 @@ class M3u8AdFilter:
             self.response_text = self.response_text.replace(discon_match, "")
             self.ads_removed += 1
 
-    def run_filters(self) -> str:
+    def run_filters(self) -> tuple[str, int]:
         """
         Run the methods in the class to remove ads from the response text.
         """
@@ -111,12 +111,10 @@ class M3u8AdFilter:
 
         if self.ads_removed == 0:
             logger.debug(f"No advertisement found in the response text. Response text:\n{self.response_text}")
-        elif self.ads_removed > 4:
-            logger.warning(f"Too many parts removed from playlist! Some removed parts may not be ads!")
         # Remove excess discontinuity tags remove response text.
         self.response_text = self.response_text.replace(f"{self.discon_tag}{self.discon_tag}", "")
         logger.debug(f"Number of ads removed: {self.ads_removed}")
-        return self.response_text
+        return self.response_text, self.ads_removed
 
 
 if __name__ == '__main__':

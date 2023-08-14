@@ -137,7 +137,7 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
 
 
 def m3u8_video_downloader() -> None:
-    DownloadOptions.download_location = Path.home() / "Downloads"
+    # DownloadOptions.download_location = Path.home() / "Downloads"
     sd = ScrapperDownloader(Path("none"))
     video_name = ""
     video_link = ""

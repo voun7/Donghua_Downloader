@@ -144,16 +144,15 @@ class ScrapperDownloader(DownloadOptions):
         # Clean up the m3u8 playlist file.
         m3u8_file.unlink()
 
-    def ad_free_playlist_downloader(self, file_name: str, response_text: str, max_ads: int = 4) -> None:
+    def ad_free_playlist_downloader(self, file_name: str, response_text: str) -> None:
         """
         Remove embedded advertisements from m3u8 playlist.
         """
         logger.debug(f"Advertisement detected in {file_name}!")
         file_path = Path(f"{self.download_location}/{file_name}.mp4")
         # Remove advertisement from text.
-        af = M3u8AdFilter(response_text)
-        ad_free_m3u8_text, ads_removed = af.run_filters()
-        ad_free_m3u8_text = response_text if ads_removed > max_ads else ad_free_m3u8_text
+        af = M3u8AdFilter()
+        ad_free_m3u8_text = af.run_filters(response_text)
         # Create temp ad filtered m3u8 playlist.
         temp_m3u8_file = Path(f"{self.download_location}/{file_name}_filtered_playlist.m3u8")
         temp_m3u8_file.write_text(ad_free_m3u8_text)

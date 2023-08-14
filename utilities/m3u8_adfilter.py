@@ -6,8 +6,8 @@ logger = logging.getLogger(__name__)
 
 
 class M3u8AdFilter:
-    def __init__(self, response_text: str) -> None:
-        self.response_text = response_text
+    def __init__(self) -> None:
+        self.response_text = None
         self.ads_removed = 0
         self.duration_tag = "#EXTINF:"
         self.discon_tag = "#EXT-X-DISCONTINUITY\n"
@@ -68,6 +68,7 @@ class M3u8AdFilter:
         """
         Remove response parts with suspicious durations that could be ads.
         """
+        min_dur_len = 2 if len(self.get_discontinuities()) > 30 else 1
         target_duration = self.get_target_duration()
         for discon in self.get_discontinuities():
             durations = self.get_durations(discon)
@@ -75,7 +76,7 @@ class M3u8AdFilter:
                 logger.debug(f"Removing Max or Min ad match: \n{discon}")
                 self.response_text = self.response_text.replace(discon, "")
                 self.ads_removed += 1
-            elif len(durations) > 1 and target_duration > sum(durations):
+            elif len(durations) > min_dur_len and target_duration > sum(durations):
                 logger.debug(f"Removing low duration ad match: \n{discon}")
                 self.response_text = self.response_text.replace(discon, "")
                 self.ads_removed += 1
@@ -93,10 +94,11 @@ class M3u8AdFilter:
             self.response_text = self.response_text.replace(discon_match, "")
             self.ads_removed += 1
 
-    def run_filters(self) -> tuple[str, int]:
+    def run_filters(self, response_text: str) -> str:
         """
         Run the methods in the class to remove ads from the response text.
         """
+        self.response_text = response_text
         discon_len = len(self.get_discontinuities())
         if discon_len == 1:
             logger.debug(f"{discon_len} pair of discontinuity tags found.")
@@ -111,15 +113,19 @@ class M3u8AdFilter:
 
         if self.ads_removed == 0:
             logger.debug(f"No advertisement found in the response text. Response text:\n{self.response_text}")
-        # Remove excess discontinuity tags remove response text.
-        self.response_text = self.response_text.replace(f"{self.discon_tag}{self.discon_tag}", "")
+        elif self.ads_removed > 4:  # The max number of parts that are allowed to be removed.
+            logger.warning(f"Too many parts removed from playlist! Response text will be used instead.")
+            self.response_text = response_text  # This is because some removed parts may not be ads.
+        else:
+            # Remove excess discontinuity tags remove response text.
+            self.response_text = self.response_text.replace(f"{self.discon_tag}{self.discon_tag}", "")
         logger.debug(f"Number of ads removed: {self.ads_removed}")
-        return self.response_text, self.ads_removed
+        return self.response_text
 
 
 if __name__ == '__main__':
     from pathlib import Path
 
-    response_txt = Path("").read_text()
-    af = M3u8AdFilter(response_txt)
-    res = af.run_filters()
+    test_txt = Path("").read_text()
+    af = M3u8AdFilter()
+    res = af.run_filters(test_txt)

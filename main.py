@@ -136,6 +136,13 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         tb.send_telegram_message(error_message)
 
 
+def m3u8_video_downloader() -> None:
+    sd = ScrapperDownloader(Path("none"))
+    video_name = ""
+    video_link = ""
+    sd.video_downloader("", (video_name, video_link))
+
+
 def main() -> None:
     # Set credentials first.
     set_credentials()
@@ -170,6 +177,7 @@ def main() -> None:
     # Run code to download new anime.
     run_youtube_api(yt_dl_archive_file, resolved_names_file, anime_list, tb)
     run_scrappers(resolved_names_file, tb)
+    # m3u8_video_downloader()
 
     end = time.perf_counter()
     logger.info(f"Total Runtime: {end - start}")

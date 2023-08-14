@@ -163,7 +163,8 @@ def main() -> None:
     DownloadOptions.ffmpeg_path, DownloadOptions.min_res_height = ffmpeg_bin_dir, min_res_height
     # Set scrapper options.
     ScrapperTools.headers, ScrapperTools.anime_list = headers, anime_list
-    ScrapperTools.resolved_names_archive = set(resolved_names_file.read_text(encoding="utf-8").splitlines())
+    ScrapperTools.resolved_names_archive = set(resolved_names_file.read_text(encoding="utf-8").splitlines()) \
+        if resolved_names_file.exists() else set()
     # Set options for proxy.
     RotatingProxiesRequest.headers, RotatingProxiesRequest.proxy_file = headers, proxy_file
     # Run code to download new anime.

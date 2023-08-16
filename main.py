@@ -34,6 +34,7 @@ def set_ffmpeg_bin(ffmpeg_dir: Path) -> Path:
     """
     if ffmpeg_dir.exists():
         ffmpeg_folder_name = list(ffmpeg_dir.iterdir())[0]
+        return ffmpeg_folder_name / "bin"
     else:
         ffmpeg_link = "https://github.com/yt-dlp/FFmpeg-Builds/releases/" \
                       "download/latest/ffmpeg-master-latest-win64-gpl.zip"
@@ -42,7 +43,7 @@ def set_ffmpeg_bin(ffmpeg_dir: Path) -> Path:
             zip_file.extractall(ffmpeg_dir)
             namelist = zip_file.namelist()  # Get the names of all the files and directories in the zip.
             ffmpeg_folder_name = namelist[0]
-    return ffmpeg_dir / ffmpeg_folder_name / "bin"
+        return ffmpeg_dir / ffmpeg_folder_name / "bin"
 
 
 def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_list: list, tb: TelegramBot) -> None:
@@ -156,7 +157,7 @@ def main() -> None:
     dfsd_files_dir.mkdir(exist_ok=True)
     ffmpeg_dir, proxy_file = dfsd_files_dir / "ffmpeg", dfsd_files_dir / "proxy list.txt"
     ffmpeg_bin_dir = set_ffmpeg_bin(ffmpeg_dir)
-    logger.debug(f"Ffmpeg bin directory: {ffmpeg_bin_dir}")
+    logger.info(f"Ffmpeg bin directory: {ffmpeg_bin_dir}, Exists: {ffmpeg_bin_dir.exists()}")
     resolved_names_file = dfsd_files_dir / "resolved_names_download_archive.txt"
     yt_dl_archive_file = dfsd_files_dir / "youtube_downloads_archive.txt"
 

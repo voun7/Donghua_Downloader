@@ -80,7 +80,6 @@ class ScrapperDownloader(DownloadOptions):
         """
         if self.new_dl_resolved_names:
             logger.info(f"Archive updated with new names. Names: {self.new_dl_resolved_names}")
-            self.tb.send_telegram_message(f"Scraper Downloads Completed. Names: {self.new_dl_resolved_names}")
             with open(self.resolved_names_file, 'a', encoding="utf-8") as text_file:
                 text_file.writelines(self.new_dl_resolved_names)
             self.new_dl_resolved_names = []  # Empty list after every update to prevent duplicates.

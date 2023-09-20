@@ -18,8 +18,8 @@ logging.getLogger("selenium").setLevel(logging.WARNING)
 
 class ScrapperTools:
     headers = anime_list = resolved_names_archive = None
+    video_num_per_post = None  # The number of recent videos that will downloaded per post.
     parser = "html.parser"
-    video_num_per_post = 3  # The number of recent videos that will downloaded per post.
     current_date = datetime.now().date()
     tb, ch_gen = TelegramBot(), ChineseTitleGenerator()
     # Common texts used by scrappers are shared from here.

@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class DownloadOptions:
-    tb = download_location = ffmpeg_path = min_res_height = None
+    tb = download_path = timeout_secs = ffmpeg_path = min_res_height = None
     host_name = socket.gethostname()
 
 
@@ -34,11 +34,11 @@ class YouTubeDownloader(DownloadOptions):
         ydl_opts = {
             'ignoreerrors': 'only_download',
             'socket_timeout': 120,
-            'wait_for_video': (1, 600),
+            'wait_for_video': (1, self.timeout_secs),
             'download_archive': self.yt_dl_archive_file,
             'format': f'bestvideo[height>={self.min_res_height}][ext=mp4]+bestaudio[ext=m4a]',
             'ffmpeg_location': self.ffmpeg_path,
-            'outtmpl': str(self.download_location) + '/%(title)s.%(ext)s'
+            'outtmpl': str(self.download_path) + '/%(title)s.%(ext)s'
         }
 
         if "VOUN-SERVER" in self.host_name:
@@ -67,7 +67,6 @@ class YouTubeDownloader(DownloadOptions):
 
 class ScrapperDownloader(DownloadOptions):
     def __init__(self, resolved_names_file: Path) -> None:
-        self.timeout_secs = 900.0
         self.resolved_names_file = resolved_names_file
         self.dl_resolved_names_archive, self.new_dl_resolved_names = set(), []
         if self.resolved_names_file.exists():
@@ -101,7 +100,7 @@ class ScrapperDownloader(DownloadOptions):
         Returns True if video's height resolution is lower than the allowed minimum and False otherwise.
         The first 10 seconds of the video are downloaded for testing.
         """
-        temp_file = Path(f"{self.download_location}/{file_name}_res_check_temp.mp4")
+        temp_file = Path(f"{self.download_path}/{file_name}_res_check_temp.mp4")
         duration = "10"  # Set the duration of the first fragment to download (in seconds).
         ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-t', duration, '-i', download_link, '-c', 'copy', str(temp_file)]
         try:
@@ -149,12 +148,12 @@ class ScrapperDownloader(DownloadOptions):
         Remove embedded advertisements from m3u8 playlist.
         """
         logger.debug(f"Advertisement detected in {file_name}!")
-        file_path = Path(f"{self.download_location}/{file_name}.mp4")
+        file_path = Path(f"{self.download_path}/{file_name}.mp4")
         # Remove advertisement from text.
         af = M3u8AdFilter()
         ad_free_m3u8_text = af.run_filters(response_text)
         # Create temp ad filtered m3u8 playlist.
-        temp_m3u8_file = Path(f"{self.download_location}/{file_name}_filtered_playlist.m3u8")
+        temp_m3u8_file = Path(f"{self.download_path}/{file_name}_filtered_playlist.m3u8")
         temp_m3u8_file.write_text(ad_free_m3u8_text)
         # Use ffmpeg to download and convert the modified playlist.
         self.m3u8_downloader(temp_m3u8_file, file_path)
@@ -164,7 +163,7 @@ class ScrapperDownloader(DownloadOptions):
         Download file with link.
         """
         logger.debug(f"Link downloader being used for {file_name}.")
-        file_path = Path(f"{self.download_location}/{file_name}.mp4")
+        file_path = Path(f"{self.download_path}/{file_name}.mp4")
         # Set the ffmpeg command as a list.
         ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-i', download_link, '-c', 'copy', str(file_path)]
         try:
@@ -179,7 +178,7 @@ class ScrapperDownloader(DownloadOptions):
         Use m3u8 link to download video and create mp4 file. Embedded advertisements links will be removed.
         """
         file_name, download_link = download_details[0], download_details[1]
-        file_path = Path(f"{self.download_location}/{file_name}.mp4")
+        file_path = Path(f"{self.download_path}/{file_name}.mp4")
         if file_path.exists():
             logger.warning(f"Resolved name: {resolved_name}, File: {file_name} exists in directory. Skipping download!")
             return

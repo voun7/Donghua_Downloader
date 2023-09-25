@@ -76,6 +76,21 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
         tb.send_telegram_message(error_message)
 
 
+def anime_scrapper_list(youtube_only_file: Path, anime_list: list) -> list:
+    """
+    An anime list that only has anime that is allowed to be used by scrapper will be returned.
+    :param youtube_only_file: The file contains a list of anime that are not allowed to be scrapped.
+    :param anime_list: The unfiltered anime used list used by YouTube.
+    """
+    if youtube_only_file.exists():
+        logger.debug("Creating filtered anime list for scrappers.")
+        banned_anime = youtube_only_file.read_text(encoding="utf-8").splitlines()
+        scrapper_list = [anime for anime in anime_list if anime not in banned_anime]
+        return scrapper_list
+    else:
+        return anime_list
+
+
 def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
     sd = ScrapperDownloader(resolved_names_file)
 
@@ -160,6 +175,7 @@ def main() -> None:
     logger.info(f"Ffmpeg bin directory: {ffmpeg_bin_dir}, Exists: {ffmpeg_bin_dir.exists()}")
     resolved_names_file = dfsd_files_dir / "resolved_names_download_archive.txt"
     yt_dl_archive_file = dfsd_files_dir / "youtube_downloads_archive.txt"
+    youtube_only_file = dfsd_files_dir / "youtube_only.txt"
 
     min_res_height = 720  # Minimum resolution height.
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -171,7 +187,8 @@ def main() -> None:
     DownloadOptions.tb, DownloadOptions.download_path, DownloadOptions.timeout_secs = tb, playlist_download_dir, 900
     DownloadOptions.ffmpeg_path, DownloadOptions.min_res_height = ffmpeg_bin_dir, min_res_height
     # Set scrapper options.
-    ScrapperTools.headers, ScrapperTools.anime_list, ScrapperTools.video_num_per_post = headers, anime_list, 3
+    scrapper_list = anime_scrapper_list(youtube_only_file, anime_list)
+    ScrapperTools.headers, ScrapperTools.anime_list, ScrapperTools.video_num_per_post = headers, scrapper_list, 3
     ScrapperTools.resolved_names_archive = set(resolved_names_file.read_text(encoding="utf-8").splitlines()) \
         if resolved_names_file.exists() else set()
     # Set options for proxy.

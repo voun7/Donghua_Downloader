@@ -121,20 +121,20 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         logger.exception(error_message)
         tb.send_telegram_message(error_message)
 
-    # site_address = "agedm1.com"
-    # try:
-    #     logger.info(f"Checking {site_address} site for recent anime upload matches...")
-    #     agedm1 = AgeDm1Scrapper(site_address)
-    #     site_posts = agedm1.get_anime_posts()
-    #     site_posts.update(agedm1.get_anime_posts(page=2))
-    #     matched_posts = agedm1.match_to_recent_videos(site_posts)
-    #     matched_download_details = agedm1.get_recent_posts_videos_download_link(matched_posts)
-    #     agedm1.driver.quit()  # Close headless browser
-    #     sd.batch_downloader(matched_download_details)
-    # except Exception as error:
-    #     error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
-    #     logger.exception(error_message)
-    #     tb.send_telegram_message(error_message)
+    site_address = "agedm1.com"
+    try:
+        logger.info(f"Checking {site_address} site for recent anime upload matches...")
+        agedm1 = AgeDm1Scrapper(site_address)
+        site_posts = agedm1.get_anime_posts()
+        site_posts.update(agedm1.get_anime_posts(page=2))
+        matched_posts = agedm1.match_to_recent_videos(site_posts)
+        matched_download_details = agedm1.get_recent_posts_videos_download_link(matched_posts)
+        agedm1.driver.quit()  # Close headless browser
+        sd.batch_downloader(matched_download_details)
+    except Exception as error:
+        error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
+        logger.exception(error_message)
+        tb.send_telegram_message(error_message)
 
     site_address = "imyyds.com"
     try:

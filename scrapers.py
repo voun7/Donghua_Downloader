@@ -78,6 +78,12 @@ class XiaobaotvScraper(ScrapperTools):
             video_name_and_link[post_title] = post_url
         return video_name_and_link
 
+    def get_post_video_link(self, soup: BeautifulSoup, post_title: str, video_number: int) -> str | None:
+        video_post1 = soup.find('li', {"title": f"{video_number}"})
+        if video_post1:
+            return self.base_url + video_post1.find('a').get('href')
+        logger.error(f"Video Link not found for Video Number:{post_title} {video_number}!")
+
     def get_recent_posts_videos_download_link(self, matched_posts: dict) -> dict:
         """
         Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
@@ -108,8 +114,7 @@ class XiaobaotvScraper(ScrapperTools):
                         logger.warning(f"Post Video Name: {post_video_name}, "
                                        f"Resolved Name: {resolved_name} already in archive!")
                         continue
-                    video_post = soup.find('li', {"title": f"{video_number}"})
-                    video_link = self.base_url + video_post.find('a').get('href')
+                    video_link = self.get_post_video_link(soup, post_title, video_number)
                     download_link = self.get_video_download_link(video_link)
                     logger.info(f"Post Video Name: {post_video_name}, Video Link: {video_link}, "
                                 f"Download Link: {download_link}")
@@ -126,12 +131,13 @@ class XiaobaotvScraper(ScrapperTools):
         """
         This method uses the video url to find the video download link.
         """
-        page_response = self.session.get(video_url, headers=self.headers)
-        soup = BeautifulSoup(page_response.text, self.parser)
-        download_script = soup.find(class_='embed-responsive clearfix')
-        download_match = re.search(r'"url":"(.*?)"', str(download_script))
-        download_link = download_match.group(1).replace("\\", '')
-        return download_link
+        if video_url:
+            page_response = self.session.get(video_url, headers=self.headers)
+            soup = BeautifulSoup(page_response.text, self.parser)
+            download_script = soup.find(class_='embed-responsive clearfix')
+            download_match = re.search(r'"url":"(.*?)"', str(download_script))
+            download_link = download_match.group(1).replace("\\", '')
+            return download_link
 
 
 class AnimeBabyScrapper(ScrapperTools):

@@ -111,7 +111,7 @@ def check_url(url: str) -> str:
 def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
     sd = ScrapperDownloader(resolved_names_file)
 
-    site_address = check_url("xiaobaotv.net")
+    site_address = check_url("xiaoxintv.net")
     try:
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         xiaobaotv = XiaobaotvScraper(site_address)
@@ -138,7 +138,7 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         logger.exception(error_message)
         tb.send_telegram_message(error_message)
 
-    site_address = check_url("agedm1.com")
+    site_address = check_url("agedmw2.com")
     try:
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         agedm1 = AgeDm1Scrapper(site_address)

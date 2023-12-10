@@ -75,7 +75,6 @@ class XiaobaotvScraper(ScrapperTools):
         page_response.raise_for_status()
         soup = BeautifulSoup(page_response.text, self.parser)
         posts = soup.find_all('li', class_='col-lg-8 col-md-6 col-sm-4 col-xs-3')
-        self.tb.send_telegram_message("This is a test")
         for post in posts:
             post_title = post.find('h4', class_='title text-overflow').text
             post_url = self.base_url + post.find('a').get('href')

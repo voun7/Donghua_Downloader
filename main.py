@@ -66,7 +66,7 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
 
     try:
         logger.info("Checking YouTube site for recent anime upload matches...")
-        youtube = YouTube(playlist_id, resolved_names_file)
+        youtube = YouTube(playlist_id, resolved_names_file, tb)
         youtube.clear_playlist()
         youtube.match_to_youtube_videos(youtube_channel_ids, anime_list)
         yd.playlist_downloader(playlist_id)
@@ -188,6 +188,7 @@ def main() -> None:
     DownloadOptions.ffmpeg_path, DownloadOptions.min_res_height = ffmpeg_bin_dir, min_res_height
     # Set scrapper options.
     scrapper_list = anime_scrapper_list(youtube_only_file, anime_list)
+    ScrapperTools.tb = tb
     ScrapperTools.headers, ScrapperTools.anime_list, ScrapperTools.video_num_per_post = headers, scrapper_list, 3
     ScrapperTools.resolved_names_archive = set(resolved_names_file.read_text(encoding="utf-8").splitlines()) \
         if resolved_names_file.exists() else set()

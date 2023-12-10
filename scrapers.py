@@ -9,7 +9,6 @@ from dateutil import parser
 from selenium import webdriver
 
 from utilities.ch_title_gen import ChineseTitleGenerator
-from utilities.telegram_bot import TelegramBot
 
 logger = logging.getLogger(__name__)
 # Do not log this messages unless they are at least warnings
@@ -17,11 +16,11 @@ logging.getLogger("selenium").setLevel(logging.WARNING)
 
 
 class ScrapperTools:
-    headers = anime_list = resolved_names_archive = None
+    headers = anime_list = resolved_names_archive = tb = None
     video_num_per_post = None  # The number of recent videos that will downloaded per post.
     parser = "html.parser"
     current_date = datetime.now().date()
-    tb, ch_gen = TelegramBot(), ChineseTitleGenerator()
+    ch_gen = ChineseTitleGenerator()
     # Common texts used by scrappers are shared from here.
     check_downlink_message = "..........Checking for latest videos download links.........."
     time_message = "Time taken to retrieve recent posts download links: "
@@ -71,6 +70,7 @@ class XiaobaotvScraper(ScrapperTools):
         page_response.raise_for_status()
         soup = BeautifulSoup(page_response.text, self.parser)
         posts = soup.find_all('li', class_='col-lg-8 col-md-6 col-sm-4 col-xs-3')
+        self.tb.send_telegram_message("This is a test")
         for post in posts:
             post_title = post.find('h4', class_='title text-overflow').text
             post_url = self.base_url + post.find('a').get('href')

@@ -11,7 +11,6 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 
 from utilities.ch_title_gen import ChineseTitleGenerator
-from utilities.telegram_bot import TelegramBot
 
 logger = logging.getLogger(__name__)
 
@@ -20,13 +19,13 @@ logger = logging.getLogger(__name__)
 class YouTube:
     credential_file = token_file = Path()
 
-    def __init__(self, playlist_id: str, resolved_names_file: Path) -> None:
+    def __init__(self, playlist_id: str, resolved_names_file: Path, telegram_bot) -> None:
         self.playlist_id = playlist_id
         self.resolved_names_file = resolved_names_file
         self.youtube = None
         self.max_results = 50
         self.default_duration = timedelta(hours=12)
-        self.tb, self.ch_name_gen = TelegramBot(), ChineseTitleGenerator()
+        self.tb, self.ch_name_gen = telegram_bot, ChineseTitleGenerator()
         try:
             self.get_authenticated_service()
         except Exception as error:

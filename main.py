@@ -91,10 +91,27 @@ def anime_scrapper_list(youtube_only_file: Path, anime_list: list) -> list:
         return anime_list
 
 
+def check_url(url: str) -> str:
+    """
+    Check site url to see if it has been updated.
+    """
+    try:
+        response = requests.get(f"https://{url}")
+    except requests.exceptions.ConnectionError:
+        response = requests.get(f"http://{url}")
+    site_url = re.search(r"https*://(.+?)/", response.url).group(1)
+    if url != site_url:
+        error_message = f"Site: {url} link has changed to {site_url}. Update site link soon to new link."
+        logger.warning(error_message)
+        tb = TelegramBot()
+        tb.send_telegram_message(error_message)
+    return site_url
+
+
 def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
     sd = ScrapperDownloader(resolved_names_file)
 
-    site_address = "xiaobaotv.net"
+    site_address = check_url("xiaobaotv.net")
     try:
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         xiaobaotv = XiaobaotvScraper(site_address)
@@ -107,7 +124,7 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         logger.exception(error_message)
         tb.send_telegram_message(error_message)
 
-    site_address = "animebaby.top"
+    site_address = check_url("animebaby.top")
     try:
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         anime_baby = AnimeBabyScrapper(site_address)
@@ -121,7 +138,7 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         logger.exception(error_message)
         tb.send_telegram_message(error_message)
 
-    site_address = "agedm1.com"
+    site_address = check_url("agedm1.com")
     try:
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         agedm1 = AgeDm1Scrapper(site_address)
@@ -136,7 +153,7 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         logger.exception(error_message)
         tb.send_telegram_message(error_message)
 
-    site_address = "imyyds.com"
+    site_address = check_url("imyyds.com")
     try:
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         imyyds = ImyydsScrapper(site_address)

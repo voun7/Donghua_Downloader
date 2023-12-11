@@ -155,7 +155,7 @@ class AnimeBabyScrapper(ScrapperTools):
 
     def detect_cloudflare(self) -> bool:
         page_response = self.session.get(self.base_url, headers=self.headers)
-        if "cloudflare" in page_response:
+        if "cloudflare" in page_response.text:
             logger.warning("Cloudflare detected in site!")
             return True
         else:

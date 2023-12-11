@@ -14,9 +14,9 @@ class URLManager:
         Check site url to see if it has been updated.
         """
         try:
-            response = requests.get(f"https://{url}")
+            response = requests.get(f"https://{url}", headers=self.headers)
         except requests.exceptions.ConnectionError:
-            response = requests.get(f"http://{url}")
+            response = requests.get(f"http://{url}", headers=self.headers)
         site_url = re.search(r"https*://(.+?)/", response.url).group(1)
         if url != site_url:
             error_message = f"Site: {url} link has changed to {site_url}. Update site link soon to new link."

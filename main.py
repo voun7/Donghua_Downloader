@@ -86,8 +86,8 @@ def scrapper_anime_list(youtube_only_file: Path, anime_list: list) -> list:
     """
     if youtube_only_file.exists():
         logger.debug("Creating filtered anime list for scrappers.")
-        banned_anime = youtube_only_file.read_text(encoding="utf-8").splitlines()
-        scrapper_list = [anime for anime in anime_list if anime not in banned_anime]
+        yt_only_anime = youtube_only_file.read_text(encoding="utf-8").splitlines()
+        scrapper_list = [anime for anime in anime_list if anime not in yt_only_anime]
         return scrapper_list
     else:
         return anime_list

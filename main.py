@@ -77,9 +77,10 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
         tb.send_telegram_message(error_message)
 
 
-def anime_scrapper_list(youtube_only_file: Path, anime_list: list) -> list:
+def scrapper_anime_list(youtube_only_file: Path, anime_list: list) -> list:
     """
     An anime list that only has anime that is allowed to be used by scrapper will be returned.
+    This method is used to prevent scrapers from scrapping anime that is preferred to be found on YouTube.
     :param youtube_only_file: The file contains a list of anime that are not allowed to be scrapped.
     :param anime_list: The unfiltered anime used list used by YouTube.
     """
@@ -190,7 +191,7 @@ def main() -> None:
     DownloadOptions.tb, DownloadOptions.download_path, DownloadOptions.timeout_secs = tb, playlist_download_dir, 900
     DownloadOptions.ffmpeg_path, DownloadOptions.min_res_height = ffmpeg_bin_dir, min_res_height
     # Set scrapper options.
-    scrapper_list = anime_scrapper_list(youtube_only_file, anime_list)
+    scrapper_list = scrapper_anime_list(youtube_only_file, anime_list)
     ScrapperTools.tb = tb
     ScrapperTools.headers, ScrapperTools.anime_list, ScrapperTools.video_num_per_post = headers, scrapper_list, 3
     ScrapperTools.resolved_names_archive = set(resolved_names_file.read_text(encoding="utf-8").splitlines()) \

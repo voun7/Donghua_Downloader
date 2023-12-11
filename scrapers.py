@@ -173,8 +173,8 @@ class AnimeBabyScrapper(ScrapperTools):
         time.sleep(delay)  # Time to allow cloudflare checks to finish
         page_content = self.chrome_driver.page_source
         if "cloudflare" in page_content:
-            logger.error("Cloudflare bypass failed!")
             message = f"Cloudflare bypass failed on {self.base_url} site!"
+            logger.error(message)
             self.tb.send_telegram_message(message)
         else:
             logger.info("Cloudflare bypass succeeded!")

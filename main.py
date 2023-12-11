@@ -12,6 +12,7 @@ from utilities.downloader import DownloadOptions, YouTubeDownloader, ScrapperDow
 from utilities.logger_setup import setup_logging
 from utilities.proxy_request import RotatingProxiesRequest
 from utilities.telegram_bot import TelegramBot
+from utilities.url_manager import URLManager
 from youtube import YouTube
 
 logger = logging.getLogger(__name__)
@@ -91,27 +92,10 @@ def anime_scrapper_list(youtube_only_file: Path, anime_list: list) -> list:
         return anime_list
 
 
-def check_url(url: str) -> str:
-    """
-    Check site url to see if it has been updated.
-    """
-    try:
-        response = requests.get(f"https://{url}")
-    except requests.exceptions.ConnectionError:
-        response = requests.get(f"http://{url}")
-    site_url = re.search(r"https*://(.+?)/", response.url).group(1)
-    if url != site_url:
-        error_message = f"Site: {url} link has changed to {site_url}. Update site link soon to new link."
-        logger.warning(error_message)
-        tb = TelegramBot()
-        tb.send_telegram_message(error_message)
-    return site_url
-
-
 def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
-    sd = ScrapperDownloader(resolved_names_file)
+    um, sd = URLManager(), ScrapperDownloader(resolved_names_file)
 
-    site_address = check_url("xiaoxintv.net")
+    site_address = um.check_url("xiaoxintv.net")
     try:
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         xiaobaotv = XiaobaotvScraper(site_address)
@@ -138,7 +122,7 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         logger.exception(error_message)
         tb.send_telegram_message(error_message)
 
-    site_address = check_url("agedmw2.com")
+    site_address = um.check_url("agedmw2.com")
     try:
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         agedm1 = AgeDm1Scrapper(site_address)
@@ -153,7 +137,7 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         logger.exception(error_message)
         tb.send_telegram_message(error_message)
 
-    site_address = check_url("imyyds.com")
+    site_address = um.check_url("imyyds.com")
     try:
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         imyyds = ImyydsScrapper(site_address)
@@ -200,6 +184,8 @@ def main() -> None:
     anime_list = [keyword for folder in destination_dir.iterdir() for keyword in re.findall(r'\((.*?)\)', folder.name)]
 
     tb = TelegramBot()
+    # Set url manager options.
+    URLManager.tb, URLManager.headers = tb, headers
     # Set download options.
     DownloadOptions.tb, DownloadOptions.download_path, DownloadOptions.timeout_secs = tb, playlist_download_dir, 900
     DownloadOptions.ffmpeg_path, DownloadOptions.min_res_height = ffmpeg_bin_dir, min_res_height

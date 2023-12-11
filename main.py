@@ -124,19 +124,19 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         logger.exception(error_message)
         tb.send_telegram_message(error_message)
 
-    # site_address = check_url("animebaby.top")
-    # try:
-    #     logger.info(f"Checking {site_address} site for recent anime upload matches...")
-    #     anime_baby = AnimeBabyScrapper(site_address)
-    #     site_posts = anime_baby.get_anime_posts()
-    #     site_posts.update(anime_baby.get_anime_posts(page=2))
-    #     matched_posts = anime_baby.match_to_recent_videos(site_posts)
-    #     matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts)
-    #     sd.batch_downloader(matched_download_details)
-    # except Exception as error:
-    #     error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
-    #     logger.exception(error_message)
-    #     tb.send_telegram_message(error_message)
+    site_address = um.check_url("animebaby.top")
+    try:
+        logger.info(f"Checking {site_address} site for recent anime upload matches...")
+        anime_baby = AnimeBabyScrapper(site_address)
+        site_posts = anime_baby.get_anime_posts()
+        site_posts.update(anime_baby.get_anime_posts(page=2))
+        matched_posts = anime_baby.match_to_recent_videos(site_posts)
+        matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts)
+        sd.batch_downloader(matched_download_details)
+    except Exception as error:
+        error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
+        logger.exception(error_message)
+        tb.send_telegram_message(error_message)
 
     site_address = check_url("agedmw2.com")
     try:

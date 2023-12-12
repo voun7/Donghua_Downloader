@@ -96,7 +96,7 @@ def scrapper_anime_list(youtube_only_file: Path, anime_list: list) -> list:
 def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
     um, sd = URLManager(), ScrapperDownloader(resolved_names_file)
 
-    site_address = um.check_url("xiaoxintv.net")
+    site_address = um.check_url("xiaobaotv.net")
     try:
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         xiaobaotv = XiaobaotvScraper(site_address)
@@ -123,7 +123,7 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         logger.exception(error_message)
         tb.send_telegram_message(error_message)
 
-    site_address = um.check_url("agedmw2.com")
+    site_address = um.check_url("agedm1.com")
     try:
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         agedm1 = AgeDm1Scrapper(site_address)
@@ -178,6 +178,7 @@ def main() -> None:
     resolved_names_file = dfsd_files_dir / "resolved_names_download_archive.txt"
     yt_dl_archive_file = dfsd_files_dir / "youtube_downloads_archive.txt"
     youtube_only_file = dfsd_files_dir / "youtube_only.txt"
+    url_data_file = dfsd_files_dir / "url_data.json"
 
     min_res_height = 720  # Minimum resolution height.
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -186,7 +187,7 @@ def main() -> None:
 
     tb = TelegramBot()
     # Set url manager options.
-    URLManager.tb, URLManager.headers = tb, headers
+    URLManager.tb, URLManager.headers, URLManager.url_data_file = tb, headers, url_data_file
     # Set download options.
     DownloadOptions.tb, DownloadOptions.download_path, DownloadOptions.timeout_secs = tb, playlist_download_dir, 900
     DownloadOptions.ffmpeg_path, DownloadOptions.min_res_height = ffmpeg_bin_dir, min_res_height

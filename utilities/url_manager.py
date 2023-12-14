@@ -12,6 +12,7 @@ class URLManager:
 
     def __init__(self) -> None:
         self.url_data = self.load_url_data()
+        logger.debug(f"Url Data: {self.url_data}")
         self.site_name_pattern = re.compile(r"https*://w{0,3}\.?(.+?)/")
 
     def load_url_data(self) -> dict:

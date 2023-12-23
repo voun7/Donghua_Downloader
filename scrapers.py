@@ -305,6 +305,7 @@ class EightEightMVScrapper(ScrapperTools):
 
         if request_type == 1:
             page_response = self.session.get(url, headers=self.headers)
+            page_response.encoding = "utf-8"
             page_response.raise_for_status()
             return BeautifulSoup(page_response.text, self.parser)
         if request_type == 2:
@@ -383,7 +384,6 @@ class EightEightMVScrapper(ScrapperTools):
         This method uses the video url to find the video download link.
         """
         if video_url:
-            # Todo: Fix download link extraction.
             soup = self.get_page_response(video_url, 2)
             download_src = soup.find("iframe", attrs={'allowfullscreen': 'true'})
             if download_src:

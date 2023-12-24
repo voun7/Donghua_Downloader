@@ -85,8 +85,9 @@ class ScrapperDownloader(DownloadOptions):
             self.new_dl_resolved_names = []  # Empty list after every update to prevent duplicates.
 
     def send_error_messages(self, scrapper_name: str) -> None:
-        self.tb.send_telegram_message(f"Scrapper Name:{scrapper_name}\n{self.error_msgs}")
-        self.error_msgs = ""
+        if self.error_msgs:
+            self.tb.send_telegram_message(f"Scrapper Name:{scrapper_name}\n{self.error_msgs}")
+            self.error_msgs = ""
 
     def check_download_archive(self, resolved_name: str, file_name: str) -> bool:
         """

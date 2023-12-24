@@ -72,6 +72,7 @@ class ScrapperDownloader(DownloadOptions):
         if self.resolved_names_file.exists():
             self.dl_resolved_names_archive = set(self.resolved_names_file.read_text(encoding="utf-8").splitlines())
         self.cmd_output = subprocess.DEVNULL if "VOUN-SERVER" in self.host_name else None
+        self.error_msgs = ""
 
     def update_download_archive(self) -> None:
         """
@@ -82,6 +83,10 @@ class ScrapperDownloader(DownloadOptions):
             with open(self.resolved_names_file, 'a', encoding="utf-8") as text_file:
                 text_file.writelines(self.new_dl_resolved_names)
             self.new_dl_resolved_names = []  # Empty list after every update to prevent duplicates.
+
+    def send_error_messages(self) -> None:
+        self.tb.send_telegram_message(self.error_msgs)
+        self.error_msgs = ""
 
     def check_download_archive(self, resolved_name: str, file_name: str) -> bool:
         """
@@ -114,7 +119,7 @@ class ScrapperDownloader(DownloadOptions):
         if not temp_file.exists():
             error_message = f"Resolution check temp file for {file_name} not found, download failed!"
             logger.error(error_message)
-            self.tb.send_telegram_message(error_message)
+            self.error_msgs = f"{self.error_msgs}\n{error_message}"
             return True
         resolution = subprocess.check_output(ffprobe_cmd, stderr=self.cmd_output).decode().strip().split(',')
         width, height = int(resolution[0]), int(resolution[1])
@@ -205,7 +210,7 @@ class ScrapperDownloader(DownloadOptions):
         else:
             error_message = f"Resolved name: {resolved_name}, File: {file_path.name}, download failed!"
             logger.warning(error_message)
-            self.tb.send_telegram_message(error_message)
+            self.error_msgs = f"{self.error_msgs}\n{error_message}"
 
     def batch_downloader(self, all_download_details: dict) -> None:
         """
@@ -227,6 +232,7 @@ class ScrapperDownloader(DownloadOptions):
                     logger.exception(f.result())
                     logger.exception(error)
         self.update_download_archive()
+        self.send_error_messages()
         logger.info("Downloads finished!")
         end = time.perf_counter()
         logger.info(f"Download time: {end - start}\n")

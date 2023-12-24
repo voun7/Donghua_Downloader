@@ -86,7 +86,7 @@ class ScrapperDownloader(DownloadOptions):
 
     def send_error_messages(self, scrapper_name: str) -> None:
         if self.error_msgs:
-            self.tb.send_telegram_message(f"Scrapper Name:{scrapper_name}\n{self.error_msgs}")
+            self.tb.send_telegram_message(f"Scrapper Name: {scrapper_name}\n{self.error_msgs}")
             self.error_msgs = ""
 
     def check_download_archive(self, resolved_name: str, file_name: str) -> bool:
@@ -191,8 +191,9 @@ class ScrapperDownloader(DownloadOptions):
         if self.check_download_archive(resolved_name, file_name):
             return
         if download_link is None:
-            logger.warning(f"Resolved name: {resolved_name}, "
-                           f"File: {file_name} has no download link. Skipping download!")
+            error_msg = f"Resolved name: {resolved_name}, File: {file_name} has no download link. Skipping download!"
+            logger.warning(error_msg)
+            self.error_msgs = f"{self.error_msgs}\n{error_msg}"
             return
         if self.check_video_resolution(resolved_name, file_name, download_link):
             return

@@ -104,7 +104,7 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         site_posts = xiaobaotv.get_anime_posts()
         matched_posts = xiaobaotv.match_to_recent_videos(site_posts)
         matched_download_details = xiaobaotv.get_recent_posts_videos_download_link(matched_posts)
-        sd.batch_downloader(matched_download_details)
+        sd.batch_downloader(site_address, matched_download_details)
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
         logger.exception(error_message)
@@ -118,7 +118,7 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         site_posts.update(anime_baby.get_anime_posts(page=2))
         matched_posts = anime_baby.match_to_recent_videos(site_posts)
         matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts)
-        sd.batch_downloader(matched_download_details)
+        sd.batch_downloader(site_address, matched_download_details)
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
         logger.exception(error_message)
@@ -132,7 +132,7 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         site_posts.update(eight_eight_mv.get_anime_posts(page=2))
         matched_posts = eight_eight_mv.match_to_recent_videos(site_posts)
         matched_download_details = eight_eight_mv.get_recent_posts_videos_download_link(matched_posts)
-        sd.batch_downloader(matched_download_details)
+        sd.batch_downloader(site_address, matched_download_details)
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
         logger.exception(error_message)
@@ -147,7 +147,7 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         matched_posts = agedm1.match_to_recent_videos(site_posts)
         matched_download_details = agedm1.get_recent_posts_videos_download_link(matched_posts)
         agedm1.driver.quit()  # Close headless browser
-        sd.batch_downloader(matched_download_details)
+        sd.batch_downloader(site_address, matched_download_details)
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
         logger.exception(error_message)
@@ -162,7 +162,7 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         site_posts.update(imyyds.get_anime_posts(page=3))
         matched_posts = imyyds.match_to_recent_videos(site_posts)
         matched_download_details = imyyds.get_recent_posts_videos_download_link(matched_posts)
-        sd.batch_downloader(matched_download_details)
+        sd.batch_downloader(site_address, matched_download_details)
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
         logger.exception(error_message)

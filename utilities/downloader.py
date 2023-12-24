@@ -84,8 +84,8 @@ class ScrapperDownloader(DownloadOptions):
                 text_file.writelines(self.new_dl_resolved_names)
             self.new_dl_resolved_names = []  # Empty list after every update to prevent duplicates.
 
-    def send_error_messages(self) -> None:
-        self.tb.send_telegram_message(self.error_msgs)
+    def send_error_messages(self, scrapper_name: str) -> None:
+        self.tb.send_telegram_message(f"Scrapper Name:{scrapper_name}\n{self.error_msgs}")
         self.error_msgs = ""
 
     def check_download_archive(self, resolved_name: str, file_name: str) -> bool:
@@ -212,12 +212,13 @@ class ScrapperDownloader(DownloadOptions):
             logger.warning(error_message)
             self.error_msgs = f"{self.error_msgs}\n{error_message}"
 
-    def batch_downloader(self, all_download_details: dict) -> None:
+    def batch_downloader(self, scrapper_name: str, all_download_details: dict) -> None:
         """
         Use multithreading to download multiple videos at the same time.
-        :param all_download_details: Should contain download link, file name and match name, in order.
+        @param scrapper_name: Name of scrapper using downloader.
+        @param all_download_details: Should contain download link, file name and match name, in order.
         """
-        logger.info("..........Using multithreading to download videos..........")
+        logger.info(f"..........{scrapper_name} Using multithreading to download videos..........")
         if not all_download_details:
             logger.info("No Videos to download!\n")
             return
@@ -232,7 +233,7 @@ class ScrapperDownloader(DownloadOptions):
                     logger.exception(f.result())
                     logger.exception(error)
         self.update_download_archive()
-        self.send_error_messages()
+        self.send_error_messages(scrapper_name)
         logger.info("Downloads finished!")
         end = time.perf_counter()
         logger.info(f"Download time: {end - start}\n")

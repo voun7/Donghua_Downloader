@@ -147,7 +147,7 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         matched_posts = agedm1.match_to_recent_videos(site_posts)
         matched_download_details = agedm1.get_recent_posts_videos_download_link(matched_posts)
         agedm1.driver.quit()  # Close headless browser
-        sd.batch_downloader(site_address, matched_download_details)
+        # sd.batch_downloader(site_address, matched_download_details)
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
         logger.exception(error_message)

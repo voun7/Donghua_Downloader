@@ -101,7 +101,7 @@ class ScrapperDownloader(DownloadOptions):
             logger.debug(f"Resolved name: {resolved_name}, File: {file_name} is not in archive.")
             return False
 
-    def check_video_resolution(self, resolved_name: str, file_name: str, download_link: str) -> bool:
+    def bad_video_res_check(self, resolved_name: str, file_name: str, download_link: str) -> bool:
         """
         Returns True if video's height resolution is lower than the allowed minimum and False otherwise.
         The first 10 seconds of the video are downloaded for testing.
@@ -118,17 +118,19 @@ class ScrapperDownloader(DownloadOptions):
         ffprobe_cmd = [f"{self.ffmpeg_path}/ffprobe", '-show_entries', 'stream=width,height', '-of', 'csv=p=0',
                        str(temp_file)]
         if not temp_file.exists():
-            error_message = f"Resolution check temp file for {file_name} not found, download failed!"
-            logger.error(error_message)
-            self.error_msgs = f"{self.error_msgs}\n{error_message}"
+            error_msg = f"Resolution check temp file for {file_name} not found, download failed!"
+            logger.error(error_msg)
+            self.error_msgs = f"{self.error_msgs}\n{error_msg}"
             return True
         resolution = subprocess.check_output(ffprobe_cmd, stderr=self.cmd_output).decode().strip().split(',')
         width, height = int(resolution[0]), int(resolution[1])
         # Delete the downloaded file.
         temp_file.unlink()
         if not height >= self.min_res_height:
-            logger.warning(f"Resolved name: {resolved_name}, File: {file_name} failed resolution test! "
-                           f"Resolution: {width} x {height}. Skipping download!")
+            error_msg = (f"Resolved name: {resolved_name}, File: {file_name} failed resolution test! "
+                         f"Resolution: {width} x {height}. Skipping download!")
+            logger.error(error_msg)
+            self.error_msgs = f"{self.error_msgs}\n{error_msg}"
             return True
         else:
             return False
@@ -195,7 +197,7 @@ class ScrapperDownloader(DownloadOptions):
             logger.warning(error_msg)
             self.error_msgs = f"{self.error_msgs}\n{error_msg}"
             return
-        if self.check_video_resolution(resolved_name, file_name, download_link):
+        if self.bad_video_res_check(resolved_name, file_name, download_link):
             return
         # Make a request to the m3u8 file link.
         response = requests.get(download_link)

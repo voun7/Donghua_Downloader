@@ -185,7 +185,7 @@ def main() -> None:
     # Variables
     start = time.perf_counter()
     # Set directory files.
-    playlist_download_dir = Path(r"\\192.168.0.111\General File Sharing\From YouTube\Chinese Anime For Subbing")
+    playlist_download_dir = Path(r"\\192.168.31.111\General File Sharing\From YouTube\Chinese Anime For Subbing")
     destination_dir = playlist_download_dir / "##Currently Airing"
     dfsd_files_dir = playlist_download_dir / "DFSD Project Files"
     dfsd_files_dir.mkdir(exist_ok=True)

@@ -17,7 +17,7 @@ def get_server_handler(log_format: logging.Formatter) -> logging.handlers:
     """
     Sends logs to the graylog server.
     """
-    server_handler = graypy.GELFUDPHandler('192.168.0.108', 12201)
+    server_handler = graypy.GELFUDPHandler('192.168.31.108', 12201)
     server_handler.setLevel(logging.INFO)
     server_handler.setFormatter(log_format)
     return server_handler

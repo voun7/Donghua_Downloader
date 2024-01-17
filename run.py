@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 def update_and_run():
     logger.debug("Checking main git repository for updates...")
 
-    result = subprocess.run(["git", "pull"], capture_output=True)
+    result = subprocess.run(["git", "pull", "origin", "master"], capture_output=True)
 
     if "Already up to date" in str(result.stdout):
         logger.info(f"Local repository is up to date. \n{result}\n")

@@ -206,7 +206,7 @@ def main() -> None:
     # Set url manager options.
     URLManager.tb, URLManager.headers, URLManager.url_data_file = tb, headers, url_data_file
     # Set download options.
-    DownloadOptions.tb, DownloadOptions.download_path, DownloadOptions.timeout_secs = tb, playlist_download_dir, 900
+    DownloadOptions.tb, DownloadOptions.download_path, DownloadOptions.timeout_secs = tb, playlist_download_dir, 1800
     DownloadOptions.ffmpeg_path, DownloadOptions.min_res_height = ffmpeg_bin_dir, min_res_height
     # Set scrapper options.
     scrapper_list = scrapper_anime_list(youtube_only_file, anime_list)

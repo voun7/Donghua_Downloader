@@ -261,12 +261,30 @@ class AnimeBabyScrapper(ScrapperTools):
                 download_link = self.get_video_download_link(video_link)
                 logger.info(f"Post Video Name: {post_video_name}, Video Link: {video_link}, "
                             f"Download Link: {download_link}")
+                if download_link and resolved_name in all_download_details:
+                    new_download_link = all_download_details[resolved_name][1]
+                    download_link = self.test_download_links([download_link, new_download_link])
+
                 all_download_details[resolved_name] = post_video_name, download_link
         end = time.perf_counter()
         logger.info(f"{self.time_message}{end - start}")
         if self.cloudflare_detected:
             self.close_driver()
         return all_download_details
+
+    def test_download_links(self, download_links: list) -> str:
+        """
+        Use the classes request session to test for working download link.
+        @return: Working download link
+        """
+        logger.debug(f"Testing download links: {download_links}")
+        for link in download_links:
+            try:
+                page_response = self.session.get(link, headers=self.headers)
+                page_response.raise_for_status()
+                return link
+            except requests.RequestException:
+                logger.debug(f"download link: {link} failed test.")
 
     def get_video_download_link(self, video_url: str) -> str:
         """

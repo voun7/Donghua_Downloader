@@ -438,7 +438,7 @@ class AgeDm1Scrapper(ScrapperTools):
             video_name_and_link[f"{post_title}{self.lst_ep_tag}{latest_video_number}"] = post_url
         return video_name_and_link
 
-    def get_post_video_link(self, soup: BeautifulSoup, video_number: int) -> str | None:
+    def get_post_video_link(self, soup: BeautifulSoup, video_number: int, url: str) -> str | None:
         video_post1 = soup.find('a', string=f"第{video_number}集")
         if video_post1:
             return self.base_url + video_post1.get('href')
@@ -448,6 +448,13 @@ class AgeDm1Scrapper(ScrapperTools):
         video_post3 = soup.find('a', string=str(video_number))
         if video_post3:
             return self.base_url + video_post3.get('href')
+        video_link = f"{url}{video_number}.html"
+        try:
+            page_response = self.session.get(video_link, headers=self.headers)
+            page_response.raise_for_status()
+            return video_link
+        except requests.RequestException:
+            logger.error(f"Video Link: {video_link} failed test.")
         logger.error(f"Video Link not found for Video Number: {video_number}!")
 
     def get_recent_posts_videos_download_link(self, matched_posts: dict) -> dict:
@@ -475,7 +482,7 @@ class AgeDm1Scrapper(ScrapperTools):
                     logger.warning(f"Post Video Name: {post_video_name}, "
                                    f"Resolved Name: {resolved_name} already in archive!")
                     continue
-                video_link = self.get_post_video_link(soup, video_number)
+                video_link = self.get_post_video_link(soup, video_number, url)
                 download_link = self.get_video_download_link(video_link)
                 logger.info(f"Post Video Name: {post_video_name}, Video Link: {video_link}, "
                             f"Download Link: {download_link}")

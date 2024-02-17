@@ -48,6 +48,17 @@ def set_ffmpeg_bin(ffmpeg_dir: Path) -> Path:
         return ffmpeg_dir / ffmpeg_folder_name / "bin"
 
 
+def download_time() -> int:
+    """
+    Determine the download time for the program depending on the time of the day.
+    """
+    current_hr = time.localtime().tm_hour
+    if current_hr > 13:
+        return 7200
+    else:
+        return 1200
+
+
 def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_list: list, tb: TelegramBot) -> None:
     # Variables
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
@@ -207,7 +218,8 @@ def main() -> None:
     # Set url manager options.
     URLManager.tb, URLManager.headers, URLManager.url_data_file = tb, headers, url_data_file
     # Set download options.
-    DownloadOptions.tb, DownloadOptions.download_path, DownloadOptions.timeout_secs = tb, playlist_download_dir, 900
+    dl_time = download_time()
+    DownloadOptions.tb, DownloadOptions.download_path, DownloadOptions.timeout_secs = tb, playlist_download_dir, dl_time
     DownloadOptions.ffmpeg_path, DownloadOptions.min_res_height = ffmpeg_bin_dir, min_res_height
     # Set scrapper options.
     scrapper_list = scrapper_anime_list(youtube_only_file, anime_list)

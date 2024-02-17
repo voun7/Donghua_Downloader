@@ -53,10 +53,7 @@ def download_time() -> int:
     Determine the download time for the program depending on the time of the day.
     """
     current_hr = time.localtime().tm_hour
-    if current_hr > 13:
-        return 7200
-    else:
-        return 1200
+    return 7200 if current_hr < 13 else 1200
 
 
 def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_list: list, tb: TelegramBot) -> None:

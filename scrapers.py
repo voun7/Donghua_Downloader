@@ -56,7 +56,7 @@ class ScrapperTools:
     @staticmethod
     def video_post_num_extractor(video_post: str) -> int:
         post_num = [char for char in video_post if char.isdigit()]
-        return int(''.join(post_num))
+        return int(''.join(post_num)) if post_num else 0
 
 
 class XiaobaotvScraper(ScrapperTools):
@@ -241,10 +241,10 @@ class AnimeBabyScrapper(ScrapperTools):
                 logger.warning(f"Post Title: {post_title} is not recent, Last Updated: {last_updated_date}")
                 continue
             latest_video_post = soup.find(string="连载：").parent.next_sibling.text
-            if "已完结" in latest_video_post or "完结" in latest_video_post:
+            latest_video_number = self.video_post_num_extractor(latest_video_post)
+            if not latest_video_number:
                 logger.info(f"Post Title: {post_title} has finished airing! URL: {url}")
                 continue
-            latest_video_number = self.video_post_num_extractor(latest_video_post)
             num_videos = self.get_num_of_videos(latest_video_number)
             video_start_num = latest_video_number - num_videos + 1
             logger.info(f"Post Title: {post_title} is new, Last Updated: {last_updated_date}, "

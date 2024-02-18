@@ -1,7 +1,6 @@
 import logging
 import re
 import time
-from datetime import datetime
 
 import requests
 from bs4 import BeautifulSoup
@@ -17,10 +16,9 @@ logging.getLogger("selenium").setLevel(logging.WARNING)
 
 
 class ScrapperTools:
-    headers = anime_list = resolved_names_archive = tb = None
+    headers = anime_list = resolved_names_archive = tb = current_date = None
     video_num_per_post = None  # The number of recent videos that will downloaded per post.
     parser = "html.parser"
-    current_date = datetime.now().date()
     ch_gen = ChineseTitleGenerator()
     # Common texts used by scrappers are shared from here.
     check_downlink_message = "..........Checking for latest videos download links.........."

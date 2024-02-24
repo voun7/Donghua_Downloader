@@ -106,7 +106,7 @@ class M3u8AdFilter:
         elif discon_len > 1:
             logger.debug(f"{discon_len} pairs of discontinuity tags found.")
             self.remove_double_discontinuity_ads()
-            self.remove_suspicious_durations()
+            # self.remove_suspicious_durations()  # Todo: Use machine learning to check before removing.
             self.check_duration_uniformity()
         else:
             logger.debug("No pair of discontinuity tags to remove ads found!")

@@ -73,8 +73,9 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
     ch_id_9 = "UC_JsHod-IAlWFWi7kDhb03Q"  # 阅文漫画
     ch_id_10 = "UCQKq8mAjHXFRd6CsdDrCB1w"  # Ziyue Animation
     ch_id_11 = "UC_grnC_fPff0bSbk9V-R3aQ"  # 幻月动漫 Moon Anime
+    ch_id_12 = "UCQeGBZ2W56r-aRtMZOSooAg"  # Ake Video Official channel
     youtube_channel_ids = [ch_id_1, ch_id_2, ch_id_3, ch_id_4, ch_id_5, ch_id_6, ch_id_7, ch_id_8, ch_id_9, ch_id_10,
-                           ch_id_11]
+                           ch_id_11, ch_id_12]
     yd = YouTubeDownloader(yt_dl_archive_file)
 
     try:

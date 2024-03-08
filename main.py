@@ -7,6 +7,7 @@ from pathlib import Path
 from zipfile import ZipFile
 
 import requests
+from bs4 import BeautifulSoup
 
 from scrapers import ScrapperTools, XiaobaotvScraper, AnimeBabyScrapper, EightEightMVScrapper, AgeDm1Scrapper, \
     ImyydsScrapper
@@ -57,11 +58,26 @@ def download_time() -> int:
     return 7200 if current_hr < 13 else 1200
 
 
+def get_yt_channel_id(url: str) -> None:
+    """
+    Use link from YouTube channel page to get the channel id.
+    """
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+    # print(soup.prettify())
+    channel_id_link = soup.find('link', {"title": "RSS"})
+    if channel_id_link:
+        channel_id_link = channel_id_link.get('href')
+        channel_id = re.search("channel_id=(.+)", channel_id_link).group(1)
+        print(f"Channel URL: {url}, Channel ID: {channel_id}")
+    else:
+        print("Could not find channel id link. URL must be from the channel page!")
+
+
 def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_list: list, tb: TelegramBot) -> None:
     # Variables
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
     # YouTube Channel IDs ordering determines priority when matching videos.
-    # To obtain the channel id check the source code of the channel page search for "externalId".
     ch_id_1 = "UC80ztI40QAXzWL94eoRzWow"  # No. 7 Animation Hall
     ch_id_2 = "UCYkn7e_zaRR_UxOrJR0RVdg"  # 次元动漫社 Animation Club
     ch_id_3 = "UCBIiQ5Hlsadi1HQl8dufZag"  # 云朵屋互娱
@@ -73,8 +89,9 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
     ch_id_9 = "UC_JsHod-IAlWFWi7kDhb03Q"  # 阅文漫画
     ch_id_10 = "UCQKq8mAjHXFRd6CsdDrCB1w"  # Ziyue Animation
     ch_id_11 = "UC_grnC_fPff0bSbk9V-R3aQ"  # 幻月动漫 Moon Anime
+    ch_id_12 = "UCQeGBZ2W56r-aRtMZOSooAg"  # Ake Video Official channel
     youtube_channel_ids = [ch_id_1, ch_id_2, ch_id_3, ch_id_4, ch_id_5, ch_id_6, ch_id_7, ch_id_8, ch_id_9, ch_id_10,
-                           ch_id_11]
+                           ch_id_11, ch_id_12]
     yd = YouTubeDownloader(yt_dl_archive_file)
 
     try:
@@ -229,6 +246,7 @@ def main() -> None:
     # Set options for proxy.
     RotatingProxiesRequest.headers, RotatingProxiesRequest.proxy_file = headers, proxy_file
     # Run code to download new anime.
+    # get_yt_channel_id("")
     run_youtube_api(yt_dl_archive_file, resolved_names_file, anime_list, tb)
     run_scrappers(resolved_names_file, tb)
     # m3u8_video_downloader()

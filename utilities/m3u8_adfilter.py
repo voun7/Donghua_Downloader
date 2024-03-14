@@ -85,7 +85,7 @@ class M3u8AdFilter:
         """
         If only one duration is different in the response text, it will be deleted.
         """
-        durations = self.get_durations(self.response_text)[:-1]  # The last duration will be removed.
+        durations = self.get_durations(self.response_text)[1:-1]  # The first and last duration will be removed.
         dur_counter = Counter(durations).most_common()
         if len(dur_counter) == 2 and dur_counter[-1][1] == 1:
             off_duration = f"{self.duration_tag}{dur_counter[-1][0]},"

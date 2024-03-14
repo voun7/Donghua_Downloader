@@ -159,7 +159,13 @@ class ScrapperDownloader(DownloadOptions):
         file_path = Path(f"{self.download_path}/{file_name}.mp4")
         # Remove advertisement from text.
         af = M3u8AdFilter()
-        ad_free_m3u8_text = af.run_filters(response_text)
+        try:
+            ad_free_m3u8_text = af.run_filters(response_text)
+        except Exception as error:
+            ad_free_m3u8_text = response_text
+            error_message = f"An error occurred while trying to remove ads Error:\n{error}\n File name: {file_name}\n"
+            logger.error(f"{error_message} Response text:\n{response_text}")
+            self.error_msgs = f"{self.error_msgs}\n{error_message}"
         # Create temp ad filtered m3u8 playlist.
         temp_m3u8_file = Path(f"{self.download_path}/{file_name}_filtered_playlist.m3u8")
         temp_m3u8_file.write_text(ad_free_m3u8_text)

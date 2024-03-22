@@ -85,7 +85,7 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
     ch_id_5 = "UCJS5PJXcAIpXkBOjPNvK7Uw"  # Vita Animation Groups
     ch_id_6 = "UCXmOpN9pg1hJBRkHODL00EA"  # 三福动漫 Sanfu
     ch_id_7 = "UCNIKva6iDURgVxf44pMZlKA"  # Animal Family
-    ch_id_8 = "UCgVZKHiJrIHomPGMD8KYTzw"  # D-ANIME
+    ch_id_8 = "UCOC-FcGSep0BFx7XCzBdQ-g"  # D-TV Channel
     ch_id_9 = "UC_JsHod-IAlWFWi7kDhb03Q"  # 阅文漫画
     ch_id_10 = "UCQKq8mAjHXFRd6CsdDrCB1w"  # Ziyue Animation
     ch_id_11 = "UC_grnC_fPff0bSbk9V-R3aQ"  # 幻月动漫 Moon Anime

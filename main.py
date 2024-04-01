@@ -253,7 +253,7 @@ def main() -> None:
     # m3u8_video_downloader()
 
     end = time.perf_counter()
-    logger.info(f"Total Runtime: {end - start}")
+    logger.info(f"Total Runtime: {round(end - start, 4)}")
 
 
 if __name__ == '__main__':

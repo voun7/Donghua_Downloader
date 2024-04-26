@@ -78,21 +78,21 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
     # Variables
     playlist_id = "PLdUiOF8vZ51jW1w84E01SGY2KNeOEPZBn"
     # YouTube Channel IDs ordering determines priority when matching videos.
-    ch_id_1 = "UC80ztI40QAXzWL94eoRzWow"  # No. 7 Animation Hall
-    ch_id_2 = "UCYkn7e_zaRR_UxOrJR0RVdg"  # 次元动漫社 Animation Club
-    ch_id_3 = "UCBIiQ5Hlsadi1HQl8dufZag"  # 云朵屋互娱
-    ch_id_4 = "UCJSAZ5pbDi8StbSbJI1riEg"  # Qixiang-Animation
-    ch_id_5 = "UCJS5PJXcAIpXkBOjPNvK7Uw"  # Vita Animation Groups
-    ch_id_6 = "UCXmOpN9pg1hJBRkHODL00EA"  # 三福动漫 Sanfu
-    ch_id_7 = "UCNIKva6iDURgVxf44pMZlKA"  # Animal Family
-    ch_id_8 = "UCOC-FcGSep0BFx7XCzBdQ-g"  # D-TV Channel
-    ch_id_9 = "UC_JsHod-IAlWFWi7kDhb03Q"  # 阅文漫画
-    ch_id_10 = "UCQKq8mAjHXFRd6CsdDrCB1w"  # Ziyue Animation
-    ch_id_11 = "UC_grnC_fPff0bSbk9V-R3aQ"  # 幻月动漫 Moon Anime
-    ch_id_12 = "UCQeGBZ2W56r-aRtMZOSooAg"  # Ake Video Official channel
-    ch_id_13 = "UCLlF6psuPCQGok8ImARAV5g"  # 神漫社Animation
-    youtube_channel_ids = [ch_id_1, ch_id_2, ch_id_3, ch_id_4, ch_id_5, ch_id_6, ch_id_7, ch_id_8, ch_id_9, ch_id_10,
-                           ch_id_11, ch_id_12, ch_id_13]
+    youtube_channel_ids = [
+        "UC80ztI40QAXzWL94eoRzWow",  # No. 7 Animation Hall
+        "UCYkn7e_zaRR_UxOrJR0RVdg",  # 次元动漫社 Animation Club
+        "UCBIiQ5Hlsadi1HQl8dufZag",  # 云朵屋互娱
+        "UCJSAZ5pbDi8StbSbJI1riEg",  # Qixiang-Animation
+        "UCJS5PJXcAIpXkBOjPNvK7Uw",  # Vita Animation Groups
+        "UCXmOpN9pg1hJBRkHODL00EA",  # 三福动漫 Sanfu
+        "UCNIKva6iDURgVxf44pMZlKA",  # Animal Family
+        "UCOC-FcGSep0BFx7XCzBdQ-g",  # D-TV Channel
+        "UC_JsHod-IAlWFWi7kDhb03Q",  # 阅文漫画
+        "UCQKq8mAjHXFRd6CsdDrCB1w",  # Ziyue Animation
+        "UC_grnC_fPff0bSbk9V-R3aQ",  # 幻月动漫 Moon Anime
+        "UCQeGBZ2W56r-aRtMZOSooAg",  # Ake Video Official channel
+        "UCLlF6psuPCQGok8ImARAV5g",  # 神漫社Animation
+    ]
     yd = YouTubeDownloader(yt_dl_archive_file)
 
     try:

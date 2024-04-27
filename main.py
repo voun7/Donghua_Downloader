@@ -127,8 +127,9 @@ def scrapper_anime_list(youtube_only_file: Path, anime_list: list) -> list:
 def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
     um, sd = URLManager(), ScrapperDownloader(resolved_names_file)
 
-    site_address = um.check_url("xiaobaotv.net")
+    site_address = "xiaobaotv.net"
     try:
+        site_address = um.check_url(site_address)
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         xiaobaotv = XiaobaotvScraper(site_address)
         site_posts = xiaobaotv.get_anime_posts()
@@ -140,8 +141,9 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         logger.exception(error_message)
         tb.send_telegram_message(error_message)
 
-    site_address = um.check_url("animebaby.top")
+    site_address = "animebaby.top"
     try:
+        site_address = um.check_url(site_address)
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         anime_baby = AnimeBabyScrapper(site_address)
         site_posts = anime_baby.get_anime_posts()
@@ -155,8 +157,9 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         logger.exception(error_message)
         tb.send_telegram_message(error_message)
 
-    site_address = um.check_url("88mv.tv")
+    site_address = "88mv.tv"
     try:
+        site_address = um.check_url(site_address)
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         eight_eight_mv = EightEightMVScrapper(site_address)
         site_posts = eight_eight_mv.get_anime_posts()
@@ -169,8 +172,9 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         logger.exception(error_message)
         tb.send_telegram_message(error_message)
 
-    site_address = um.check_url("imyyds.com")
+    site_address = "imyyds.com"
     try:
+        site_address = um.check_url(site_address)
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         imyyds = ImyydsScrapper(site_address)
         site_posts = imyyds.get_anime_posts()
@@ -184,8 +188,9 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         logger.exception(error_message)
         tb.send_telegram_message(error_message)
 
-    site_address = um.check_url("agedm1.com")
+    site_address = "agedm1.com"
     try:
+        site_address = um.check_url(site_address)
         logger.info(f"Checking {site_address} site for recent anime upload matches...")
         agedm1 = AgeDm1Scrapper(site_address)
         site_posts = agedm1.get_anime_posts()
@@ -233,7 +238,7 @@ def main() -> None:
 
     tb = TelegramBot()
     # Set url manager options.
-    URLManager.tb, URLManager.headers, URLManager.url_data_file = tb, headers, url_data_file
+    URLManager.headers, URLManager.url_data_file = headers, url_data_file
     # Set download options.
     dl_time = download_time()
     DownloadOptions.tb, DownloadOptions.download_path, DownloadOptions.timeout_secs = tb, playlist_download_dir, dl_time

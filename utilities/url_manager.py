@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class URLManager:
-    tb = headers = url_data_file = None
+    headers = url_data_file = None
 
     def __init__(self) -> None:
         self.url_data = self.load_url_data()
@@ -71,12 +71,10 @@ class URLManager:
                 logger.debug(f"New site url: {site_name} being added as value.")
                 self.url_data[url].append(site_name)
                 self.update_url_data()
-                return site_name
         elif site_name is None and url in self.url_data:  # Original url failed to load.
             site_name = self.last_working_url(url)
-            logger.warning(f"Site: {url} link has changed to {site_name}. Update site link to new link.")
-        else:
-            error_message = f"Site: {url} does not work and no alternatives in data file!"
-            logger.error(error_message)
-            self.tb.send_telegram_message(error_message)
+            if site_name:
+                logger.warning(f"Site: {url} link has changed to {site_name}. Update site link to new link.")
+            else:
+                raise ConnectionError(f"Site: {url} does not work and no alternatives in data file!")
         return site_name

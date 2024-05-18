@@ -9,7 +9,7 @@ from zipfile import ZipFile
 import requests
 from bs4 import BeautifulSoup
 
-from scrapers import ScrapperTools, XiaobaotvScraper, AnimeBabyScrapper, EightEightMVScrapper, AgeDm1Scrapper, \
+from scrapers import ScrapperTools, XiaobaotvScraper, AnimeBabyScrapper, AgeDm1Scrapper, \
     ImyydsScrapper
 from utilities.downloader import DownloadOptions, YouTubeDownloader, ScrapperDownloader
 from utilities.logger_setup import setup_logging
@@ -80,6 +80,7 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
     # YouTube Channel IDs ordering determines priority when matching videos.
     youtube_channel_ids = [
         "UC80ztI40QAXzWL94eoRzWow",  # No. 7 Animation Hall
+        "UCEY7zXcul32d1hvRCDlxLjQ",  # 动漫游乐园
         "UCYkn7e_zaRR_UxOrJR0RVdg",  # 次元动漫社 Animation Club
         "UCBIiQ5Hlsadi1HQl8dufZag",  # 云朵屋互娱
         "UCJSAZ5pbDi8StbSbJI1riEg",  # Qixiang-Animation

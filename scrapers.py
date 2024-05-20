@@ -128,7 +128,7 @@ class XiaobaotvScraper(ScrapperTools):
                 logger.exception(error_msg)
                 error_msgs = f"{error_msgs}\n{error_msg}\n"
         if error_msgs:
-            self.tb.send_telegram_message(error_msgs)
+            self.tb.send_telegram_message(f"XiaobaotvScraper\n{error_msgs}")
         end = time.perf_counter()
         logger.info(f"{self.time_message}{end - start}")
         return all_download_details

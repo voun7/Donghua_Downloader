@@ -94,6 +94,7 @@ class XiaobaotvScraper(ScrapperTools):
         """
         logger.info(self.check_downlink_message)
         all_download_details, start = {}, time.perf_counter()
+        error_msgs = ""
         for post_title, match_details in matched_posts.items():
             try:
                 anime_name, url = match_details[0], match_details[1]
@@ -123,9 +124,11 @@ class XiaobaotvScraper(ScrapperTools):
                                 f"Download Link: {download_link}")
                     all_download_details[resolved_name] = post_video_name, download_link
             except Exception as error:
-                error_message = f"An error occurred while scrapping {post_title}! \nError: {error}"
-                logger.exception(error_message)
-                self.tb.send_telegram_message(error_message)
+                error_msg = f"An error occurred while scrapping {post_title}! \nError: {error}"
+                logger.exception(error_msg)
+                error_msgs = f"{error_msgs}\n{error_msg}\n"
+        if error_msgs:
+            self.tb.send_telegram_message(f"XiaobaotvScraper\n{error_msgs}")
         end = time.perf_counter()
         logger.info(f"{self.time_message}{end - start}")
         return all_download_details

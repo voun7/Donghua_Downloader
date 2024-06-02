@@ -128,19 +128,19 @@ def scrapper_anime_list(youtube_only_file: Path, anime_list: list) -> list:
 def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
     um, sd = URLManager(), ScrapperDownloader(resolved_names_file)
 
-    site_address = "xiaobaotv.net"
-    try:
-        site_address = um.check_url(site_address)
-        logger.info(f"Checking {site_address} site for recent anime upload matches...")
-        xiaobaotv = XiaobaotvScraper(site_address)
-        site_posts = xiaobaotv.get_anime_posts()
-        matched_posts = xiaobaotv.match_to_recent_videos(site_posts)
-        matched_download_details = xiaobaotv.get_recent_posts_videos_download_link(matched_posts)
-        sd.batch_downloader(site_address, matched_download_details)
-    except Exception as error:
-        error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
-        logger.exception(error_message)
-        tb.send_telegram_message(error_message)
+    # site_address = "xiaobaotv.net"
+    # try:
+    #     site_address = um.check_url(site_address)
+    #     logger.info(f"Checking {site_address} site for recent anime upload matches...")
+    #     xiaobaotv = XiaobaotvScraper(site_address)
+    #     site_posts = xiaobaotv.get_anime_posts()
+    #     matched_posts = xiaobaotv.match_to_recent_videos(site_posts)
+    #     matched_download_details = xiaobaotv.get_recent_posts_videos_download_link(matched_posts)
+    #     sd.batch_downloader(site_address, matched_download_details)
+    # except Exception as error:
+    #     error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
+    #     logger.exception(error_message)
+    #     tb.send_telegram_message(error_message)
 
     site_address = "animebaby.top"
     try:

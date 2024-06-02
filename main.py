@@ -97,7 +97,7 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
 
     try:
         logger.info("Checking YouTube site for recent anime upload matches...")
-        youtube = YouTube(playlist_id, resolved_names_file, tb)
+        youtube = YouTube(playlist_id, resolved_names_file)
         youtube.clear_playlist()
         youtube.match_to_youtube_videos(youtube_channel_ids, anime_list)
         time.sleep(10)  # Prevents skipped downloads by giving YouTube time to added videos the playlist.

@@ -32,6 +32,7 @@ class YouTube:
             error_message = f"Youtube program failed to authenticate! \nError: {error}"
             logger.critical(error_message)
             self.tb.send_telegram_message(error_message)
+            raise ConnectionError
 
     def get_authenticated_service(self) -> None:
         """
@@ -138,8 +139,7 @@ class YouTube:
         :return: Dictionary containing video id as key, resolved name and video title as values.
         """
         logger.info("..........Checking matched videos for duration and quality..........")
-        min_duration = timedelta(minutes=3)
-        max_duration = timedelta(minutes=40)
+        min_duration, max_duration = timedelta(minutes=3), timedelta(minutes=40)
         passed_check_videos = {}
         for video_id, resolved_name in matched_videos.items():
             request = self.youtube.videos().list(part="snippet,contentDetails", id=video_id)
@@ -181,7 +181,7 @@ class YouTube:
             return
         videos_in_playlist = self.get_videos_in_playlist()
         for passed_video_id, passed_video_title in passed_videos.items():
-            if passed_video_id not in list(videos_in_playlist.keys()):
+            if passed_video_id not in list(videos_in_playlist):
                 logger.info(f"Video ID: {passed_video_id} is being added to playlist, "
                             f"Video Title: {passed_video_title}")
                 insert_request = self.youtube.playlistItems().insert(

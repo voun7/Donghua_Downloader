@@ -54,7 +54,7 @@ class YouTube:
                 with open(self.token_file, 'w') as token:
                     token.write(creds.to_json())
             except Exception as error:
-                raise Exception(f"Youtube program failed to authenticate! \nError: {error}")
+                raise RuntimeError(f"Youtube program failed to authenticate! \nError: {error}") from error
         self.youtube = build(api_service_name, api_version, credentials=creds)
 
     def clear_playlist(self) -> None:

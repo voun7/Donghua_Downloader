@@ -284,5 +284,4 @@ class YouTube:
                                        f"Resolved name: {resolved_name} already exists in matches, will not be added.")
         self.check_matches(matched_videos)
         end = time.perf_counter()
-        total_time = end - start
-        logger.info(f"Time matching recent uploads and adding to playlist took: {total_time}")
+        logger.info(f"Time matching recent uploads and adding to playlist took: {round(end - start)}s")

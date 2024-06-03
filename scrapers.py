@@ -136,7 +136,7 @@ class XiaobaotvScraper(ScrapperTools):
         if error_msgs:
             self.tb.send_telegram_message(f"XiaobaotvScraper\n{error_msgs}")
         end = time.perf_counter()
-        logger.info(f"{self.time_message}{end - start}")
+        logger.info(f"{self.time_message}{round(end - start)}s")
         return all_download_details
 
     def get_video_download_link(self, video_url: str) -> str:
@@ -273,7 +273,7 @@ class AnimeBabyScrapper(ScrapperTools):
 
                 all_download_details[resolved_name] = post_video_name, download_link
         end = time.perf_counter()
-        logger.info(f"{self.time_message}{end - start}")
+        logger.info(f"{self.time_message}{round(end - start)}s")
         if self.cloudflare_detected:
             self.close_driver()
         return all_download_details
@@ -377,7 +377,7 @@ class AgeDm1Scrapper(ScrapperTools):
                             f"Download Link: {download_link}")
                 all_download_details[resolved_name] = post_video_name, download_link
         end = time.perf_counter()
-        logger.info(f"{self.time_message}{end - start}")
+        logger.info(f"{self.time_message}{round(end - start)}s")
         return all_download_details
 
     def test_download_links(self, download_links: list) -> str:
@@ -481,7 +481,7 @@ class ImyydsScrapper(ScrapperTools):
                             f"Download Link: {download_link}")
                 all_download_details[resolved_name] = post_video_name, download_link
         end = time.perf_counter()
-        logger.info(f"{self.time_message}{end - start}")
+        logger.info(f"{self.time_message}{round(end - start)}s")
         return all_download_details
 
     def get_video_download_link(self, video_url: str) -> str:
@@ -495,6 +495,114 @@ class ImyydsScrapper(ScrapperTools):
             download_match = re.search(r'"contentUrl": "(.*?)"', download_script.text)
             download_link = download_match.group(1)
             return download_link
+
+
+class YhdmScrapper(ScrapperTools):
+    def __init__(self, site: str) -> None:
+        self.base_url = f"http://{site}"
+        self.session = requests.Session()
+        self.lst_ep_tag = " LST-EP:"
+
+    def get_page_response(self, url: str, request_type: int = 1) -> BeautifulSoup:
+        if request_type == 1:
+            page_response = self.session.get(url, headers=self.headers)
+            page_response.encoding = "utf-8"
+            page_response.raise_for_status()
+            return BeautifulSoup(page_response.text, self.parser)
+        if request_type == 2:
+            self.driver.get(url)
+            return BeautifulSoup(self.driver.page_source, self.parser)
+
+    def get_anime_posts(self, page: int = 1) -> dict:
+        """
+        This method returns all the anime's posted on the sites given page.
+        :return: Post Title as key and url as value.
+        """
+        logger.info(f"..........Site Page {page} Anime Posts..........")
+        video_name_and_link = {}
+        payload = f"/acg/0/0/china/{page}.html"
+        soup = self.get_page_response(self.base_url + payload, 2)
+        posts = soup.find_all('a', class_="li-hv")
+        for post in posts:
+            post_title = post["title"]
+            post_url = self.base_url + post.get('href')
+            latest_video_post = post.find("p", class_="bz").text
+            latest_video_number = self.video_post_num_extractor(latest_video_post)
+            logger.info(f"Post Title: {post_title}, Post URL: {post_url}")
+            video_name_and_link[f"{post_title}{self.lst_ep_tag}{latest_video_number}"] = post_url
+        return video_name_and_link
+
+    def get_post_video_link(self, soup: BeautifulSoup, video_number: int) -> str | None:
+        video_post1 = soup.find('a', string=f"第{video_number}集")
+        if video_post1:
+            return self.base_url + video_post1.get('href')
+        video_post2 = soup.find('a', class_="twidth", string=str(video_number))
+        if video_post2:
+            return self.base_url + video_post2.get('href')
+        video_post3 = soup.find('a', string=str(video_number))
+        if video_post3:
+            return self.base_url + video_post3.get('href')
+        logger.error(f"Video Link not found for Video Number: {video_number}!")
+
+    def get_recent_posts_videos_download_link(self, matched_posts: dict) -> dict:
+        """
+        Check if post's url latest video is recent and gets the videos download links of it and its other recent posts.
+        How many of the other recent post videos are determined by video_num_per_post value.
+        """
+        logger.info(self.check_downlink_message)
+        all_download_details, start = {}, time.perf_counter()
+        for post_title_and_last_ep, match_details in matched_posts.items():
+            post_split = post_title_and_last_ep.split(self.lst_ep_tag)
+            post_title, latest_video_number = post_split[0], int(post_split[1])
+            anime_name, url = match_details[0], match_details[1]
+            soup = self.get_page_response(url, 2)
+            num_videos = self.get_num_of_videos(latest_video_number)
+            video_start_num = latest_video_number - num_videos + 1
+            logger.info(f"Post Title: {post_title}, Latest Video Number: {latest_video_number}. "
+                        f"Last {num_videos} Video Numbers: {video_start_num}-{latest_video_number}")
+            for video_number in range(video_start_num, latest_video_number + 1):
+                post_video_name = f"{post_title} 第{video_number}集"
+                resolved_name = self.ch_gen.generate_title(post_video_name, anime_name)
+                if resolved_name in self.resolved_names_archive:
+                    logger.warning(f"Post Video Name: {post_video_name}, "
+                                   f"Resolved Name: {resolved_name} already in archive!")
+                    continue
+                video_link = self.get_post_video_link(soup, video_number)
+                download_link = self.get_video_download_link(video_link)
+                logger.info(f"Post Video Name: {post_video_name}, Video Link: {video_link}, "
+                            f"Download Link: {download_link}")
+                all_download_details[resolved_name] = post_video_name, download_link
+        end = time.perf_counter()
+        logger.info(f"{self.time_message}{round(end - start)}s")
+        return all_download_details
+
+    def test_download_links(self, download_links: list) -> str:
+        """
+        Use the classes request session to test for working download link.
+        @return: Working download link
+        """
+        logger.debug(f"Testing download links: {download_links}")
+        for link in download_links:
+            link = link.replace("497", "")
+            try:
+                page_response = self.session.get(link, headers=self.headers)
+                page_response.raise_for_status()
+                return link
+            except requests.RequestException:
+                logger.debug(f"download link: {link} failed test.")
+
+    def get_video_download_link(self, video_url: str) -> str:
+        """
+        This method uses the video url to find the video download link.
+        """
+        if video_url:
+            soup = self.get_page_response(video_url, 2)
+            download_match = soup.find(id="playiframe")
+            if download_match:
+                download_links = re.findall(r"https?://[\w\-./]+.m3u8", download_match.get('src'))
+                download_link = self.test_download_links(download_links)
+                if download_link:
+                    return download_link
 
 
 class TempScrapper(ScrapperTools):
@@ -575,7 +683,7 @@ class TempScrapper(ScrapperTools):
                             f"Download Link: {download_link}")
                 all_download_details[resolved_name] = post_video_name, download_link
         end = time.perf_counter()
-        logger.info(f"{self.time_message}{end - start}")
+        logger.info(f"{self.time_message}{round(end - start)}s")
         return all_download_details
 
     def get_video_download_link(self, video_url: str) -> str:

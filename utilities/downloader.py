@@ -62,7 +62,7 @@ class YouTubeDownloader(DownloadOptions):
         with YoutubeDL(self.get_yt_dlp_options()) as ydl:
             ydl.download(playlist_link)
         end = time.perf_counter()
-        logger.info(f"Time downloading playlist took: {end - start}\n")
+        logger.info(f"Time downloading playlist took: {round(end - start)}s\n")
 
 
 class ScrapperDownloader(DownloadOptions):
@@ -246,4 +246,4 @@ class ScrapperDownloader(DownloadOptions):
         self.send_error_messages(scrapper_name)
         logger.info("Downloads finished!")
         end = time.perf_counter()
-        logger.info(f"Download time: {round(end - start, 4)}\n")
+        logger.info(f"Download time: {round(end - start)}s\n")

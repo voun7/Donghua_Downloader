@@ -9,7 +9,7 @@ from zipfile import ZipFile
 import requests
 from bs4 import BeautifulSoup
 
-from scrapers import ScrapperTools, XiaobaotvScraper, AnimeBabyScrapper, AgeDm1Scrapper, ImyydsScrapper
+from scrapers import ScrapperTools, XiaobaotvScraper, AnimeBabyScrapper, AgeDm1Scrapper, ImyydsScrapper, YhdmScrapper
 from utilities.downloader import DownloadOptions, YouTubeDownloader, ScrapperDownloader
 from utilities.logger_setup import setup_logging
 from utilities.proxy_request import RotatingProxiesRequest
@@ -183,7 +183,21 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         site_posts.update(agedm1.get_anime_posts(page=2))
         matched_posts = agedm1.match_to_recent_videos(site_posts)
         matched_download_details = agedm1.get_recent_posts_videos_download_link(matched_posts)
-        agedm1.driver.quit()  # Close headless browser
+        sd.batch_downloader(site_address, matched_download_details)
+    except Exception as error:
+        error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
+        logger.exception(error_message)
+        tb.send_telegram_message(error_message)
+
+    site_address = "yhdm.in"
+    try:
+        site_address = um.check_url(site_address)
+        logger.info(f"Checking {site_address} site for recent anime upload matches...")
+        yhdm = YhdmScrapper(site_address)
+        site_posts = yhdm.get_anime_posts()
+        site_posts.update(yhdm.get_anime_posts(page=2))
+        matched_posts = yhdm.match_to_recent_videos(site_posts)
+        matched_download_details = yhdm.get_recent_posts_videos_download_link(matched_posts)
         sd.batch_downloader(site_address, matched_download_details)
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
@@ -240,11 +254,11 @@ def main() -> None:
     # Run code to download new anime.
     # get_yt_channel_id("")
     run_youtube_api(yt_dl_archive_file, resolved_names_file, anime_list, tb)
-    run_scrappers(resolved_names_file, tb)
+    run_scrappers(resolved_names_file, tb), ScrapperTools.driver.close()
     # m3u8_video_downloader()
 
     end = time.perf_counter()
-    logger.info(f"Total Runtime: {round(end - start, 4)}")
+    logger.info(f"Total Runtime: {round(end - start)}s")
 
 
 if __name__ == '__main__':

@@ -54,7 +54,7 @@ def download_time() -> int:
     Determine the download time for the program depending on the time of the day.
     """
     current_hr = time.localtime().tm_hour
-    return 7200 if current_hr < 13 else 1200
+    return 7200 if current_hr < 18 else 1200
 
 
 def get_yt_channel_id(url: str) -> None:

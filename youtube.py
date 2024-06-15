@@ -136,7 +136,7 @@ class YouTube:
         :return: Dictionary containing video id as key, resolved name and video title as values.
         """
         logger.info("..........Checking matched videos for duration and quality..........")
-        min_duration, max_duration = timedelta(minutes=3), timedelta(minutes=40)
+        min_duration, max_duration = timedelta(minutes=2), timedelta(minutes=40)
         passed_check_videos = {}
         for video_id, resolved_name in matched_videos.items():
             request = self.youtube.videos().list(part="snippet,contentDetails", id=video_id)

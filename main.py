@@ -82,6 +82,7 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
         "UCEY7zXcul32d1hvRCDlxLjQ",  # 动漫游乐园
         "UCYkn7e_zaRR_UxOrJR0RVdg",  # 次元动漫社 Animation Club
         "UCBIiQ5Hlsadi1HQl8dufZag",  # 云朵屋互娱
+        "UCDsfSnYAzLAG8233lSfVC3g",  # Chinese animation
         "UCJSAZ5pbDi8StbSbJI1riEg",  # Qixiang-Animation
         "UCJS5PJXcAIpXkBOjPNvK7Uw",  # Vita Animation Groups
         "UCXmOpN9pg1hJBRkHODL00EA",  # 三福动漫 Sanfu

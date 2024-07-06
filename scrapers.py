@@ -110,7 +110,7 @@ class XiaobaotvScraper(ScrapperTools):
                 if not last_updated_date >= self.current_date:
                     logger.warning(f"Post Title: {post_title} is not recent, Last Updated: {last_updated_date}")
                     continue
-                latest_video_number = int(post_update[0].strip('更新至集全'))
+                latest_video_number = self.video_post_num_extractor(post_update[0])
                 num_videos = self.get_num_of_videos(latest_video_number)
                 video_start_num = latest_video_number - num_videos + 1
                 logger.info(f"Post Title: {post_title} is new, Last Updated: {last_updated_date}, "

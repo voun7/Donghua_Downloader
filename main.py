@@ -255,7 +255,7 @@ def main() -> None:
     # Run code to download new anime.
     # get_yt_channel_id("")
     run_youtube_api(yt_dl_archive_file, resolved_names_file, anime_list, tb)
-    run_scrappers(resolved_names_file, tb), ScrapperTools.driver.close()
+    run_scrappers(resolved_names_file, tb), ScrapperTools.sel_driver.close()
     # m3u8_video_downloader()
 
     end = time.perf_counter()

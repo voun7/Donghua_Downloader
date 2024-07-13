@@ -23,9 +23,8 @@ class ScrapperTools:
     check_downlink_message = "..........Checking for latest videos download links.........."
     time_message = "Time taken to retrieve recent posts download links: "
     # Selenium config
-    options = webdriver.ChromeOptions()
-    options.add_argument("--headless=new")
-    driver = webdriver.Chrome(options=options)
+    sel_driver = webdriver.Firefox()
+    sel_driver.minimize_window()
 
     def match_to_recent_videos(self, posts: dict) -> dict:
         """
@@ -59,16 +58,16 @@ class ScrapperTools:
 class XiaobaotvScraper(ScrapperTools):
     def __init__(self, site: str) -> None:
         self.base_url = f"https://{site}"
-        self.session, self.request_type = requests.Session(), 1
+        self.session = requests.Session()
 
-    def get_page_response(self, url: str) -> BeautifulSoup:
-        if self.request_type == 1:
+    def get_page_response(self, url: str, request_type: int = 1) -> BeautifulSoup:
+        if request_type == 1:
             page_response = self.session.get(url, headers=self.headers)
             page_response.raise_for_status()
             return BeautifulSoup(page_response.text, self.parser)
-        if self.request_type == 2:
-            self.driver.get(url)
-            return BeautifulSoup(self.driver.page_source, self.parser)
+        if request_type == 2:
+            self.sel_driver.get(url)
+            return BeautifulSoup(self.sel_driver.page_source, self.parser)
 
     def get_anime_posts(self, page: int = 1) -> dict:
         """
@@ -88,9 +87,15 @@ class XiaobaotvScraper(ScrapperTools):
         return video_name_and_link
 
     def get_post_video_link(self, soup: BeautifulSoup, post_title: str, video_number: int) -> str | None:
-        video_post1 = soup.find('li', {"title": f"{video_number}"})
+        video_post1 = soup.find('li', {"title": f"第{video_number:02d}集"})
         if video_post1:
             return self.base_url + video_post1.find('a').get('href')
+        video_post2 = soup.find('li', {"title": f"第{video_number}集"})
+        if video_post2:
+            return self.base_url + video_post2.find('a').get('href')
+        video_post3 = soup.find('li', {"title": f"{video_number}"})
+        if video_post3:
+            return self.base_url + video_post3.find('a').get('href')
         logger.error(f"Video Link not found for Video Number:{post_title} {video_number}!")
 
     def get_recent_posts_videos_download_link(self, matched_posts: dict) -> dict:
@@ -100,41 +105,32 @@ class XiaobaotvScraper(ScrapperTools):
         """
         logger.info(self.check_downlink_message)
         all_download_details, start = {}, time.perf_counter()
-        error_msgs = ""
         for post_title, match_details in matched_posts.items():
-            try:
-                anime_name, url = match_details[0], match_details[1]
-                soup = self.get_page_response(url)
-                post_update = soup.find('span', class_='text-red').text.split(' / ')
-                last_updated_date = parser.parse(post_update[1]).date()
-                if not last_updated_date >= self.current_date:
-                    logger.warning(f"Post Title: {post_title} is not recent, Last Updated: {last_updated_date}")
+            anime_name, url = match_details[0], match_details[1]
+            soup = self.get_page_response(url)
+            post_update = soup.find('span', class_='text-red').text.split(' / ')
+            last_updated_date = parser.parse(post_update[1]).date()
+            if not last_updated_date >= self.current_date:
+                logger.warning(f"Post Title: {post_title} is not recent, Last Updated: {last_updated_date}")
+                continue
+            latest_video_number = self.video_post_num_extractor(post_update[0])
+            num_videos = self.get_num_of_videos(latest_video_number)
+            video_start_num = latest_video_number - num_videos + 1
+            logger.info(f"Post Title: {post_title} is new, Last Updated: {last_updated_date}, "
+                        f"Latest Video Number: {latest_video_number}. "
+                        f"Last {num_videos} Video Numbers: {video_start_num}-{latest_video_number}")
+            for video_number in range(video_start_num, latest_video_number + 1):
+                post_video_name = f"{post_title} 第{video_number}集"
+                resolved_name = self.ch_gen.generate_title(post_video_name, anime_name)
+                if resolved_name in self.resolved_names_archive:
+                    logger.warning(f"Post Video Name: {post_video_name}, "
+                                   f"Resolved Name: {resolved_name} already in archive!")
                     continue
-                latest_video_number = self.video_post_num_extractor(post_update[0])
-                num_videos = self.get_num_of_videos(latest_video_number)
-                video_start_num = latest_video_number - num_videos + 1
-                logger.info(f"Post Title: {post_title} is new, Last Updated: {last_updated_date}, "
-                            f"Latest Video Number: {latest_video_number}. "
-                            f"Last {num_videos} Video Numbers: {video_start_num}-{latest_video_number}")
-                for video_number in range(video_start_num, latest_video_number + 1):
-                    post_video_name = f"{post_title} 第{video_number}集"
-                    resolved_name = self.ch_gen.generate_title(post_video_name, anime_name)
-                    if resolved_name in self.resolved_names_archive:
-                        logger.warning(f"Post Video Name: {post_video_name}, "
-                                       f"Resolved Name: {resolved_name} already in archive!")
-                        continue
-                    video_link = self.get_post_video_link(soup, post_title, video_number)
-                    download_link = self.get_video_download_link(video_link)
-                    logger.info(f"Post Video Name: {post_video_name}, Video Link: {video_link}, "
-                                f"Download Link: {download_link}")
-                    all_download_details[resolved_name] = post_video_name, download_link
-            except Exception as error:
-                self.request_type = 2  # change to selenium after error occurs.
-                error_msg = f"An error occurred while scrapping {post_title}! \nError: {error}"
-                logger.exception(error_msg)
-                error_msgs = f"{error_msgs}\n{error_msg}\n"
-        if error_msgs:
-            self.tb.send_telegram_message(f"XiaobaotvScraper\n{error_msgs}")
+                video_link = self.get_post_video_link(soup, post_title, video_number)
+                download_link = self.get_video_download_link(video_link)
+                logger.info(f"Post Video Name: {post_video_name}, Video Link: {video_link}, "
+                            f"Download Link: {download_link}")
+                all_download_details[resolved_name] = post_video_name, download_link
         end = time.perf_counter()
         logger.info(f"{self.time_message}{round(end - start)}s")
         return all_download_details
@@ -144,11 +140,12 @@ class XiaobaotvScraper(ScrapperTools):
         This method uses the video url to find the video download link.
         """
         if video_url:
-            soup = self.get_page_response(video_url)
+            soup = self.get_page_response(video_url, 2)
             download_script = soup.find(class_='embed-responsive clearfix')
             download_match = re.search(r'"url":"(.*?)"', str(download_script))
-            download_link = download_match.group(1).replace("\\", '')
-            return download_link
+            if download_match:
+                download_link = download_match.group(1).replace("\\", '')
+                return download_link
 
 
 class AnimeBabyScrapper(ScrapperTools):
@@ -156,9 +153,6 @@ class AnimeBabyScrapper(ScrapperTools):
         self.base_url = f"https://{site}"
         self.session = requests.Session()
         self.cloudflare_detected = self.detect_cloudflare()
-        self.chrome_driver = None
-        if self.cloudflare_detected:
-            self.initiate_driver()
 
     def detect_cloudflare(self) -> bool:
         page_response = self.session.get(self.base_url, headers=self.headers)
@@ -169,38 +163,14 @@ class AnimeBabyScrapper(ScrapperTools):
             logger.info("Cloudflare not detected in site.")
             return False
 
-    def initiate_driver(self, delay: float = 12) -> None:
-        """
-        Initiate Chrome web driver that helps bypass cloudflare protection.
-        :param delay: Time in seconds to spend waiting.
-        """
-        from undetected_chromedriver import Chrome
-        self.chrome_driver = Chrome(headless=True)
-        self.chrome_driver.get(self.base_url)
-        time.sleep(delay)  # Time to allow cloudflare checks to finish
-        page_content = self.chrome_driver.page_source
-        if "cloudflare" in page_content:
-            message = f"Cloudflare bypass failed on {self.base_url} site!"
-            logger.error(message)
-            self.tb.send_telegram_message(message)
-        else:
-            logger.info("Cloudflare bypass succeeded!")
-
-    def close_driver(self, delay: float = 3) -> None:
-        try:
-            self.chrome_driver.close()
-            time.sleep(delay)
-        except Exception as error:
-            logger.error(f"An error occurred while closing the driver! \nError: {error}")
-
     def get_page_response(self, url: str) -> BeautifulSoup:
         if not self.cloudflare_detected:
             page_response = self.session.get(url, headers=self.headers)
             page_response.raise_for_status()
             return BeautifulSoup(page_response.text, self.parser)
         else:
-            self.chrome_driver.get(url)
-            return BeautifulSoup(self.chrome_driver.page_source, self.parser)
+            self.sel_driver.get(url)
+            return BeautifulSoup(self.sel_driver.page_source, self.parser)
 
     def get_anime_posts(self, page: int = 1) -> dict:
         """
@@ -274,8 +244,6 @@ class AnimeBabyScrapper(ScrapperTools):
                 all_download_details[resolved_name] = post_video_name, download_link
         end = time.perf_counter()
         logger.info(f"{self.time_message}{round(end - start)}s")
-        if self.cloudflare_detected:
-            self.close_driver()
         return all_download_details
 
     def test_download_links(self, download_links: list) -> str:
@@ -316,8 +284,8 @@ class AgeDm1Scrapper(ScrapperTools):
         logger.info(f"..........Site Page {page} Anime Posts..........")
         video_name_and_link = {}
         payload = f"/acg/china/{page}.html"
-        self.driver.get(self.base_url + payload)
-        soup = BeautifulSoup(self.driver.page_source, self.parser)
+        self.sel_driver.get(self.base_url + payload)
+        soup = BeautifulSoup(self.sel_driver.page_source, self.parser)
         posts = soup.find_all('li', class_='anime_icon2')
         for post in posts:
             post_title = post.find('h4', class_='anime_icon2_name').text.strip()
@@ -357,8 +325,8 @@ class AgeDm1Scrapper(ScrapperTools):
             post_split = post_title_and_last_ep.split(self.lst_ep_tag)
             post_title, latest_video_post = post_split[0], post_split[1]
             anime_name, url = match_details[0], match_details[1]
-            self.driver.get(url)
-            soup = BeautifulSoup(self.driver.page_source, self.parser)
+            self.sel_driver.get(url)
+            soup = BeautifulSoup(self.sel_driver.page_source, self.parser)
             latest_video_number = self.video_post_num_extractor(latest_video_post)
             num_videos = self.get_num_of_videos(latest_video_number)
             video_start_num = latest_video_number - num_videos + 1
@@ -396,8 +364,8 @@ class AgeDm1Scrapper(ScrapperTools):
         This method uses the video url to find the video download link.
         """
         if video_url:
-            self.driver.get(video_url)
-            soup = BeautifulSoup(self.driver.page_source, self.parser)
+            self.sel_driver.get(video_url)
+            soup = BeautifulSoup(self.sel_driver.page_source, self.parser)
             download_match = soup.find(id="playiframe")
             if download_match:
                 download_links = re.findall(r"https?://[\w\-./]+.m3u8", download_match.get('src'))
@@ -510,8 +478,8 @@ class YhdmScrapper(ScrapperTools):
             page_response.raise_for_status()
             return BeautifulSoup(page_response.text, self.parser)
         if request_type == 2:
-            self.driver.get(url)
-            return BeautifulSoup(self.driver.page_source, self.parser)
+            self.sel_driver.get(url)
+            return BeautifulSoup(self.sel_driver.page_source, self.parser)
 
     def get_anime_posts(self, page: int = 1) -> dict:
         """
@@ -616,8 +584,8 @@ class TempScrapper(ScrapperTools):
             page_response.raise_for_status()
             return BeautifulSoup(page_response.text, self.parser)
         if request_type == 2:
-            self.driver.get(url)
-            return BeautifulSoup(self.driver.page_source, self.parser)
+            self.sel_driver.get(url)
+            return BeautifulSoup(self.sel_driver.page_source, self.parser)
 
     def get_anime_posts(self, page: int = 1) -> dict:
         """

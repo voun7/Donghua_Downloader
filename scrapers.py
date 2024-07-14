@@ -23,7 +23,7 @@ class ScrapperTools:
     check_downlink_message = "..........Checking for latest videos download links.........."
     time_message = "Time taken to retrieve recent posts download links: "
     # Selenium config
-    sel_driver = webdriver.Firefox()
+    sel_driver = webdriver.Edge()
     sel_driver.minimize_window()
 
     def match_to_recent_videos(self, posts: dict) -> dict:

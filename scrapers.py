@@ -6,6 +6,7 @@ import requests
 import undetected_chromedriver as uc
 from bs4 import BeautifulSoup
 from dateutil import parser
+from selenium import webdriver
 
 from utilities.ch_title_gen import ChineseTitleGenerator
 
@@ -23,7 +24,11 @@ class ScrapperTools:
     check_downlink_message = "..........Checking for latest videos download links.........."
     time_message = "Time taken to retrieve recent posts download links: "
     # Selenium config
-    sel_driver = uc.Chrome()
+    try:
+        sel_driver = uc.Chrome()
+    except Exception as error:
+        logger.exception(f"An error occurred while initializing sel driver. Error: {error}")
+        sel_driver = webdriver.Edge()
     sel_driver.minimize_window()
 
     def match_to_recent_videos(self, posts: dict) -> dict:

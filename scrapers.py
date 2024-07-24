@@ -113,7 +113,11 @@ class XiaobaotvScraper(ScrapperTools):
         for post_title, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]
             soup = self.get_page_response(url)
-            post_update = soup.find('span', class_='text-red').text.split(' / ')
+            post_update = soup.find('span', class_='text-red')
+            if not post_update:
+                logger.warning(f"Post Title: {post_title}, post update not available!")
+                continue
+            post_update = post_update.text.split(' / ')
             last_updated_date = parser.parse(post_update[1]).date()
             if not last_updated_date >= self.current_date:
                 logger.warning(f"Post Title: {post_title} is not recent, Last Updated: {last_updated_date}")

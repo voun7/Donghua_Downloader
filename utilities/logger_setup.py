@@ -1,9 +1,7 @@
 import logging
 import sys
-from logging.handlers import TimedRotatingFileHandler
+from logging.handlers import TimedRotatingFileHandler, SysLogHandler
 from pathlib import Path
-
-import graypy
 
 
 def get_console_handler() -> logging.handlers:
@@ -17,7 +15,7 @@ def get_server_handler(log_format: logging.Formatter) -> logging.handlers:
     """
     Sends logs to the graylog server.
     """
-    server_handler = graypy.GELFUDPHandler('192.168.31.108', 12201)
+    server_handler = SysLogHandler(address=('192.168.31.114', 514))
     server_handler.setLevel(logging.INFO)
     server_handler.setFormatter(log_format)
     return server_handler

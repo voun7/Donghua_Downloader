@@ -65,7 +65,7 @@ class XiaobaotvScraper(ScrapperTools):
         self.base_url = f"https://{site}"
         self.session = requests.Session()
 
-    def get_page_response(self, url: str, request_type: int = 1) -> BeautifulSoup:
+    def get_page_response(self, url: str, request_type: int = 2) -> BeautifulSoup:
         if request_type == 1:
             page_response = self.session.get(url, headers=self.headers)
             page_response.raise_for_status()
@@ -149,7 +149,7 @@ class XiaobaotvScraper(ScrapperTools):
         This method uses the video url to find the video download link.
         """
         if video_url:
-            soup = self.get_page_response(video_url, 2)
+            soup = self.get_page_response(video_url)
             download_script = soup.find(class_='embed-responsive clearfix')
             download_match = re.search(r'"url":"(.*?)"', str(download_script))
             if download_match:

@@ -15,7 +15,7 @@ def get_server_handler(log_format: logging.Formatter) -> logging.handlers:
     """
     Sends logs to the graylog server.
     """
-    server_handler = SysLogHandler(address=('192.168.31.114', 514))
+    server_handler = SysLogHandler(address=('192.168.31.114', 1514))
     server_handler.setLevel(logging.INFO)
     server_handler.setFormatter(log_format)
     return server_handler

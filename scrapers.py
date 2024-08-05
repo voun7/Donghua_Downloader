@@ -9,6 +9,7 @@ from dateutil import parser
 from selenium import webdriver
 
 from utilities.ch_title_gen import ChineseTitleGenerator
+from utilities.proxy_request import RotatingProxiesRequest
 
 logger = logging.getLogger(__name__)
 # Do not log this messages unless they are at least warnings
@@ -63,16 +64,25 @@ class ScrapperTools:
 class XiaobaotvScraper(ScrapperTools):
     def __init__(self, site: str) -> None:
         self.base_url = f"https://{site}"
-        self.session = requests.Session()
+        self.r_proxy, self.proxy_driver = RotatingProxiesRequest(), None
+        # self.detect_site_block()
 
-    def get_page_response(self, url: str, request_type: int = 2) -> BeautifulSoup:
-        if request_type == 1:
-            page_response = self.session.get(url, headers=self.headers)
-            page_response.raise_for_status()
-            return BeautifulSoup(page_response.text, self.parser)
-        if request_type == 2:
-            self.sel_driver.get(url)
-            return BeautifulSoup(self.sel_driver.page_source, self.parser)
+    def set_proxy_request(self, url: str) -> None:
+        if proxy := self.r_proxy.get_proxy(url):
+            options = uc.ChromeOptions()
+            options.add_argument(f"--proxy-server={proxy}")
+            self.proxy_driver = uc.Chrome(options)
+
+    def detect_site_block(self) -> None:
+        page_response = requests.get(self.base_url, headers=self.headers)
+        if page_response.status_code == 403:
+            logger.info("Real Ip address has been blocked. Switching to rotating proxy requests.")
+            self.set_proxy_request(self.base_url)
+
+    def get_page_response(self, url: str) -> BeautifulSoup:
+        driver = self.proxy_driver or self.sel_driver
+        driver.get(url)
+        return BeautifulSoup(driver.page_source, self.parser)
 
     def get_anime_posts(self, page: int = 1) -> dict:
         """
@@ -142,6 +152,8 @@ class XiaobaotvScraper(ScrapperTools):
                 all_download_details[resolved_name] = post_video_name, download_link
         end = time.perf_counter()
         logger.info(f"{self.time_message}{round(end - start)}s")
+        if self.proxy_driver:
+            self.proxy_driver.close()
         return all_download_details
 
     def get_video_download_link(self, video_url: str) -> str:

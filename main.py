@@ -226,7 +226,7 @@ def main() -> None:
     destination_dir = playlist_download_dir / "##Currently Airing"
     dfsd_files_dir = playlist_download_dir / "DFSD Project Files"
     dfsd_files_dir.mkdir(exist_ok=True)
-    ffmpeg_dir, proxy_file = dfsd_files_dir / "ffmpeg", dfsd_files_dir / "proxy list.txt"
+    ffmpeg_dir, proxy_file = dfsd_files_dir / "ffmpeg", dfsd_files_dir / "proxies.txt"
     ffmpeg_bin_dir = set_ffmpeg_bin(ffmpeg_dir)
     logger.info(f"Ffmpeg bin directory: {ffmpeg_bin_dir}, Exists: {ffmpeg_bin_dir.exists()}")
     resolved_names_file = dfsd_files_dir / "resolved_names_download_archive.txt"
@@ -235,8 +235,8 @@ def main() -> None:
     url_data_file = dfsd_files_dir / "url_data.json"
 
     min_res_height = 720  # Minimum resolution height.
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
-                             'Chrome/113.0.0.0 Safari/537.36'}
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                             "Chrome/127.0.0.0 Safari/537.36"}
     anime_list = [keyword for folder in destination_dir.iterdir() for keyword in re.findall(r'\((.*?)\)', folder.name)]
 
     tb = TelegramBot()

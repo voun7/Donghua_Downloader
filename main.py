@@ -84,6 +84,7 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
         "UCJSAZ5pbDi8StbSbJI1riEg",  # Qixiang-Animation
         "UCJS5PJXcAIpXkBOjPNvK7Uw",  # Vita Animation Groups
         "UCXmOpN9pg1hJBRkHODL00EA",  # 三福动漫 Sanfu
+        "UC5FQ3sxZsjxD9Bej9PsPt9Q",  # Mythology Animation
         "UCNIKva6iDURgVxf44pMZlKA",  # Animal Family
         "UCOC-FcGSep0BFx7XCzBdQ-g",  # D-TV Channel
         "UC_JsHod-IAlWFWi7kDhb03Q",  # 阅文漫画

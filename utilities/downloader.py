@@ -38,7 +38,8 @@ class YouTubeDownloader(DownloadOptions):
             'download_archive': self.yt_dl_archive_file,
             'format': f'bestvideo[height>={self.min_res_height}][ext=mp4]+bestaudio[ext=m4a]',
             'ffmpeg_location': self.ffmpeg_path,
-            'outtmpl': str(self.download_path) + '/%(title)s.%(ext)s'
+            'outtmpl': str(self.download_path) + '/%(title)s.%(ext)s',
+            'writesubtitles': True,
         }
 
         if "VOUN-SERVER" in self.host_name:

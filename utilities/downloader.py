@@ -102,7 +102,7 @@ class ScrapperDownloader(DownloadOptions):
             logger.debug(f"Resolved name: {resolved_name}, File: {file_name} is not in archive.")
             return False
 
-    def bad_video_res_check(self, resolved_name: str, file_name: str, download_link: str) -> bool:
+    def video_res_check(self, resolved_name: str, file_name: str, download_link: str) -> bool:
         """
         Returns True if video's height resolution is lower than the allowed minimum and False otherwise.
         The first 10 seconds of the video are downloaded for testing.
@@ -204,7 +204,7 @@ class ScrapperDownloader(DownloadOptions):
             logger.warning(error_msg)
             self.error_msgs = f"{self.error_msgs}\n{error_msg}"
             return
-        if self.bad_video_res_check(resolved_name, file_name, download_link):
+        if self.video_res_check(resolved_name, file_name, download_link):
             return
         # Make a request to the m3u8 file link.
         response = requests.get(download_link)

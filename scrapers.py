@@ -6,7 +6,7 @@ import requests
 import undetected_chromedriver as uc
 from bs4 import BeautifulSoup
 from dateutil import parser
-from selenium import webdriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 from utilities.ch_title_gen import ChineseTitleGenerator
 from utilities.proxy_request import RotatingProxiesRequest
@@ -16,21 +16,36 @@ logger = logging.getLogger(__name__)
 logging.getLogger("selenium").setLevel(logging.WARNING)
 
 
+def suppress_uc_exception(uc_obj: uc) -> None:
+    """
+    Suppress the os error exception when .close() or .quit() is used.
+    """
+    old_del = uc_obj.Chrome.__del__
+
+    def new_del(self) -> None:
+        try:
+            old_del(self)
+        except OSError:
+            pass
+
+    setattr(uc_obj.Chrome, '__del__', new_del)
+
+
+suppress_uc_exception(uc)
+
+
 class ScrapperTools:
     headers = anime_list = resolved_names_archive = tb = current_date = None
     video_num_per_post = None  # The number of recent videos that will downloaded per post.
     parser = "html.parser"
     ch_gen = ChineseTitleGenerator()
     latest_ep_tag = " LST-EP:"
+    m3u8_pattern = re.compile(r"https?://[\w\-./]+.m3u8")
     # Common texts used by scrappers are shared from here.
     check_downlink_message = "..........Checking for latest videos download links.........."
     time_message = "Time taken to retrieve recent posts download links: "
-    # Selenium config
-    try:
-        sel_driver = uc.Chrome()
-    except Exception as error:
-        logger.exception(f"An error occurred while initializing sel driver. Error: {error}")
-        sel_driver = webdriver.Edge()
+    # undetected_chromedriver selenium config
+    sel_driver = uc.Chrome()
     sel_driver.minimize_window()
 
     def match_to_recent_videos(self, posts: dict) -> dict:
@@ -49,6 +64,20 @@ class ScrapperTools:
         if not matched_posts:
             logger.info("No post matches found!")
         return matched_posts
+
+    def extract_video_links(self, url: str, wait_time: int = 5) -> list:
+        """
+        Extract all the video links from the network log of the site url.
+        """
+        capabilities = DesiredCapabilities.CHROME
+        capabilities["goog:loggingPrefs"] = {"performance": "ALL"}
+        driver = uc.Chrome(desired_capabilities=capabilities, headless=True)
+        driver.get(url)
+        time.sleep(wait_time)
+        logs = driver.get_log("performance")
+        links = self.m3u8_pattern.findall(str(logs))
+        driver.quit()
+        return links
 
     def get_num_of_videos(self, latest_video_number: int) -> int:
         if latest_video_number < self.video_num_per_post:  # Prevents asking for more videos than are available.
@@ -205,7 +234,7 @@ class AnimeBabyScrapper(ScrapperTools):
         soup = self.get_page_response(self.base_url + payload)
         posts = soup.find_all('a', class_="public-list-exp")
         for post in posts:
-            post_title = post.find('img')['alt']
+            post_title = post.find('img').get('alt', '')
             post_url = self.base_url + post['href']
             latest_video_number = post.find('span', class_="public-list-prb hide ft2").text
             logger.info(f"Post Title: {post_title}, Post URL: {post_url}")
@@ -282,10 +311,9 @@ class AnimeBabyScrapper(ScrapperTools):
         This method uses the video url to find the video download link.
         """
         if video_url:
-            soup = self.get_page_response(video_url)
-            download_link = soup.find("")
-            if download_link:
-                return download_link.get('href')
+            links = self.extract_video_links(video_url)
+            if links:
+                return self.test_download_links(links)
 
 
 class AgeDm1Scrapper(ScrapperTools):
@@ -384,7 +412,7 @@ class AgeDm1Scrapper(ScrapperTools):
             soup = BeautifulSoup(self.sel_driver.page_source, self.parser)
             download_match = soup.find(id="playiframe")
             if download_match:
-                download_links = re.findall(r"https?://[\w\-./]+.m3u8", download_match.get('src'))
+                download_links = self.m3u8_pattern.findall(download_match.get('src'))
                 download_link = self.test_download_links(download_links)
                 if download_link:
                     return download_link
@@ -583,7 +611,7 @@ class YhdmScrapper(ScrapperTools):
             soup = self.get_page_response(video_url, 2)
             download_match = soup.find(id="playiframe")
             if download_match:
-                download_links = re.findall(r"https?://[\w\-./]+.m3u8", download_match.get('src'))
+                download_links = self.m3u8_pattern.findall(download_match.get('src'))
                 download_link = self.test_download_links(download_links)
                 if download_link:
                     return download_link

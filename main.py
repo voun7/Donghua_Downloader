@@ -249,7 +249,7 @@ def main() -> None:
     # Set scrapper options.
     scrapper_list = scrapper_anime_list(youtube_only_file, anime_list)
     ScrapperTools.tb, ScrapperTools.current_date = tb, datetime.now().date()  # .replace(day=) to change day.
-    ScrapperTools.headers, ScrapperTools.anime_list, ScrapperTools.video_num_per_post = headers, scrapper_list, 3
+    ScrapperTools.headers, ScrapperTools.anime_list, ScrapperTools.video_num_per_post = headers, scrapper_list, 5
     ScrapperTools.resolved_names_archive = set(resolved_names_file.read_text(encoding="utf-8").splitlines()) \
         if resolved_names_file.exists() else set()
     # Set options for proxy.

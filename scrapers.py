@@ -502,9 +502,9 @@ class ImyydsScrapper(ScrapperTools):
         if video_url:
             page_response = self.session.get(video_url, headers=self.headers)
             soup = BeautifulSoup(page_response.text, self.parser)
-            download_script = soup.find("script", attrs={'type': 'application/ld+json'})
-            download_match = re.search(r'"contentUrl": "(.*?)"', download_script.text)
-            download_link = download_match.group(1)
+            download_script = soup.find("div", class_="player_video")
+            download_match = re.search('"url":"(.*?)"', str(download_script))
+            download_link = download_match.group(1).split("&")[0].replace("\\", "")
             return download_link
 
 

@@ -67,7 +67,7 @@ class ScrapperTools:
 
     def extract_video_links(self, url: str, wait_time: int = 5) -> list:
         """
-        Extract all the video links from the network log of the site url.
+        Extract all the m3u8 video download links from the network log of the site url.
         """
         capabilities = DesiredCapabilities.CHROME
         capabilities["goog:loggingPrefs"] = {"performance": "ALL"}
@@ -230,30 +230,26 @@ class AnimeBabyScrapper(ScrapperTools):
         """
         logger.info(f"..........Site Page {page} Anime Posts..........")
         video_name_and_link = {}
-        payload = f"/vod/list/{page}/42/73/0/0/0/0/0"
+        payload = f"/index.php/vod/show/id/20/page/{page}.html"
         soup = self.get_page_response(self.base_url + payload)
-        posts = soup.find_all('a', class_="public-list-exp")
+        posts = soup.find_all('a', class_="module-item-title")
         for post in posts:
-            post_title = post.find('img').get('alt', '')
-            post_url = self.base_url + post['href']
-            latest_video_number = post.find('span', class_="public-list-prb hide ft2").text
+            post_title = post.contents[0]
+            post_url = self.base_url + post.get('href')
             logger.info(f"Post Title: {post_title}, Post URL: {post_url}")
-            video_name_and_link[f"{post_title}{self.latest_ep_tag}{latest_video_number}"] = post_url
+            video_name_and_link[post_title] = post_url
         return video_name_and_link
 
     def get_post_video_link(self, soup: BeautifulSoup, post_title: str, video_number: int) -> str | None:
-        video_post1 = soup.find('a', class_="hide", string=lambda txt: txt and txt.strip() == f"{video_number}")
+        video_post1 = soup.find('a', {"title": f"播放{post_title}第{video_number:02d}集"})
         if video_post1:
             return self.base_url + video_post1.get('href')
-        video_post2 = soup.find('a', class_="hide", string=lambda txt: txt and txt.strip() == f"{video_number:02d}")
+        video_post2 = soup.find('a', {"title": f"播放{post_title}第{video_number}集"})
         if video_post2:
             return self.base_url + video_post2.get('href')
-        video_post3 = soup.find('a', class_="hide", string=lambda txt: txt and txt.strip() == f"第{video_number}集")
+        video_post3 = soup.find('a', {"title": f"播放{post_title}{video_number}"})
         if video_post3:
             return self.base_url + video_post3.get('href')
-        video_post4 = soup.find('a', class_="hide", string=lambda txt: txt and txt.strip() == f"第{video_number:02d}集")
-        if video_post4:
-            return self.base_url + video_post4.get('href')
         logger.error(f"Video Link not found for Video Number:{post_title} {video_number}!")
 
     def get_recent_posts_videos_download_link(self, matched_posts: dict) -> dict:
@@ -263,11 +259,14 @@ class AnimeBabyScrapper(ScrapperTools):
         """
         logger.info(self.check_downlink_message)
         all_download_details, start = {}, time.perf_counter()
-        for post_title_and_last_ep, match_details in matched_posts.items():
-            post_split = post_title_and_last_ep.split(self.latest_ep_tag)
-            post_title, latest_video_number = post_split[0], self.video_post_num_extractor(post_split[1])
+        for post_title, match_details in matched_posts.items():
             anime_name, url = match_details[0], match_details[1]
             soup = self.get_page_response(url)
+            latest_video_post = soup.find(string="连载：").parent.next_sibling.text
+            latest_video_number = self.video_post_num_extractor(latest_video_post)
+            if not latest_video_number:
+                logger.info(f"Post Title: {post_title} has finished airing! URL: {url}")
+                continue
             num_videos = self.get_num_of_videos(latest_video_number)
             video_start_num = latest_video_number - num_videos + 1
             logger.info(f"Post Title: {post_title}, Latest Video Number: {latest_video_number}. "
@@ -311,9 +310,9 @@ class AnimeBabyScrapper(ScrapperTools):
         This method uses the video url to find the video download link.
         """
         if video_url:
-            links = self.extract_video_links(video_url)
-            if links:
-                return self.test_download_links(links)
+            soup = self.get_page_response(video_url)
+            download_link = soup.find(id="bfurl").get('href')
+            return download_link
 
 
 class AgeDm1Scrapper(ScrapperTools):

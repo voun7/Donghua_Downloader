@@ -207,12 +207,12 @@ class ScrapperDownloader(DownloadOptions):
         if self.video_res_check(resolved_name, file_name, download_link):
             return
         # Make a request to the m3u8 file link.
-        response = requests.get(download_link)
-        response_text, advert_tag = response.text, "#EXT-X-DISCONTINUITY\n"
-        if advert_tag in response_text:
-            self.ad_free_playlist_downloader(file_name, response_text)
-        else:
-            self.link_downloader(file_name, download_link)
+        # response = requests.get(download_link)
+        # response_text, advert_tag = response.text, "#EXT-X-DISCONTINUITY\n"
+        # if advert_tag in response_text:
+        #     self.ad_free_playlist_downloader(file_name, response_text)
+        # else:
+        self.link_downloader(file_name, download_link)
 
         if file_path.exists():
             logger.info(f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded successfully!")

@@ -329,6 +329,7 @@ class AgeDm1Scrapper(ScrapperTools):
         video_name_and_link = {}
         payload = f"/acg/china/{page}.html"
         self.sel_driver.get(self.base_url + payload)
+        time.sleep(10)  # give page more time to load
         soup = BeautifulSoup(self.sel_driver.page_source, self.parser)
         posts = soup.find_all('li', class_='anime_icon2')
         for post in posts:

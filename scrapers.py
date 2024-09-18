@@ -1,6 +1,7 @@
 import logging
 import re
 import time
+import winreg
 
 import requests
 import undetected_chromedriver as uc
@@ -34,6 +35,22 @@ def suppress_uc_exception(uc_obj: uc) -> None:
 suppress_uc_exception(uc)
 
 
+def get_win_chrome_version() -> int:
+    """
+    Get Chrome version on Windows os.
+    """
+    try:
+        key_path = r"SOFTWARE\Google\Chrome\BLBeacon"  # Path to the registry key where Chrome version is stored
+        key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, key_path)  # Open the registry key
+        version, _ = winreg.QueryValueEx(key, "version")  # Query for the version value
+        winreg.CloseKey(key)  # Close the registry key
+        return int(version.split(".")[0])
+    except FileNotFoundError:
+        logger.exception("Chrome is not installed or the registry path is incorrect")
+    except Exception as error:
+        logger.exception(f"An error occurred: {error}")
+
+
 class ScrapperTools:
     headers = anime_list = resolved_names_archive = tb = current_date = None
     video_num_per_post = None  # The number of recent videos that will downloaded per post.
@@ -45,7 +62,8 @@ class ScrapperTools:
     check_downlink_message = "..........Checking for latest videos download links.........."
     time_message = "Time taken to retrieve recent posts download links: "
     # undetected_chromedriver selenium config
-    sel_driver = uc.Chrome()
+    chrome_version = get_win_chrome_version()
+    sel_driver = uc.Chrome(version_main=chrome_version)
     sel_driver.minimize_window()
 
     def match_to_recent_videos(self, posts: dict) -> dict:

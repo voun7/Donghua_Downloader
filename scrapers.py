@@ -347,15 +347,24 @@ class AgeDm1Scrapper(ScrapperTools):
         video_name_and_link = {}
         payload = f"/acg/china/{page}.html"
         self.sel_driver.get(self.base_url + payload)
-        time.sleep(10)  # give page more time to load
         soup = BeautifulSoup(self.sel_driver.page_source, self.parser)
         posts = soup.find_all('li', class_='anime_icon2')
-        for post in posts:
-            post_title = post.find('h4', class_='anime_icon2_name').text.strip()
-            post_url = self.base_url + post.find('a').get('href')
-            latest_video_number = post.find('span').text
-            logger.info(f"Post Title: {post_title}, Post URL: {post_url}")
-            video_name_and_link[f"{post_title}{self.latest_ep_tag}{latest_video_number}"] = post_url
+        # Sometimes a page with a different html structure is loaded.
+        if posts:
+            for post in posts:
+                post_title = post.find('h4', class_='anime_icon2_name').text.strip()
+                post_url = self.base_url + post.find('a').get('href')
+                latest_video_number = post.find('span').text
+                logger.info(f"Post Title: {post_title}, Post URL: {post_url}")
+                video_name_and_link[f"{post_title}{self.latest_ep_tag}{latest_video_number}"] = post_url
+        else:
+            posts = soup.find_all('a', class_='li-hv')
+            for post in posts:
+                post_title = post.get('title')
+                post_url = self.base_url + post.get('href')
+                latest_video_number = post.find('p', class_='bz').text.strip()
+                logger.info(f"Post Title: {post_title}, Post URL: {post_url}")
+                video_name_and_link[f"{post_title}{self.latest_ep_tag}{latest_video_number}"] = post_url
         return video_name_and_link
 
     def get_post_video_link(self, soup: BeautifulSoup, video_number: int, url: str) -> str | None:

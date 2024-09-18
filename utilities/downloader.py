@@ -5,7 +5,7 @@ import subprocess
 import time
 from pathlib import Path
 
-import requests
+# import requests
 from yt_dlp import YoutubeDL
 
 from utilities.m3u8_adfilter import M3u8AdFilter

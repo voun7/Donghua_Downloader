@@ -143,8 +143,11 @@ class YouTube:
             response = request.execute()
             for item in response['items']:
                 video_title = item['snippet']['title']
-                iso_content_duration = item['contentDetails']['duration']
-                content_duration = isodate.parse_duration(iso_content_duration)
+                iso_content_duration = item['contentDetails'].get('duration')
+                if iso_content_duration:
+                    content_duration = isodate.parse_duration(iso_content_duration)
+                else:
+                    content_duration = timedelta()  # Premieres are given 0 duration.
                 definition = item['contentDetails']['definition']
                 if min_duration < content_duration < max_duration and definition == "hd":
                     passed_check_videos[video_id] = resolved_name, video_title

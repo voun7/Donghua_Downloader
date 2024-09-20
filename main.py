@@ -9,7 +9,8 @@ from zipfile import ZipFile
 import requests
 from bs4 import BeautifulSoup
 
-from scrapers import ScrapperTools, XiaobaotvScraper, AnimeBabyScrapper, AgeDm1Scrapper, ImyydsScrapper, YhdmScrapper
+from scrapers import ScrapperTools, XiaobaotvScraper, AnimeBabyScrapper, AgeDm1Scrapper, ImyydsScrapper, YhdmScrapper, \
+    LQ010Scrapper
 from utilities.downloader import DownloadOptions, YouTubeDownloader, ScrapperDownloader
 from utilities.logger_setup import setup_logging
 from utilities.proxy_request import RotatingProxiesRequest
@@ -54,7 +55,7 @@ def download_time() -> int:
     Determine the download time for the program depending on the time of the day.
     """
     current_hr = time.localtime().tm_hour
-    return 7200 if current_hr < 18 else 1200
+    return 3600 if current_hr < 18 else 1200
 
 
 def get_yt_channel_id(url: str) -> None:
@@ -138,6 +139,21 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         site_posts.update(xiaobaotv.get_anime_posts(page=3))
         matched_posts = xiaobaotv.match_to_recent_videos(site_posts)
         matched_download_details = xiaobaotv.get_recent_posts_videos_download_link(matched_posts)
+        sd.batch_downloader(site_address, matched_download_details)
+    except Exception as error:
+        error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
+        logger.exception(error_message)
+        tb.send_telegram_message(error_message)
+
+    site_address = "v.lq010.com"
+    try:
+        site_address = um.check_url(site_address)
+        logger.info(f"Checking {site_address} site for recent anime upload matches...")
+        lq010 = LQ010Scrapper(site_address)
+        site_posts = lq010.get_anime_posts()
+        site_posts.update(lq010.get_anime_posts(page=2))
+        matched_posts = lq010.match_to_recent_videos(site_posts)
+        matched_download_details = lq010.get_recent_posts_videos_download_link(matched_posts)
         sd.batch_downloader(site_address, matched_download_details)
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"

@@ -152,6 +152,7 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         lq010 = LQ010Scrapper(site_address)
         site_posts = lq010.get_anime_posts()
         site_posts.update(lq010.get_anime_posts(page=2))
+        site_posts.update(lq010.get_anime_posts(page=3))
         matched_posts = lq010.match_to_recent_videos(site_posts)
         matched_download_details = lq010.get_recent_posts_videos_download_link(matched_posts)
         sd.batch_downloader(site_address, matched_download_details)
@@ -265,7 +266,7 @@ def main() -> None:
     # Set scrapper options.
     scrapper_list = scrapper_anime_list(youtube_only_file, anime_list)
     ScrapperTools.tb, ScrapperTools.current_date = tb, datetime.now().date()  # .replace(day=) to change day.
-    ScrapperTools.headers, ScrapperTools.anime_list, ScrapperTools.video_num_per_post = headers, scrapper_list, 5
+    ScrapperTools.headers, ScrapperTools.anime_list, ScrapperTools.video_num_per_post = headers, scrapper_list, 8
     ScrapperTools.resolved_names_archive = set(resolved_names_file.read_text(encoding="utf-8").splitlines()) \
         if resolved_names_file.exists() else set()
     # Set options for proxy.

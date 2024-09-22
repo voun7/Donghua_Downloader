@@ -145,22 +145,6 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         logger.exception(error_message)
         tb.send_telegram_message(error_message)
 
-    site_address = "animebaby.top"
-    try:
-        site_address = um.check_url(site_address)
-        logger.info(f"Checking {site_address} site for recent anime upload matches...")
-        anime_baby = AnimeBabyScrapper(site_address)
-        site_posts = anime_baby.get_anime_posts()
-        site_posts.update(anime_baby.get_anime_posts(page=2))
-        site_posts.update(anime_baby.get_anime_posts(page=3))
-        matched_posts = anime_baby.match_to_recent_videos(site_posts)
-        matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts)
-        sd.batch_downloader(site_address, matched_download_details)
-    except Exception as error:
-        error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
-        logger.exception(error_message)
-        tb.send_telegram_message(error_message)
-
     site_address = "imyyds.com"
     try:
         site_address = um.check_url(site_address)
@@ -217,6 +201,22 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
         site_posts.update(lq010.get_anime_posts(page=2))
         matched_posts = lq010.match_to_recent_videos(site_posts)
         matched_download_details = lq010.get_recent_posts_videos_download_link(matched_posts)
+        sd.batch_downloader(site_address, matched_download_details)
+    except Exception as error:
+        error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
+        logger.exception(error_message)
+        tb.send_telegram_message(error_message)
+
+    site_address = "animebaby.top"
+    try:
+        site_address = um.check_url(site_address)
+        logger.info(f"Checking {site_address} site for recent anime upload matches...")
+        anime_baby = AnimeBabyScrapper(site_address)
+        site_posts = anime_baby.get_anime_posts()
+        site_posts.update(anime_baby.get_anime_posts(page=2))
+        site_posts.update(anime_baby.get_anime_posts(page=3))
+        matched_posts = anime_baby.match_to_recent_videos(site_posts)
+        matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts)
         sd.batch_downloader(site_address, matched_download_details)
     except Exception as error:
         error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"

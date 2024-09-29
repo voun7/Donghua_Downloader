@@ -93,6 +93,7 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
         "UC_grnC_fPff0bSbk9V-R3aQ",  # 幻月动漫 Moon Anime
         "UCQeGBZ2W56r-aRtMZOSooAg",  # Ake Video Official channel
         "UCYkn7e_zaRR_UxOrJR0RVdg",  # 次元动漫社 Animation Club
+        "UCvkA0WKMLxk0vfI5Ck8EKKw",  # 趣漫社
         # "UCEY7zXcul32d1hvRCDlxLjQ",  # 动漫游乐园
     ]
     yd = YouTubeDownloader(yt_dl_archive_file)

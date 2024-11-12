@@ -9,8 +9,7 @@ from zipfile import ZipFile
 import requests
 from bs4 import BeautifulSoup
 
-from scrapers import ScrapperTools, XiaobaotvScraper, AnimeBabyScrapper, AgeDm1Scrapper, ImyydsScrapper, YhdmScrapper, \
-    LQ010Scrapper
+import scrapers as sps
 from utilities.downloader import DownloadOptions, YouTubeDownloader, ScrapperDownloader
 from utilities.logger_setup import setup_logging
 from utilities.proxy_request import RotatingProxiesRequest
@@ -129,100 +128,30 @@ def scrapper_anime_list(youtube_only_file: Path, anime_list: list) -> list:
 
 def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
     um, sd = URLManager(), ScrapperDownloader(resolved_names_file)
+    scrappers = {
+        "xiaobaotv.net": "XiaobaotvScraper",
+        # "imyyds.com": "ImyydsScrapper",
+        "agedm1.com": "AgeDm1Scrapper",
+        "yhdm.in": "YhdmScrapper",
+        "v.lq010.com": "LQ010Scrapper",
+        "animebaby.top": "AnimeBabyScrapper",
+    }
 
-    site_address = "xiaobaotv.net"
-    try:
-        site_address = um.check_url(site_address)
-        logger.info(f"Checking {site_address} site for recent anime upload matches...")
-        xiaobaotv = XiaobaotvScraper(site_address)
-        site_posts = xiaobaotv.get_anime_posts()
-        site_posts.update(xiaobaotv.get_anime_posts(page=2))
-        site_posts.update(xiaobaotv.get_anime_posts(page=3))
-        matched_posts = xiaobaotv.match_to_recent_videos(site_posts)
-        matched_download_details = xiaobaotv.get_recent_posts_videos_download_link(matched_posts)
-        sd.batch_downloader(site_address, matched_download_details)
-    except Exception as error:
-        error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
-        logger.exception(error_message)
-        tb.send_telegram_message(error_message)
-
-    site_address = "imyyds.com"
-    try:
-        site_address = um.check_url(site_address)
-        logger.info(f"Checking {site_address} site for recent anime upload matches...")
-        imyyds = ImyydsScrapper(site_address)
-        site_posts = imyyds.get_anime_posts()
-        site_posts.update(imyyds.get_anime_posts(page=2))
-        site_posts.update(imyyds.get_anime_posts(page=3))
-        matched_posts = imyyds.match_to_recent_videos(site_posts)
-        matched_download_details = imyyds.get_recent_posts_videos_download_link(matched_posts)
-        sd.batch_downloader(site_address, matched_download_details)
-    except Exception as error:
-        error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
-        logger.exception(error_message)
-        tb.send_telegram_message(error_message)
-
-    site_address = "agedm1.com"
-    try:
-        site_address = um.check_url(site_address)
-        logger.info(f"Checking {site_address} site for recent anime upload matches...")
-        agedm1 = AgeDm1Scrapper(site_address)
-        site_posts = agedm1.get_anime_posts()
-        site_posts.update(agedm1.get_anime_posts(page=2))
-        matched_posts = agedm1.match_to_recent_videos(site_posts)
-        matched_download_details = agedm1.get_recent_posts_videos_download_link(matched_posts)
-        sd.batch_downloader(site_address, matched_download_details)
-    except Exception as error:
-        error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
-        logger.exception(error_message)
-        tb.send_telegram_message(error_message)
-
-    site_address = "yhdm.in"
-    try:
-        site_address = um.check_url(site_address)
-        logger.info(f"Checking {site_address} site for recent anime upload matches...")
-        yhdm = YhdmScrapper(site_address)
-        site_posts = yhdm.get_anime_posts()
-        site_posts.update(yhdm.get_anime_posts(page=2))
-        site_posts.update(yhdm.get_anime_posts(page=3))
-        matched_posts = yhdm.match_to_recent_videos(site_posts)
-        matched_download_details = yhdm.get_recent_posts_videos_download_link(matched_posts)
-        sd.batch_downloader(site_address, matched_download_details)
-    except Exception as error:
-        error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
-        logger.exception(error_message)
-        tb.send_telegram_message(error_message)
-
-    site_address = "v.lq010.com"
-    try:
-        site_address = um.check_url(site_address)
-        logger.info(f"Checking {site_address} site for recent anime upload matches...")
-        lq010 = LQ010Scrapper(site_address)
-        site_posts = lq010.get_anime_posts()
-        site_posts.update(lq010.get_anime_posts(page=2))
-        matched_posts = lq010.match_to_recent_videos(site_posts)
-        matched_download_details = lq010.get_recent_posts_videos_download_link(matched_posts)
-        sd.batch_downloader(site_address, matched_download_details)
-    except Exception as error:
-        error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
-        logger.exception(error_message)
-        tb.send_telegram_message(error_message)
-
-    site_address = "animebaby.top"
-    try:
-        site_address = um.check_url(site_address)
-        logger.info(f"Checking {site_address} site for recent anime upload matches...")
-        anime_baby = AnimeBabyScrapper(site_address)
-        site_posts = anime_baby.get_anime_posts()
-        site_posts.update(anime_baby.get_anime_posts(page=2))
-        site_posts.update(anime_baby.get_anime_posts(page=3))
-        matched_posts = anime_baby.match_to_recent_videos(site_posts)
-        matched_download_details = anime_baby.get_recent_posts_videos_download_link(matched_posts)
-        sd.batch_downloader(site_address, matched_download_details)
-    except Exception as error:
-        error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
-        logger.exception(error_message)
-        tb.send_telegram_message(error_message)
+    for site_address, scrapper_class in scrappers.items():
+        try:
+            site_address = um.check_url(site_address)
+            logger.info(f"Checking {site_address} site for recent anime upload matches...")
+            scrapper = getattr(sps, scrapper_class)(site_address)
+            site_posts = scrapper.get_anime_posts()
+            site_posts.update(scrapper.get_anime_posts(page=2))
+            site_posts.update(scrapper.get_anime_posts(page=3))
+            matched_posts = scrapper.match_to_recent_videos(site_posts)
+            matched_download_details = scrapper.get_recent_posts_videos_download_link(matched_posts)
+            sd.batch_downloader(site_address, matched_download_details)
+        except Exception as error:
+            error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
+            logger.exception(error_message)
+            tb.send_telegram_message(error_message)
 
 
 def m3u8_video_downloader() -> None:
@@ -265,9 +194,9 @@ def main() -> None:
     DownloadOptions.ffmpeg_path, DownloadOptions.min_res_height = ffmpeg_bin_dir, min_res_height
     # Set scrapper options.
     scrapper_list = scrapper_anime_list(youtube_only_file, anime_list)
-    ScrapperTools.tb, ScrapperTools.current_date = tb, datetime.now().date()  # .replace(day=) to change day.
-    ScrapperTools.headers, ScrapperTools.anime_list, ScrapperTools.video_num_per_post = headers, scrapper_list, 8
-    ScrapperTools.resolved_names_archive = set(resolved_names_file.read_text(encoding="utf-8").splitlines()) \
+    sps.ScrapperTools.tb, sps.ScrapperTools.current_date = tb, datetime.now().date()  # .replace(day=) to change day.
+    sps.ScrapperTools.headers, sps.ScrapperTools.anime_list, sps.ScrapperTools.video_num_per_post = headers, scrapper_list, 8
+    sps.ScrapperTools.resolved_names_archive = set(resolved_names_file.read_text(encoding="utf-8").splitlines()) \
         if resolved_names_file.exists() else set()
     # Set options for proxy.
     RotatingProxiesRequest.headers, RotatingProxiesRequest.proxy_file = headers, proxy_file
@@ -275,7 +204,7 @@ def main() -> None:
     # get_yt_channel_id("")
     run_youtube_api(yt_dl_archive_file, resolved_names_file, anime_list, tb)
     run_scrappers(resolved_names_file, tb)
-    ScrapperTools.sel_driver.quit()
+    sps.ScrapperTools.sel_driver.quit()
     # m3u8_video_downloader()
 
     end = time.perf_counter()

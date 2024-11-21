@@ -6,10 +6,10 @@ import winreg
 import requests
 import undetected_chromedriver as uc
 from bs4 import BeautifulSoup
+from ch_title_gen import ChineseTitleGenerator
 from dateutil import parser
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-from utilities.ch_title_gen import ChineseTitleGenerator
 from utilities.proxy_request import RotatingProxiesRequest
 
 logger = logging.getLogger(__name__)

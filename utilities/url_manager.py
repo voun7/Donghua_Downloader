@@ -3,6 +3,7 @@ import logging
 import re
 
 import requests
+from requests.exceptions import ConnectionError, HTTPError, ReadTimeout
 
 logger = logging.getLogger(__name__)
 
@@ -37,10 +38,11 @@ class URLManager:
         Check if the url works and catch any error that may occur when testing url.
         """
         try:
-            response = requests.get(f"http://{url}", headers=self.headers)
+            response = requests.get(f"http://{url}", headers=self.headers, timeout=6)
+            response.raise_for_status()
             site_name = self.site_name_pattern.search(response.url).group(1)
             return site_name
-        except requests.exceptions.ConnectionError:
+        except (ConnectionError, HTTPError, ReadTimeout):
             logger.error(f"Site: {url} failed to connect.")
             return
 

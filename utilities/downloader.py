@@ -111,7 +111,7 @@ class ScrapperDownloader(DownloadOptions):
         duration = "10"  # Set the duration of the first fragment to download (in seconds).
         ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-t', duration, '-i', download_link, '-c', 'copy', str(temp_file)]
         try:
-            subprocess.run(ffmpeg_cmd, stderr=self.cmd_output, timeout=self.timeout_secs / 6.0)
+            subprocess.run(ffmpeg_cmd, stderr=self.cmd_output, timeout=self.timeout_secs / 6.0, check=True)
         except Exception as error:
             logger.debug(f"An error occurred while downloading {temp_file}, Error: {error}")
             temp_file.unlink(missing_ok=True)
@@ -142,10 +142,10 @@ class ScrapperDownloader(DownloadOptions):
         :param m3u8_file: The m3u8 playlist.
         :param file_path: The file path for the file to be downloaded.
         """
-        ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-protocol_whitelist', 'file,http,https,tcp,tls', '-i',
-                      str(m3u8_file), '-c', 'copy', str(file_path)]
+        ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", "-err_detect", "explode", "-xerror" '-protocol_whitelist',
+                      'file,http,https,tcp,tls', '-i', str(m3u8_file), '-c', 'copy', str(file_path)]
         try:
-            subprocess.run(ffmpeg_cmd, stderr=self.cmd_output, timeout=self.timeout_secs)
+            subprocess.run(ffmpeg_cmd, stderr=self.cmd_output, timeout=self.timeout_secs, check=True)
         except Exception as error:
             logger.debug(f"An error occurred while downloading {file_path.name}, Error: {error}")
             file_path.unlink(missing_ok=True)
@@ -180,10 +180,11 @@ class ScrapperDownloader(DownloadOptions):
         logger.debug(f"Link downloader being used for {file_name}.")
         file_path = Path(f"{self.download_path}/{file_name}.mp4")
         # Set the ffmpeg command as a list.
-        ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", '-i', download_link, '-c', 'copy', str(file_path)]
+        ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", "-err_detect", "explode", "-xerror", '-i', download_link, '-c',
+                      'copy', str(file_path)]
         try:
             # Run the command using subprocess.run().
-            subprocess.run(ffmpeg_cmd, stderr=self.cmd_output, timeout=self.timeout_secs)
+            subprocess.run(ffmpeg_cmd, stderr=self.cmd_output, timeout=self.timeout_secs, check=True)
         except Exception as error:
             logger.debug(f"An error occurred while downloading {file_name}, Error: {error}")
             file_path.unlink(missing_ok=True)

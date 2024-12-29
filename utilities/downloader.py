@@ -4,8 +4,9 @@ import socket
 import subprocess
 import time
 from pathlib import Path
+from urllib.parse import urlparse
 
-# import requests
+import requests
 from yt_dlp import YoutubeDL
 
 from utilities.m3u8_adfilter import M3u8AdFilter
@@ -142,7 +143,7 @@ class ScrapperDownloader(DownloadOptions):
         :param m3u8_file: The m3u8 playlist.
         :param file_path: The file path for the file to be downloaded.
         """
-        ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", "-err_detect", "explode", "-xerror" '-protocol_whitelist',
+        ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", "-err_detect", "explode", "-xerror", '-protocol_whitelist',
                       'file,http,https,tcp,tls', '-i', str(m3u8_file), '-c', 'copy', str(file_path)]
         try:
             subprocess.run(ffmpeg_cmd, stderr=self.cmd_output, timeout=self.timeout_secs, check=True)
@@ -189,6 +190,30 @@ class ScrapperDownloader(DownloadOptions):
             logger.debug(f"An error occurred while downloading {file_name}, Error: {error}")
             file_path.unlink(missing_ok=True)
 
+    @staticmethod
+    def get_m3u8_playlist(response_link: str, response_text: str) -> str:
+        """
+        Generate playlist from m3u8 link that has no playlist.
+        A base url is prepended to the relative links in the playlist.
+        """
+        logger.debug("Extracting playlist link from response...")
+        download_links = [line for line in response_text.splitlines() if line.endswith(".m3u8")]
+        logger.debug(f"Playlist links extracted: {download_links}")
+        if not download_links:
+            return response_text
+        else:
+            download_link = download_links[0]
+
+        parsed_link = urlparse(response_link)
+        base_link = f"{parsed_link.scheme}://{parsed_link.netloc}"
+
+        if not download_link.startswith("http"):
+            download_link = f"{base_link}{download_link}"
+        logger.debug(f"New download link for playlist: {download_link}")
+        response_text = "\n".join(f"{base_link}{line}" if ".ts" in line and not line.startswith("http") else line
+                                  for line in requests.get(download_link).text.splitlines())
+        return response_text
+
     def video_downloader(self, resolved_name: str, download_details: tuple) -> None:
         """
         Use m3u8 link to download video and create mp4 file. Embedded advertisements links will be removed.
@@ -207,13 +232,15 @@ class ScrapperDownloader(DownloadOptions):
             return
         if self.video_res_check(resolved_name, file_name, download_link):
             return
-        # Make a request to the m3u8 file link.
-        # response = requests.get(download_link)
-        # response_text, advert_tag = response.text, "#EXT-X-DISCONTINUITY\n"
-        # if advert_tag in response_text:
-        #     self.ad_free_playlist_downloader(file_name, response_text)
-        # else:
-        self.link_downloader(file_name, download_link)
+
+        response = requests.get(download_link)
+        response_text, advert_tag = response.text, "#EXT-X-DISCONTINUITY\n"
+        if "#EXTINF" not in response_text:  # check for duration tag
+            response_text = self.get_m3u8_playlist(download_link, response_text)
+        if advert_tag in response_text:
+            self.ad_free_playlist_downloader(file_name, response_text)
+        else:
+            self.link_downloader(file_name, download_link)
 
         if file_path.exists():
             logger.info(f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded successfully!")

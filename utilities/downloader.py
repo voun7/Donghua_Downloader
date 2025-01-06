@@ -208,6 +208,8 @@ class ScrapperDownloader(DownloadOptions):
         base_link = f"{parsed_link.scheme}://{parsed_link.netloc}"
 
         if not download_link.startswith("http"):
+            if not download_link.startswith("/"):
+                download_link = f"/{download_link}"
             download_link = f"{base_link}{download_link}"
         logger.debug(f"New download link for playlist: {download_link}")
         response_text = "\n".join(f"{base_link}{line}" if ".ts" in line and not line.startswith("http") else line

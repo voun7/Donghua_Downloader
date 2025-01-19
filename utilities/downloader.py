@@ -153,7 +153,7 @@ class ScrapperDownloader(DownloadOptions):
         # Clean up the m3u8 playlist file.
         m3u8_file.unlink()
 
-    def ad_free_playlist_downloader(self, file_name: str, response_text: str) -> None:
+    def ad_free_playlist_downloader(self, file_name: str, response_text: str, download_link: str) -> None:
         """
         Remove embedded advertisements from m3u8 playlist.
         """
@@ -161,6 +161,9 @@ class ScrapperDownloader(DownloadOptions):
         file_path = Path(f"{self.download_path}/{file_name}.mp4")
         # Remove advertisement from text.
         af = M3u8AdFilter()
+        # Make sure the playlist segments all have base links
+        base_link = self.get_base_link(download_link)
+        response_text = self.insert_base_link(base_link, response_text)
         try:
             ad_free_m3u8_text = af.run_filters(response_text)
         except Exception as error:
@@ -191,7 +194,22 @@ class ScrapperDownloader(DownloadOptions):
             file_path.unlink(missing_ok=True)
 
     @staticmethod
-    def get_m3u8_playlist(response_link: str, response_text: str) -> str:
+    def get_base_link(url: str) -> str:
+        """
+        Use given link to construct base link.
+        """
+        parsed_link = urlparse(url)
+        return f"{parsed_link.scheme}://{parsed_link.netloc}"
+
+    @staticmethod
+    def insert_base_link(base_link: str, response_text: str) -> str:
+        """
+        Insert a base link into m3u8 playlist segments without base link.
+        """
+        return "\n".join(f"{base_link}{line}" if ".ts" in line and not line.startswith("http") else line
+                         for line in response_text.splitlines())
+
+    def get_m3u8_playlist(self, response_link: str, response_text: str) -> str:
         """
         Generate playlist from m3u8 link that has no playlist.
         A base url is prepended to the relative links in the playlist.
@@ -204,16 +222,15 @@ class ScrapperDownloader(DownloadOptions):
         else:
             download_link = download_links[0]
 
-        parsed_link = urlparse(response_link)
-        base_link = f"{parsed_link.scheme}://{parsed_link.netloc}"
+        base_link = self.get_base_link(response_link)
 
         if not download_link.startswith("http"):
             if not download_link.startswith("/"):
                 download_link = f"/{download_link}"
             download_link = f"{base_link}{download_link}"
         logger.debug(f"New download link for playlist: {download_link}")
-        response_text = "\n".join(f"{base_link}{line}" if ".ts" in line and not line.startswith("http") else line
-                                  for line in requests.get(download_link).text.splitlines())
+        response_text = requests.get(download_link).text
+        response_text = self.insert_base_link(base_link, response_text)
         return response_text
 
     def video_downloader(self, resolved_name: str, download_details: tuple) -> None:
@@ -240,7 +257,7 @@ class ScrapperDownloader(DownloadOptions):
         if "#EXTINF" not in response_text:  # check for duration tag
             response_text = self.get_m3u8_playlist(download_link, response_text)
         if advert_tag in response_text:
-            self.ad_free_playlist_downloader(file_name, response_text)
+            self.ad_free_playlist_downloader(file_name, response_text, download_link)
         else:
             self.link_downloader(file_name, download_link)
 

@@ -132,8 +132,6 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
     um, sd = URLManager(), ScrapperDownloader(resolved_names_file)
     scrappers = {
         "xiaobaotv.net": "XiaobaotvScraper",
-        # "imyyds.com": "ImyydsScrapper",
-        "agedm1.com": "AgeDm1Scrapper",
         "yhdm.in": "YhdmScrapper",
         "v.lq010.com": "LQ010Scrapper",
         "animebaby.top": "AnimeBabyScrapper",

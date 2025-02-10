@@ -83,6 +83,7 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
         "UCDsfSnYAzLAG8233lSfVC3g",  # Chinese animation
         "UCJSAZ5pbDi8StbSbJI1riEg",  # Qixiang-Animation
         "UCnQ4raNnLXrXy9ZzOzC2Tcw",  # 七七动漫
+        "UC87Bjy1d5lSiDthuq1mNtqg",  # 大熊说漫 Big Bear Animation
         "UCJS5PJXcAIpXkBOjPNvK7Uw",  # Vita Animation Groups
         "UCh4STTSfZURHIs3CpsYeIjA",  # Animation Factory
         "UCXmOpN9pg1hJBRkHODL00EA",  # 三福动漫 Sanfu
@@ -97,13 +98,16 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
         "UCYkn7e_zaRR_UxOrJR0RVdg",  # 次元动漫社 Animation Club
         "UCvkA0WKMLxk0vfI5Ck8EKKw",  # 趣漫社
     ]
-    yd = YouTubeDownloader(yt_dl_archive_file)
+    if len(youtube_channel_ids) != len(set(youtube_channel_ids)):
+        logger.warning("Remove duplicate detected in youtube channel ids!")
+        time.sleep(30)
 
+    yd = YouTubeDownloader(yt_dl_archive_file)
     try:
         logger.info("Checking YouTube site for recent anime upload matches...")
         youtube = YouTube(playlist_id, resolved_names_file)
         youtube.clear_playlist()
-        youtube.match_to_youtube_videos(youtube_channel_ids, anime_list)
+        youtube.match_to_youtube_videos(list(dict.fromkeys(youtube_channel_ids)), anime_list)  # ids will be unique
         time.sleep(60)  # Prevents skipped downloads by giving YouTube time to added videos the playlist.
         yd.playlist_downloader(playlist_id)
     except Exception as error:

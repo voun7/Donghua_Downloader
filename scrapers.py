@@ -57,7 +57,7 @@ class ScrapperTools:
     parser = "html.parser"
     ch_gen = ChineseTitleGenerator()
     latest_ep_tag = " LST-EP:"
-    m3u8_pattern = re.compile(r"https?://[\w\-./]+.m3u8")
+    m3u8_pattern = re.compile(r"https?://[\w\-./:]+.m3u8")
     # Common texts used by scrappers are shared from here.
     check_downlink_message = "..........Checking for latest videos download links.........."
     time_message = "Time taken to retrieve recent posts download links: "

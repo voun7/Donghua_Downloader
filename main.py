@@ -108,7 +108,7 @@ def run_youtube_api(yt_dl_archive_file: Path, resolved_names_file: Path, anime_l
         youtube = YouTube(playlist_id, resolved_names_file)
         youtube.clear_playlist()
         youtube.match_to_youtube_videos(list(dict.fromkeys(youtube_channel_ids)), anime_list)  # ids will be unique
-        time.sleep(60)  # Prevents skipped downloads by giving YouTube time to added videos the playlist.
+        time.sleep(30)  # Prevents skipped downloads by giving YouTube time to added videos the playlist.
         yd.playlist_downloader(playlist_id)
     except Exception as error:
         error_message = f"An error occurred while running YouTube scrapper! Error: {error}"

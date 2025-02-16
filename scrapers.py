@@ -272,7 +272,10 @@ class AnimeBabyScrapper(ScrapperTools):
             video_name_and_link[post_title] = post_url
         return video_name_and_link
 
-    def get_post_video_link(self, soup: BeautifulSoup, post_title: str, video_number: int) -> str | None:
+    def get_post_video_link(self, soup: BeautifulSoup, post_title: str, post_url: str, video_number: int) -> str | None:
+        video_post4 = soup.find('a', {"title": f"播放{post_title}第{video_number:02d}话"})
+        if video_post4:
+            return self.base_url + video_post4.get('href')
         video_post1 = soup.find('a', {"title": f"播放{post_title}第{video_number:02d}集"})
         if video_post1:
             return self.base_url + video_post1.get('href')
@@ -282,6 +285,10 @@ class AnimeBabyScrapper(ScrapperTools):
         video_post3 = soup.find('a', {"title": f"播放{post_title}{video_number}"})
         if video_post3:
             return self.base_url + video_post3.get('href')
+        video_link = f"{post_url.replace("detail", "play").rstrip(".html")}/sid/1/nid/{video_number}.html"
+        video_link = self.test_links(self.session, [video_link])
+        if video_link:
+            return video_link
         logger.error(f"Video Link not found for Video Number:{post_title} {video_number}!")
 
     def get_recent_posts_videos_download_link(self, matched_posts: dict) -> dict:
@@ -292,12 +299,12 @@ class AnimeBabyScrapper(ScrapperTools):
         logger.info(self.check_downlink_message)
         all_download_details, start = {}, time.perf_counter()
         for post_title, match_details in matched_posts.items():
-            anime_name, url = match_details[0], match_details[1]
-            soup = self.get_page_response(url)
+            anime_name, post_url = match_details[0], match_details[1]
+            soup = self.get_page_response(post_url)
             latest_video_post = soup.find(string="连载：").parent.next_sibling.text
             latest_video_number = self.video_post_num_extractor(latest_video_post)
             if not latest_video_number:
-                logger.info(f"Post Title: {post_title} has finished airing! URL: {url}")
+                logger.info(f"Post Title: {post_title} has finished airing! URL: {post_url}")
                 continue
             num_videos = self.get_num_of_videos(latest_video_number)
             video_start_num = latest_video_number - num_videos + 1
@@ -310,14 +317,12 @@ class AnimeBabyScrapper(ScrapperTools):
                     logger.warning(f"Post Video Name: {post_video_name}, "
                                    f"Resolved Name: {resolved_name} already in archive!")
                     continue
-                video_link = self.get_post_video_link(soup, post_title, video_number)
+                video_link = self.get_post_video_link(soup, post_title, post_url, video_number)
                 download_link = self.get_video_download_link(video_link)
                 logger.info(f"Post Video Name: {post_video_name}, Video Link: {video_link}, "
                             f"Download Link: {download_link}")
-                if download_link and resolved_name in all_download_details:
-                    new_download_link = all_download_details[resolved_name][1]
-                    download_link = self.test_download_links([download_link, new_download_link])
-
+                if resolved_name in all_download_details and all_download_details[resolved_name][1]:
+                    continue
                 all_download_details[resolved_name] = post_video_name, download_link
         end = time.perf_counter()
         logger.info(f"{self.time_message}{round(end - start)}s")

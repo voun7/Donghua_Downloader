@@ -108,6 +108,20 @@ class ScrapperTools:
         post_num = [char for char in video_post if char.isdigit()]
         return int(''.join(post_num)) if post_num else 0
 
+    def test_links(self, session, links: list) -> str:
+        """
+        Use the classes request session to test for a working link.
+        @return: Working link
+        """
+        logger.debug(f"Testing links: {links}")
+        for link in links:
+            try:
+                page_response = session.get(link, headers=self.headers)
+                page_response.raise_for_status()
+                return link
+            except requests.RequestException:
+                logger.debug(f"Link: {link} failed test.")
+
 
 class XiaobaotvScraper(ScrapperTools):
     def __init__(self, site: str) -> None:
@@ -309,20 +323,6 @@ class AnimeBabyScrapper(ScrapperTools):
         logger.info(f"{self.time_message}{round(end - start)}s")
         return all_download_details
 
-    def test_download_links(self, download_links: list) -> str:
-        """
-        Use the classes request session to test for working download link.
-        @return: Working download link
-        """
-        logger.debug(f"Testing download links: {download_links}")
-        for link in download_links:
-            try:
-                page_response = self.session.get(link, headers=self.headers)
-                page_response.raise_for_status()
-                return link
-            except requests.RequestException:
-                logger.debug(f"download link: {link} failed test.")
-
     def get_video_download_link(self, video_url: str) -> str:
         """
         This method uses the video url to find the video download link.
@@ -413,21 +413,6 @@ class YhdmScrapper(ScrapperTools):
         logger.info(f"{self.time_message}{round(end - start)}s")
         return all_download_details
 
-    def test_download_links(self, download_links: list) -> str:
-        """
-        Use the classes request session to test for working download link.
-        @return: Working download link
-        """
-        logger.debug(f"Testing download links: {download_links}")
-        for link in download_links:
-            link = link.replace("497", "")
-            try:
-                page_response = self.session.get(link, headers=self.headers)
-                page_response.raise_for_status()
-                return link
-            except requests.RequestException:
-                logger.debug(f"download link: {link} failed test.")
-
     def get_video_download_link(self, video_url: str) -> str:
         """
         This method uses the video url to find the video download link.
@@ -437,7 +422,8 @@ class YhdmScrapper(ScrapperTools):
             download_match = soup.find(id="playiframe")
             if download_match:
                 download_links = self.m3u8_pattern.findall(download_match.get('src'))
-                download_link = self.test_download_links(download_links)
+                download_links = [link.replace("497", "") for link in download_links]
+                download_link = self.test_links(self.session, download_links)
                 if download_link:
                     return download_link
 

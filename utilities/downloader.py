@@ -1,9 +1,9 @@
-import concurrent.futures
 import logging
 import socket
 import subprocess
-import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from time import perf_counter
 from urllib.parse import urlparse
 
 import requests
@@ -57,14 +57,12 @@ class YouTubeDownloader(DownloadOptions):
         This method uses yt_dlp to download videos from playlist.
         """
         logger.info("..........Downloading videos from playlist..........")
-        start = time.perf_counter()
-
+        start = perf_counter()
         playlist_link = f"https://www.youtube.com/playlist?list={playlist_id}"
 
         with YoutubeDL(self.get_yt_dlp_options()) as ydl:
             ydl.download(playlist_link)
-        end = time.perf_counter()
-        logger.info(f"Time downloading playlist took: {round(end - start)}s\n")
+        logger.info(f"Duration downloading playlist: {round(perf_counter() - start)}s\n")
 
 
 class ScrapperDownloader(DownloadOptions):
@@ -75,6 +73,7 @@ class ScrapperDownloader(DownloadOptions):
             self.dl_resolved_names_archive = set(self.resolved_names_file.read_text(encoding="utf-8").splitlines())
         self.cmd_output = subprocess.DEVNULL if "VOUN-SERVER" in self.host_name else None
         self.error_msgs = ""
+        self.ffmpeg_dwn_cmd = [f"{self.ffmpeg_path}/ffmpeg", "-err_detect", "explode", "-xerror"]
 
     def update_download_archive(self) -> None:
         """
@@ -126,8 +125,7 @@ class ScrapperDownloader(DownloadOptions):
             return True
         resolution = subprocess.check_output(ffprobe_cmd, stderr=self.cmd_output).decode().strip().split(',')
         width, height = int(resolution[0]), int(resolution[1])
-        # Delete the downloaded file.
-        temp_file.unlink()
+        temp_file.unlink()  # Delete the downloaded file.
         if not height >= self.min_res_height:
             error_msg = (f"Resolved name: {resolved_name}, File: {file_name} failed resolution test! "
                          f"Resolution: {width} x {height}. Skipping download!")
@@ -143,8 +141,8 @@ class ScrapperDownloader(DownloadOptions):
         :param m3u8_file: The m3u8 playlist.
         :param file_path: The file path for the file to be downloaded.
         """
-        ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", "-err_detect", "explode", "-xerror", '-protocol_whitelist',
-                      'file,http,https,tcp,tls', '-i', str(m3u8_file), '-c', 'copy', str(file_path)]
+        ffmpeg_cmd = [*self.ffmpeg_dwn_cmd, '-protocol_whitelist', 'file,http,https,tcp,tls', '-i', str(m3u8_file),
+                      '-c', 'copy', str(file_path)]
         try:
             subprocess.run(ffmpeg_cmd, stderr=self.cmd_output, timeout=self.timeout_secs, check=True)
         except Exception as error:
@@ -184,8 +182,7 @@ class ScrapperDownloader(DownloadOptions):
         logger.debug(f"Link downloader being used for {file_name}.")
         file_path = Path(f"{self.download_path}/{file_name}.mp4")
         # Set the ffmpeg command as a list.
-        ffmpeg_cmd = [f"{self.ffmpeg_path}/ffmpeg", "-err_detect", "explode", "-xerror", '-i', download_link, '-c',
-                      'copy', str(file_path)]
+        ffmpeg_cmd = [*self.ffmpeg_dwn_cmd, '-i', download_link, '-c', 'copy', str(file_path)]
         try:
             # Run the command using subprocess.run().
             subprocess.run(ffmpeg_cmd, stderr=self.cmd_output, timeout=self.timeout_secs, check=True)
@@ -233,6 +230,23 @@ class ScrapperDownloader(DownloadOptions):
         response_text = self.insert_base_link(base_link, response_text)
         return response_text
 
+    def dispatch_downloader(self, download_link: str, file_name: str) -> None:
+        """
+        Selects the method for initiating the download by checking for ad in playlist.
+        """
+        try:
+            response = requests.get(download_link)
+            response_text = response.text
+        except requests.exceptions.ConnectTimeout:
+            response_text = ""
+            logger.info(f"Check for ad in playlist failed. Name: {file_name}")
+        if "#EXTINF" not in response_text:  # check for duration tag
+            response_text = self.get_m3u8_playlist(download_link, response_text)
+        if "#EXT-X-DISCONTINUITY" in response_text:
+            self.ad_free_playlist_downloader(file_name, response_text, download_link)
+        else:
+            self.link_downloader(file_name, download_link)
+
     def video_downloader(self, resolved_name: str, download_details: tuple) -> None:
         """
         Use m3u8 link to download video and create mp4 file. Embedded advertisements links will be removed.
@@ -252,15 +266,7 @@ class ScrapperDownloader(DownloadOptions):
         if self.video_res_check(resolved_name, file_name, download_link):
             return
 
-        response = requests.get(download_link)
-        response_text, advert_tag = response.text, "#EXT-X-DISCONTINUITY\n"
-        if "#EXTINF" not in response_text:  # check for duration tag
-            response_text = self.get_m3u8_playlist(download_link, response_text)
-        if advert_tag in response_text:
-            self.ad_free_playlist_downloader(file_name, response_text, download_link)
-        else:
-            self.link_downloader(file_name, download_link)
-
+        self.dispatch_downloader(download_link, file_name)
         if file_path.exists():
             logger.info(f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded successfully!")
             self.dl_resolved_names_archive.add(resolved_name)  # Prevent download of existing resolved names.
@@ -273,25 +279,22 @@ class ScrapperDownloader(DownloadOptions):
     def batch_downloader(self, scrapper_name: str, all_download_details: dict) -> None:
         """
         Use multithreading to download multiple videos at the same time.
-        @param scrapper_name: Name of scrapper using downloader.
-        @param all_download_details: Should contain download link, file name and match name, in order.
+        :param scrapper_name: Name of scrapper using downloader.
+        :param all_download_details: Should contain download link, file name and match name, in order.
         """
         logger.info(f"..........{scrapper_name} Using multithreading to download videos..........")
         if not all_download_details:
             logger.info("No Videos to download!\n")
             return
-        logger.debug(f"all_download_details: {all_download_details}")
-        start = time.perf_counter()
-        with concurrent.futures.ThreadPoolExecutor() as executor:
+        logger.info(f"Download details: {all_download_details}")
+        start = perf_counter()
+        with ThreadPoolExecutor() as executor:
             futures = [executor.submit(self.video_downloader, resolved_name, download_details)
                        for resolved_name, download_details in all_download_details.items()]
-            for i, f in enumerate(concurrent.futures.as_completed(futures)):  # as each  process completes
+            for _, f in enumerate(as_completed(futures)):  # as each  process completes
                 error = f.exception()
                 if error:
                     logger.exception(f.result())
                     logger.exception(error)
-        self.update_download_archive()
-        self.send_error_messages(scrapper_name)
-        logger.info("Downloads finished!")
-        end = time.perf_counter()
-        logger.info(f"Download time: {round(end - start)}s\n")
+        self.update_download_archive(), self.send_error_messages(scrapper_name)
+        logger.info(f"Downloads finished! Duration: {round(perf_counter() - start)}s\n")

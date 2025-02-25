@@ -37,7 +37,7 @@ def set_ffmpeg_bin(ffmpeg_dir: Path) -> Path:
     """
     if ffmpeg_dir.exists():
         ffmpeg_folder_name = list(ffmpeg_dir.iterdir())[0]
-        return ffmpeg_folder_name / "bin"
+        ffmpeg_bin_dir = ffmpeg_folder_name / "bin"
     else:
         ffmpeg_link = "https://github.com/yt-dlp/FFmpeg-Builds/releases/" \
                       "download/latest/ffmpeg-master-latest-win64-gpl.zip"
@@ -46,7 +46,9 @@ def set_ffmpeg_bin(ffmpeg_dir: Path) -> Path:
             zip_file.extractall(ffmpeg_dir)
             namelist = zip_file.namelist()  # Get the names of all the files and directories in the zip.
             ffmpeg_folder_name = namelist[0]
-        return ffmpeg_dir / ffmpeg_folder_name / "bin"
+        ffmpeg_bin_dir = ffmpeg_dir / ffmpeg_folder_name / "bin"
+    logger.info(f"Ffmpeg bin directory: {ffmpeg_bin_dir}, Exists: {ffmpeg_bin_dir.exists()}")
+    return ffmpeg_bin_dir
 
 
 def download_time() -> int:
@@ -172,17 +174,13 @@ def main() -> None:
     start = time.perf_counter()
     # Set directory files.
     download_dir = Path(r"\\192.168.31.111\General File Sharing\From YouTube\Chinese Anime For Subbing")
-    destination_dir, dfsd_files_dir = download_dir / "##Currently Airing", download_dir / "DFSD Project Files"
-    dfsd_files_dir.mkdir(exist_ok=True)
-    ffmpeg_dir, proxy_file = dfsd_files_dir / "ffmpeg", dfsd_files_dir / "proxies.txt"
-    ffmpeg_bin_dir = set_ffmpeg_bin(ffmpeg_dir)
-    logger.info(f"Ffmpeg bin directory: {ffmpeg_bin_dir}, Exists: {ffmpeg_bin_dir.exists()}")
-    resolved_names_file = dfsd_files_dir / "resolved_names_download_archive.txt"
-    yt_dl_archive_file = dfsd_files_dir / "youtube_downloads_archive.txt"
-    youtube_only_file = dfsd_files_dir / "youtube_only.txt"
-    url_data_file = dfsd_files_dir / "url_data.json"
+    destination_dir, project_files = download_dir / "##Currently Airing", download_dir / "Project Files"
+    project_files.mkdir(exist_ok=True)
+    ffmpeg_bin_dir, proxy_file = set_ffmpeg_bin(project_files / "ffmpeg"), project_files / "proxies.txt"
+    resolved_names_file = project_files / "resolved_names_dl_archive.txt"
+    yt_dl_archive_file = project_files / "yt_dlp_archive.txt"
+    youtube_only_file, url_data_file = project_files / "youtube_only.txt", project_files / "url_data.json"
 
-    min_res_height = 720  # Minimum resolution height.
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                              "Chrome/127.0.0.0 Safari/537.36"}
     anime_list = [keyword for folder in destination_dir.iterdir() for keyword in re.findall(r'\((.*?)\)', folder.name)]
@@ -192,7 +190,7 @@ def main() -> None:
     URLManager.headers, URLManager.url_data_file = headers, url_data_file
     # Set download options.
     DownloadOptions.tb, DownloadOptions.download_path, DownloadOptions.timeout_secs = tb, download_dir, download_time()
-    DownloadOptions.ffmpeg_path, DownloadOptions.min_res_height = ffmpeg_bin_dir, min_res_height
+    DownloadOptions.ffmpeg_path, DownloadOptions.min_res_height = ffmpeg_bin_dir, 720  # Minimum resolution height.
     # Set scrapper options.
     scrapper_list = scrapper_anime_list(youtube_only_file, anime_list)
     sps.ScrapperTools.tb, sps.ScrapperTools.current_date = tb, datetime.now().date()  # .replace(day=) to change day.
@@ -208,8 +206,7 @@ def main() -> None:
     sps.ScrapperTools.sel_driver.quit()
     # m3u8_video_downloader()
 
-    end = time.perf_counter()
-    logger.info(f"Total Runtime: {round(end - start)}s")
+    logger.info(f"Total Runtime: {round(time.perf_counter() - start)}s")
 
 
 if __name__ == '__main__':

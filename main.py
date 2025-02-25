@@ -159,7 +159,6 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
 
 
 def m3u8_video_downloader() -> None:
-    # DownloadOptions.download_path = Path.home() / "Downloads"
     sd = ScrapperDownloader(Path("none"))
     video_name = ""
     video_link = ""
@@ -172,9 +171,8 @@ def main() -> None:
     # Variables
     start = time.perf_counter()
     # Set directory files.
-    playlist_download_dir = Path(r"\\192.168.31.111\General File Sharing\From YouTube\Chinese Anime For Subbing")
-    destination_dir = playlist_download_dir / "##Currently Airing"
-    dfsd_files_dir = playlist_download_dir / "DFSD Project Files"
+    download_dir = Path(r"\\192.168.31.111\General File Sharing\From YouTube\Chinese Anime For Subbing")
+    destination_dir, dfsd_files_dir = download_dir / "##Currently Airing", download_dir / "DFSD Project Files"
     dfsd_files_dir.mkdir(exist_ok=True)
     ffmpeg_dir, proxy_file = dfsd_files_dir / "ffmpeg", dfsd_files_dir / "proxies.txt"
     ffmpeg_bin_dir = set_ffmpeg_bin(ffmpeg_dir)
@@ -193,8 +191,7 @@ def main() -> None:
     # Set url manager options.
     URLManager.headers, URLManager.url_data_file = headers, url_data_file
     # Set download options.
-    dl_time = download_time()
-    DownloadOptions.tb, DownloadOptions.download_path, DownloadOptions.timeout_secs = tb, playlist_download_dir, dl_time
+    DownloadOptions.tb, DownloadOptions.download_path, DownloadOptions.timeout_secs = tb, download_dir, download_time()
     DownloadOptions.ffmpeg_path, DownloadOptions.min_res_height = ffmpeg_bin_dir, min_res_height
     # Set scrapper options.
     scrapper_list = scrapper_anime_list(youtube_only_file, anime_list)

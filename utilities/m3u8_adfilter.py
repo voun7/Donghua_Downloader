@@ -1,6 +1,5 @@
 import logging
 import re
-from collections import Counter
 
 logger = logging.getLogger(__name__)
 
@@ -8,11 +7,10 @@ logger = logging.getLogger(__name__)
 class M3u8AdFilter:
     def __init__(self) -> None:
         self.response_text = None
-        self.ads_removed = 0
-        self.duration_tag = "#EXTINF:"
-        self.discon_tag = "#EXT-X-DISCONTINUITY\n"
+        self.ads_removed, self.max_removed_ads, self.ad_max_duration = 0, 4, 30
+        self.duration_tag, self.discon_tag = "#EXTINF:", "#EXT-X-DISCONTINUITY\n"
 
-    def get_target_duration(self, tag: str = "#EXT-X-TARGETDURATION:") -> float | int:
+    def get_target_duration(self, tag: str = "#EXT-X-TARGETDURATION:") -> None | float | int:
         """
         Get the target duration of the video of the playlist.
         """
@@ -51,7 +49,7 @@ class M3u8AdFilter:
         result = advert_pattern.subn(_sub, self.response_text)
         self.response_text, self.ads_removed = result[0], self.ads_removed + result[1]
 
-    def remove_double_discontinuity_ads(self) -> None:
+    def remove_double_discontinues(self) -> None:
         """
         Remove discontinuity blocks that have two tags at the start.
         """
@@ -68,31 +66,15 @@ class M3u8AdFilter:
         """
         Remove response parts with suspicious durations that could be ads.
         """
-        min_dur_len = 2 if len(self.get_discontinuities()) > 30 else 1
         target_duration = self.get_target_duration()
         for discon in self.get_discontinuities():
             durations = self.get_durations(discon)
-            if max(durations) > target_duration or min(durations) == 0:
-                logger.debug(f"Removing Max or Min ad match: \n{discon}")
+            if sum(durations) < self.ad_max_duration and sum(durations) % target_duration != 0:
+                # The 2nd condition is for skipping discontinuity segments that all have the same duration as the
+                # target length. Discontinuity with ads usually have varying length for its segments.
+                logger.debug(f"Suspicious ad match: \n{discon}")
                 self.response_text = self.response_text.replace(discon, "")
                 self.ads_removed += 1
-            elif len(durations) > min_dur_len and target_duration > sum(durations):
-                logger.debug(f"Removing low duration ad match: \n{discon}")
-                self.response_text = self.response_text.replace(discon, "")
-                self.ads_removed += 1
-
-    def check_duration_uniformity(self) -> None:
-        """
-        If only one duration is different in the response text, it will be deleted.
-        """
-        durations = self.get_durations(self.response_text)[1:-1]  # The first and last duration will be removed.
-        dur_counter = Counter(durations).most_common()
-        if len(dur_counter) == 2 and dur_counter[-1][1] == 1:
-            off_duration = f"{self.duration_tag}{dur_counter[-1][0]},"
-            discon_match = [discon for discon in self.get_discontinuities() if off_duration in discon][0]
-            logger.debug(f"Removing non uniform duration ad match: \n{discon_match}")
-            self.response_text = self.response_text.replace(discon_match, "")
-            self.ads_removed += 1
 
     def run_filters(self, response_text: str) -> str:
         """
@@ -105,15 +87,14 @@ class M3u8AdFilter:
             self.remove_single_discontinuity()
         elif discon_len > 1:
             logger.debug(f"{discon_len} pairs of discontinuity tags found.")
-            self.remove_double_discontinuity_ads()
+            self.remove_double_discontinues()
             self.remove_suspicious_durations()
-            self.check_duration_uniformity()
         else:
             logger.debug("No pair of discontinuity tags to remove ads found!")
 
         if self.ads_removed == 0:
             logger.debug(f"No advertisement found in the response text. Response text:\n{self.response_text}")
-        elif self.ads_removed > 4:  # The max number of parts that are allowed to be removed.
+        elif self.ads_removed > self.max_removed_ads:  # The max number of parts that are allowed to be removed.
             logger.warning(f"Too many parts removed from playlist! Response text will be used instead.")
             self.response_text = response_text  # This is because some removed parts may not be ads.
         else:
@@ -125,6 +106,8 @@ class M3u8AdFilter:
 
 if __name__ == '__main__':
     from pathlib import Path
+
+    logging.basicConfig(level=logging.DEBUG, format="%(message)s")
 
     test_txt = Path("").read_text()
     af = M3u8AdFilter()

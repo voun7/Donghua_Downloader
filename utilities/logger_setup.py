@@ -23,7 +23,7 @@ def get_server_handler(log_format: logging.Formatter) -> logging.handlers:
 
 def get_file_handler(log_dir: Path, log_format: logging.Formatter) -> logging.handlers:
     log_file = log_dir / "runtime.log"
-    file_handler = TimedRotatingFileHandler(log_file, when='midnight', interval=1, backupCount=14, encoding='utf-8')
+    file_handler = TimedRotatingFileHandler(log_file, when='H', interval=6, backupCount=14, encoding='utf-8')
     file_handler.namer = my_namer
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(log_format)

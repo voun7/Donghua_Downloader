@@ -1,7 +1,7 @@
 import logging
 import re
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from io import BytesIO
 from pathlib import Path
 from zipfile import ZipFile
@@ -206,7 +206,7 @@ def main() -> None:
     sps.ScrapperTools.sel_driver.quit()
     # m3u8_video_downloader()
 
-    logger.info(f"Total Runtime: {round(time.perf_counter() - start)}s")
+    logger.info(f"Total Runtime: {timedelta(seconds=round(time.perf_counter() - start))}")
 
 
 if __name__ == '__main__':

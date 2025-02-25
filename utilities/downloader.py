@@ -240,7 +240,7 @@ class ScrapperDownloader(DownloadOptions):
         except requests.exceptions.ConnectTimeout:
             response_text = ""
             logger.info(f"Check for ad in playlist failed. Name: {file_name}")
-        if "#EXTINF" not in response_text:  # check for duration tag
+        if response_text and "#EXTINF" not in response_text:  # check for duration tag
             response_text = self.get_m3u8_playlist(download_link, response_text)
         if "#EXT-X-DISCONTINUITY" in response_text:
             self.ad_free_playlist_downloader(file_name, response_text, download_link)

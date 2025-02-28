@@ -344,7 +344,7 @@ class YhdmScrapper(ScrapperTools):
         self.session = requests.Session()
         self.lst_ep_tag = " LST-EP:"
 
-    def get_page_response(self, url: str, request_type: int = 1, sleep_time: int = 0) -> BeautifulSoup:
+    def get_page_response(self, url: str, request_type: int = 1) -> BeautifulSoup:
         if request_type == 1:
             page_response = self.session.get(url, headers=self.headers)
             page_response.encoding = "utf-8"
@@ -352,7 +352,12 @@ class YhdmScrapper(ScrapperTools):
             return BeautifulSoup(page_response.text, self.parser)
         if request_type == 2:
             self.sel_driver.get(url)
-            time.sleep(sleep_time)
+            attempts = 0
+            while self.sel_driver.page_source.count("正在加载列表中") > 1 and attempts < 4:
+                attempts += 1
+                logger.info(f"Page not fully loaded, refreshing... attempt:{attempts}")
+                self.sel_driver.refresh()
+                time.sleep(6)
             return BeautifulSoup(self.sel_driver.page_source, self.parser)
 
     def get_anime_posts(self, page: int = 1) -> dict:
@@ -363,7 +368,7 @@ class YhdmScrapper(ScrapperTools):
         logger.info(f"..........Site Page {page} Anime Posts..........")
         video_name_and_link = {}
         payload = f"/acg/0/0/china/{page}.html"
-        soup = self.get_page_response(self.base_url + payload, 2, 6)
+        soup = self.get_page_response(self.base_url + payload, 2)
         posts = soup.find_all('a', class_="li-hv")
         for post in posts:
             post_title = post["title"]

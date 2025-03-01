@@ -68,11 +68,8 @@ class YouTubeDownloader(DownloadOptions):
 class ScrapperDownloader(DownloadOptions):
     def __init__(self, resolved_names_file: Path) -> None:
         self.resolved_names_file = resolved_names_file
-        self.dl_resolved_names_archive, self.new_dl_resolved_names = set(), []
-        if self.resolved_names_file.exists():
-            self.dl_resolved_names_archive = set(self.resolved_names_file.read_text(encoding="utf-8").splitlines())
+        self.new_dl_resolved_names, self.error_msgs = [], ""
         self.cmd_output = subprocess.DEVNULL if "VOUN-SERVER" in self.host_name else None
-        self.error_msgs = ""
         self.ffmpeg_dwn_cmd = [f"{self.ffmpeg_path}/ffmpeg", "-err_detect", "explode", "-xerror"]
 
     def update_download_archive(self) -> None:
@@ -89,18 +86,6 @@ class ScrapperDownloader(DownloadOptions):
         if self.error_msgs:
             self.tb.send_telegram_message(f"Scrapper Name: {scrapper_name}\n{self.error_msgs}")
             self.error_msgs = ""
-
-    def check_download_archive(self, resolved_name: str, file_name: str) -> bool:
-        """
-        Check if the resolved name is in archive.
-        """
-        if resolved_name in self.dl_resolved_names_archive:
-            logger.warning(f"Resolved name: {resolved_name}, File: {file_name} exists in the archive. "
-                           f"Skipping download!")
-            return True
-        else:
-            logger.debug(f"Resolved name: {resolved_name}, File: {file_name} is not in archive.")
-            return False
 
     @staticmethod
     def file_remover(file: Path, missing_ok: bool = False):
@@ -269,9 +254,7 @@ class ScrapperDownloader(DownloadOptions):
         if file_path.exists():
             logger.warning(f"Resolved name: {resolved_name}, File: {file_name} exists in directory. Skipping download!")
             return
-        if self.check_download_archive(resolved_name, file_name):
-            return
-        if download_link is None:
+        if not download_link:
             error_msg = f"Resolved name: {resolved_name}, File: {file_name} has no download link. Skipping download!"
             logger.warning(error_msg)
             self.error_msgs = f"{self.error_msgs}\n{error_msg}"
@@ -282,7 +265,6 @@ class ScrapperDownloader(DownloadOptions):
         self.dispatch_downloader(download_link, file_name)
         if file_path.exists():
             logger.info(f"Resolved name: {resolved_name}, File: {file_path.name}, downloaded successfully!")
-            self.dl_resolved_names_archive.add(resolved_name)  # Prevent download of existing resolved names.
             self.new_dl_resolved_names.append(resolved_name + "\n")
         else:
             error_message = f"Resolved name: {resolved_name}, File: {file_path.name}, download failed!"

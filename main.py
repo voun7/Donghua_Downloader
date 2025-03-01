@@ -162,7 +162,7 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
 
 
 def m3u8_video_downloader() -> None:
-    sd = ScrapperDownloader(Path("none"))
+    sd = ScrapperDownloader(Path(""))
     video_name = ""
     video_link = ""
     sd.video_downloader("", (video_name, video_link))
@@ -181,6 +181,7 @@ def main() -> None:
     resolved_names_file = project_files / "resolved_names_dl_archive.txt"
     yt_dl_archive_file = project_files / "yt_dlp_archive.txt"
     youtube_only_file, url_data_file = project_files / "youtube_only.txt", project_files / "url_data.json"
+    resolved_names_file.touch(exist_ok=True)
 
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                              "Chrome/127.0.0.0 Safari/537.36"}
@@ -195,9 +196,8 @@ def main() -> None:
     # Set scrapper options.
     scrapper_list = scrapper_anime_list(youtube_only_file, anime_list)
     sps.ScrapperTools.tb, sps.ScrapperTools.current_date = tb, datetime.now().date()  # .replace(day=) to change day.
-    sps.ScrapperTools.headers, sps.ScrapperTools.anime_list, sps.ScrapperTools.video_num_per_post = headers, scrapper_list, 8
-    sps.ScrapperTools.resolved_names_archive = set(resolved_names_file.read_text(encoding="utf-8").splitlines()) \
-        if resolved_names_file.exists() else set()
+    sps.ScrapperTools.headers, sps.ScrapperTools.anime_list = headers, scrapper_list
+    sps.ScrapperTools.resolved_names_file, sps.ScrapperTools.video_num_per_post = resolved_names_file, 8
     # Set options for proxy.
     RotatingProxiesRequest.headers, RotatingProxiesRequest.proxy_file = headers, proxy_file
     # Run code to download new anime.

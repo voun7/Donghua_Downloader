@@ -208,9 +208,8 @@ class YouTube:
         :return: Dictionary containing the video id as key and video title as value.
         """
         logger.info("..........Checking archive for resolved name matches..........")
-        resolved_names_archive, archive_checked_videos, new_resolved_names = [], {}, []
-        if self.resolved_names_file.exists():
-            resolved_names_archive = set(self.resolved_names_file.read_text(encoding="utf-8").splitlines())
+        resolved_names_archive = set(self.resolved_names_file.read_text(encoding="utf-8").splitlines())
+        archive_checked_videos, new_resolved_names = {}, []
         for video_id, video_details in quality_checked_videos.items():
             resolved_name, video_title = video_details[0], video_details[1]
             if resolved_name in resolved_names_archive:
@@ -232,9 +231,10 @@ class YouTube:
                 logger.info(f"Video ID: {video_id}, Resolved name: {resolved_name} is being added to the archive.")
                 archive_checked_videos[video_id] = video_title
                 new_resolved_names.append(resolved_name + "\n")
-        logger.debug(f"new_resolved_names: {new_resolved_names}")
-        with open(self.resolved_names_file, 'a', encoding="utf-8") as text_file:
-            text_file.writelines(new_resolved_names)
+        if new_resolved_names:
+            logger.info(f"Archive updated with new names. Names: {new_resolved_names}")
+            with open(self.resolved_names_file, 'a', encoding="utf-8") as text_file:
+                text_file.writelines(new_resolved_names)
         return archive_checked_videos
 
     def get_all_channel_uploads(self, youtube_channel_ids: list) -> dict:

@@ -52,7 +52,7 @@ def get_win_chrome_version() -> int | None:
 
 
 class ScrapperTools:
-    headers = anime_list = resolved_names_archive = tb = current_date = None
+    headers = anime_list = resolved_names_file = tb = current_date = None
     video_num_per_post = None  # The number of recent videos that will downloaded per post.
     parser = "html.parser"
     ch_gen = ChineseTitleGenerator()
@@ -128,6 +128,7 @@ class XiaobaotvScraper(ScrapperTools):
         self.base_url = f"https://{site}"
         self.r_proxy, self.proxy_driver = RotatingProxiesRequest(), None
         # self.detect_site_block()
+        self.resolved_names_archive = set(self.resolved_names_file.read_text(encoding="utf-8").splitlines())
 
     def set_proxy_request(self, url: str) -> None:
         if proxy := self.r_proxy.get_proxy(url):
@@ -236,6 +237,7 @@ class AnimeBabyScrapper(ScrapperTools):
         self.base_url = f"https://{site}"
         self.session = requests.Session()
         self.cloudflare_detected = self.detect_cloudflare()
+        self.resolved_names_archive = set(self.resolved_names_file.read_text(encoding="utf-8").splitlines())
 
     def detect_cloudflare(self) -> bool:
         page_response = self.session.get(self.base_url, headers=self.headers)
@@ -342,6 +344,7 @@ class AgeDm1Scrapper(ScrapperTools):
     def __init__(self, site: str) -> None:
         self.base_url = f"https://{site}"
         self.session = requests.Session()
+        self.resolved_names_archive = set(self.resolved_names_file.read_text(encoding="utf-8").splitlines())
 
     def get_page_response(self, url: str, sleep_time: int = 0) -> BeautifulSoup:
         self.sel_driver.get(url)
@@ -452,6 +455,7 @@ class YhdmScrapper(ScrapperTools):
     def __init__(self, site: str) -> None:
         self.base_url = f"http://{site}"
         self.session = requests.Session()
+        self.resolved_names_archive = set(self.resolved_names_file.read_text(encoding="utf-8").splitlines())
 
     def get_page_response(self, url: str, sleep_time: int = 0) -> BeautifulSoup:
         self.sel_driver.get(url)
@@ -546,6 +550,7 @@ class LQ010Scrapper(ScrapperTools):
     def __init__(self, site: str) -> None:
         self.base_url = f"http://{site}"
         self.session = requests.Session()
+        self.resolved_names_archive = set(self.resolved_names_file.read_text(encoding="utf-8").splitlines())
 
     def get_page_response(self, url: str, request_type: int = 1) -> BeautifulSoup | None:
         if request_type == 1:
@@ -638,6 +643,7 @@ class TempScrapper(ScrapperTools):
     def __init__(self, site: str) -> None:
         self.base_url = f"https://{site}"
         self.session = requests.Session()
+        self.resolved_names_archive = set(self.resolved_names_file.read_text(encoding="utf-8").splitlines())
 
     def get_page_response(self, url: str, request_type: int = 1) -> BeautifulSoup | None:
         if request_type == 1:

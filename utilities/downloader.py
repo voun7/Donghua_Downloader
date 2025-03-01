@@ -276,11 +276,12 @@ class ScrapperDownloader(DownloadOptions):
             logger.warning(error_message)
             self.error_msgs = f"{self.error_msgs}\n{error_message}"
 
-    def batch_downloader(self, scrapper_name: str, all_download_details: dict) -> None:
+    def batch_downloader(self, scrapper_name: str, all_download_details: dict, max_concurrent_dl: int) -> None:
         """
         Use multithreading to download multiple videos at the same time.
         :param scrapper_name: Name of scrapper using downloader.
         :param all_download_details: Should contain download link, file name and match name, in order.
+        :param max_concurrent_dl: The max number of downloads that can happen at a time.
         """
         logger.info(f"..........{scrapper_name} Using multithreading to download videos..........")
         if not all_download_details:
@@ -288,7 +289,7 @@ class ScrapperDownloader(DownloadOptions):
             return
         logger.info(f"Download details: {all_download_details}")
         start = perf_counter()
-        with ThreadPoolExecutor() as executor:
+        with ThreadPoolExecutor(max_concurrent_dl) as executor:
             futures = [executor.submit(self.video_downloader, resolved_name, download_details)
                        for resolved_name, download_details in all_download_details.items()]
             for _, f in enumerate(as_completed(futures)):  # as each  process completes

@@ -153,7 +153,7 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
             site_posts.update(scrapper.get_anime_posts(page=3))
             matched_posts = scrapper.match_to_recent_videos(site_posts)
             matched_download_details = scrapper.get_recent_posts_videos_download_link(matched_posts)
-            sd.batch_downloader(site_address, matched_download_details)
+            sd.batch_downloader(site_address, matched_download_details, 6)
         except Exception as error:
             error_message = f"An error occurred while running {site_address} site scrapper! \nError: {error}"
             logger.exception(error_message)

@@ -3,7 +3,7 @@ import socket
 import subprocess
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
-from time import perf_counter
+from time import perf_counter, sleep
 from urllib.parse import urlparse
 
 import requests
@@ -102,6 +102,19 @@ class ScrapperDownloader(DownloadOptions):
             logger.debug(f"Resolved name: {resolved_name}, File: {file_name} is not in archive.")
             return False
 
+    @staticmethod
+    def file_remover(file: Path, missing_ok: bool = False):
+        for i in range(5):  # Try 5 times
+            try:
+                file.unlink(missing_ok)
+                logger.debug(f"File {file.name} deleted successfully!")
+                break
+            except PermissionError:
+                logger.warning(f"Attempt {i + 1}: File: {file.name} is in use, retrying deletion...")
+                sleep(2)  # Wait 2 seconds before retrying
+        else:
+            logger.error("Failed to delete file after multiple attempts.")
+
     def video_res_check(self, resolved_name: str, file_name: str, download_link: str) -> bool:
         """
         Returns True if video's height resolution is lower than the allowed minimum and False otherwise.
@@ -114,7 +127,7 @@ class ScrapperDownloader(DownloadOptions):
             subprocess.run(ffmpeg_cmd, stderr=self.cmd_output, timeout=self.timeout_secs / 6.0, check=True)
         except Exception as error:
             logger.debug(f"An error occurred while downloading {temp_file}, Error: {error}")
-            temp_file.unlink(missing_ok=True)
+            self.file_remover(temp_file, True)
         # Get the resolution of the downloaded video.
         ffprobe_cmd = [f"{self.ffmpeg_path}/ffprobe", '-show_entries', 'stream=width,height', '-of', 'csv=p=0',
                        str(temp_file)]
@@ -125,7 +138,7 @@ class ScrapperDownloader(DownloadOptions):
             return True
         resolution = subprocess.check_output(ffprobe_cmd, stderr=self.cmd_output).decode().strip().split(',')
         width, height = int(resolution[0]), int(resolution[1])
-        temp_file.unlink()  # Delete the downloaded file.
+        self.file_remover(temp_file)  # Delete the downloaded file.
         if not height >= self.min_res_height:
             error_msg = (f"Resolved name: {resolved_name}, File: {file_name} failed resolution test! "
                          f"Resolution: {width} x {height}. Skipping download!")
@@ -147,9 +160,9 @@ class ScrapperDownloader(DownloadOptions):
             subprocess.run(ffmpeg_cmd, stderr=self.cmd_output, timeout=self.timeout_secs, check=True)
         except Exception as error:
             logger.debug(f"An error occurred while downloading {file_path.name}, Error: {error}")
-            file_path.unlink(missing_ok=True)
+            self.file_remover(file_path, True)
         # Clean up the m3u8 playlist file.
-        m3u8_file.unlink()
+        self.file_remover(m3u8_file)
 
     def ad_free_playlist_downloader(self, file_name: str, response_text: str, download_link: str) -> None:
         """
@@ -188,7 +201,7 @@ class ScrapperDownloader(DownloadOptions):
             subprocess.run(ffmpeg_cmd, stderr=self.cmd_output, timeout=self.timeout_secs, check=True)
         except Exception as error:
             logger.debug(f"An error occurred while downloading {file_name}, Error: {error}")
-            file_path.unlink(missing_ok=True)
+            self.file_remover(file_path, True)
 
     @staticmethod
     def get_base_link(url: str) -> str:

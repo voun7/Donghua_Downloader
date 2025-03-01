@@ -139,6 +139,7 @@ def run_scrappers(resolved_names_file: Path, tb: TelegramBot) -> None:
     scrappers = {
         "xiaobaotv.net": "XiaobaotvScraper",
         "yhdm.in": "YhdmScrapper",
+        "agedm88.com": "AgeDm1Scrapper",
         "v.lq010.com": "LQ010Scrapper",
         "animebaby.top": "AnimeBabyScrapper",
     }

@@ -232,11 +232,16 @@ class ScrapperDownloader(DownloadOptions):
         """
         Selects the method for initiating the download by checking for ad in playlist.
         """
-        try:
-            response = requests.get(download_link)
-            response_text = response.text
-        except requests.exceptions.ConnectTimeout:
-            response_text = ""
+        response_text = ""
+        for i in range(3):
+            try:
+                response = requests.get(download_link)
+                response_text = response.text
+                break
+            except requests.exceptions.ConnectTimeout:
+                logger.warning(f"Attempt {i + 1}: For ad check in File: {file_name} failed...")
+                sleep(5)  # Wait before retrying
+        else:
             logger.info(f"Check for ad in playlist failed. Name: {file_name}")
         if response_text and "#EXTINF" not in response_text:  # check for duration tag
             response_text = self.get_m3u8_playlist(download_link, response_text)

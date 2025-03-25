@@ -461,7 +461,7 @@ class YhdmScrapper(ScrapperTools):
         self.sel_driver.get(url)
         attempts = 0
         time.sleep(sleep_time)
-        while (("按剧情" not in self.sel_driver.page_source or self.sel_driver.page_source.count("正在加载列表中") > 1)
+        while (("not private" in self.sel_driver.page_source or self.sel_driver.page_source.count("正在加载列表中") > 1)
                and attempts < 4):
             attempts += 1
             logger.info(f"Page not fully loaded, refreshing... attempt:{attempts}")

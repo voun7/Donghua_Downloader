@@ -293,9 +293,7 @@ class ScrapperDownloader(DownloadOptions):
             futures = [executor.submit(self.video_downloader, resolved_name, download_details)
                        for resolved_name, download_details in all_download_details.items()]
             for _, f in enumerate(as_completed(futures)):  # as each  process completes
-                error = f.exception()
-                if error:
-                    logger.exception(f.result())
-                    logger.exception(error)
+                if error := f.exception():
+                    logger.exception(f"\n\n{error}\n\n")
         self.update_download_archive(), self.send_error_messages(scrapper_name)
         logger.info(f"Downloads finished! Duration: {round(perf_counter() - start)}s\n")
